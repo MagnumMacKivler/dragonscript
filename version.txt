@@ -1,1 +1,3 @@
-~'ntypes":{}'size":n3;'n":{}'s":{~'name":'Here Be Dragons!"'version":'2.0.0"'changelog":'Initial Upload"}'stypes":{~'name":'s"'version":'s"'changelog":'s"}
+version:2.0.0
+name:Here Be Dragons!
+changelog:Initial Upload

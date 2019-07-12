@@ -1,0 +1,688 @@
+@name dragonscript/hologen
+@inputs
+@outputs 
+@persist RagdollBits:table
+@trigger 
+
+HoloVersion = "2.0.0"
+
+function void holoSkeleton(P0:vector,PH:vector,PLWJ:vector,PLWH:vector,PRWJ:vector,PRWH:vector,Scale){
+    local Ang0 = ang()
+    local V1 = vec(1)
+    
+    #Animation Skeleton
+    
+    holoCreate(0,P0,V1,Ang0,vec(255),"models/editor/axis_helper_thick.mdl") #Body Base
+    holoCreate(1,P0 + vec(27,0,0)*Scale,V1,Ang0,vec(255),"models/editor/axis_helper_thick.mdl") #Neck Base
+    holoCreate(2,PH,V1,Ang0,vec(255),"models/editor/axis_helper_thick.mdl") #Head
+    
+    local PLS = P0 + vec(24,7,0)*Scale
+    holoCreate(3,PLS,V1,Ang0,vec(255),"models/editor/axis_helper_thick.mdl") #Left Shoulder
+    holoCreate(92,PLS + vec(0,0,-18)*Scale,V1,Ang0,vec(255),"models/editor/axis_helper_thick.mdl") #Left Elbow
+    holoCreate(4,PLS + vec(0,0,-36)*Scale,V1,Ang0,vec(255),"models/editor/axis_helper_thick.mdl") #Left Front Foot
+    
+    local PRS = P0 + vec(24,-7,0)*Scale
+    holoCreate(5,PRS,V1,Ang0,vec(255),"models/editor/axis_helper_thick.mdl") #Right Shoulder
+    holoCreate(93,PRS + vec(0,0,-18)*Scale,V1,Ang0,vec(255),"models/editor/axis_helper_thick.mdl") #Right Elbow
+    holoCreate(6,PRS + vec(0,0,-36)*Scale,V1,Ang0,vec(255),"models/editor/axis_helper_thick.mdl") #Right Front Foot
+    
+    local PLH = P0 + vec(-20,7,0)*Scale
+    holoCreate(7,PLH,V1,Ang0,vec(255),"models/editor/axis_helper_thick.mdl") #Left Hip
+    holoCreate(94,PLH + vec(0,0,-12)*Scale,V1,Ang0,vec(255),"models/editor/axis_helper_thick.mdl") #Left Knee
+    holoCreate(8,PLH + vec(0,0,-36)*Scale,V1,Ang0,vec(255),"models/editor/axis_helper_thick.mdl") #Left Rear Foot
+    
+    local PRH = P0 + vec(-20,-7,0)*Scale
+    holoCreate(9,PRH,V1,Ang0,vec(255),"models/editor/axis_helper_thick.mdl") #Right Hip
+    holoCreate(95,PRH + vec(0,0,-12)*Scale,V1,Ang0,vec(255),"models/editor/axis_helper_thick.mdl") #Right Knee
+    holoCreate(10,PRH + vec(0,0,-36)*Scale,V1,Ang0,vec(255),"models/editor/axis_helper_thick.mdl") #Right Rear Foot
+    
+    PT = P0 + vec(-28,0,0)*Scale
+    holoCreate(11,PT,V1,Ang0,vec(255),"models/editor/axis_helper_thick.mdl") #Tail
+    
+    
+    holoCreate(12,PLWJ,V1,Ang0,vec(255),"models/editor/axis_helper_thick.mdl") #Left Wing Joint
+    
+    LH1 = holoCreate(70,PLWH,V1,Ang0,vec(255),"models/editor/axis_helper_thick.mdl") #Left Wing "Hand" 1
+    LH2 = holoCreate(71,PLWH,V1,Ang0,vec(255),"models/editor/axis_helper_thick.mdl") #Left Wing "Hand" 2
+    LH3 = holoCreate(72,PLWH,V1,Ang0,vec(255),"models/editor/axis_helper_thick.mdl") #Left Wing "Hand" 3
+    
+    holoCreate(14,PRWJ,V1,Ang0,vec(255),"models/editor/axis_helper_thick.mdl") #Right Wing Joint
+    
+    RH1 = holoCreate(80,PRWH,V1,Ang0,vec(255),"models/editor/axis_helper_thick.mdl") #Right Wing "Hand" 1
+    RH2 = holoCreate(81,PRWH,V1,Ang0,vec(255),"models/editor/axis_helper_thick.mdl") #Right Wing "Hand" 2
+    RH3 = holoCreate(82,PRWH,V1,Ang0,vec(255),"models/editor/axis_helper_thick.mdl") #Right Wing "Hand" 3
+    #holoCreate(15,PRWH,V1,Ang0,vec(255),"models/editor/axis_helper_thick.mdl") #Right Wing "Hand" 1
+
+    
+    holoParent(0,entity())
+    holoParent(1,0)
+    holoParent(2,1)
+    holoParent(3,0)
+    holoParent(92,3)
+    holoParent(4,92)
+    holoParent(5,0)
+    holoParent(93,5)
+    holoParent(6,93)
+    holoParent(7,0)
+    holoParent(94,7)
+    holoParent(8,94)
+    holoParent(9,0)
+    holoParent(95,9)
+    holoParent(10,95)
+    holoParent(11,0)
+    holoParent(12,0)
+    holoParent(70,12)
+    holoParent(71,12)
+    holoParent(72,12)
+    holoParent(14,0)
+    holoParent(80,14)
+    holoParent(81,14)
+    holoParent(82,14)
+    holoParent(15,14)
+    
+    local SkeletonAlpha = 0
+    
+    holoAlpha(0,SkeletonAlpha)
+    holoAlpha(1,SkeletonAlpha)
+    holoAlpha(2,SkeletonAlpha)
+    holoAlpha(3,SkeletonAlpha)
+    holoAlpha(92,SkeletonAlpha)
+    holoAlpha(4,SkeletonAlpha)
+    holoAlpha(5,SkeletonAlpha)
+    holoAlpha(93,SkeletonAlpha)
+    holoAlpha(6,SkeletonAlpha)
+    holoAlpha(7,SkeletonAlpha)
+    holoAlpha(94,SkeletonAlpha)
+    holoAlpha(8,SkeletonAlpha)
+    holoAlpha(9,SkeletonAlpha)
+    holoAlpha(95,SkeletonAlpha)
+    holoAlpha(10,SkeletonAlpha)
+    holoAlpha(11,SkeletonAlpha)
+    holoAlpha(12,SkeletonAlpha)
+    holoAlpha(70,SkeletonAlpha)
+    holoAlpha(71,SkeletonAlpha)
+    holoAlpha(72,SkeletonAlpha)
+    holoAlpha(14,SkeletonAlpha)
+    holoAlpha(80,SkeletonAlpha)
+    holoAlpha(81,SkeletonAlpha)
+    holoAlpha(82,SkeletonAlpha)
+    holoAlpha(15,SkeletonAlpha)
+    #holoAlpha(102,SkeletonAlpha)
+    
+    return void
+}
+
+function void ragdollGenerate(Step){
+    local Holo = 0
+    switch(Step){
+        case 0, 
+            Holo = 0
+            RagdollBits["body",entity] = propSpawn("models/sprops/cuboids/height24/size_1/cube_24x60x24.mdl",holoEntity(Holo):pos(),holoEntity(Holo):toWorld(ang(0,0,0)),1)
+            Holo = 1
+            RagdollBits["neck",entity] = propSpawn("models/sprops/cuboids/height12/size_1/cube_12x12x12.mdl",holoEntity(Holo):pos(),holoEntity(Holo):toWorld(ang(0,90,0)),1)
+            Holo = 2
+            RagdollBits["head",entity] = propSpawn("models/sprops/cuboids/height12/size_1/cube_12x12x12.mdl",holoEntity(Holo):pos(),holoEntity(Holo):toWorld(ang(0,90,0)),1)
+            break
+        case 1, 
+            Holo = 3
+            RagdollBits["leftshoulder",entity] = propSpawn("models/sprops/cuboids/height12/size_1/cube_12x12x12.mdl",holoEntity(Holo):pos(),holoEntity(Holo):toWorld(ang(0,90,0)),1)
+            Holo = 92
+            RagdollBits["leftelbow",entity] = propSpawn("models/sprops/cuboids/height12/size_1/cube_12x12x12.mdl",holoEntity(Holo):pos(),holoEntity(Holo):toWorld(ang(0,90,0)),1)
+            Holo = 4
+            RagdollBits["leftfrontfoot",entity] = propSpawn("models/sprops/cuboids/height06/size_2/cube_12x12x6.mdl",holoEntity(Holo):pos(),holoEntity(Holo):toWorld(ang(0,90,0)),1)
+            break
+        case 2, 
+            Holo = 5
+            RagdollBits["rightshoulder",entity] = propSpawn("models/sprops/cuboids/height12/size_1/cube_12x12x12.mdl",holoEntity(Holo):pos(),holoEntity(Holo):toWorld(ang(0,90,0)),1)
+            Holo = 93
+            RagdollBits["rightelbow",entity] = propSpawn("models/sprops/cuboids/height12/size_1/cube_12x12x12.mdl",holoEntity(Holo):pos(),holoEntity(Holo):toWorld(ang(0,90,0)),1)
+            Holo = 6
+            RagdollBits["rightfrontfoot",entity] = propSpawn("models/sprops/cuboids/height06/size_2/cube_12x12x6.mdl",holoEntity(Holo):pos(),holoEntity(Holo):toWorld(ang(0,90,0)),1)
+            break
+        case 3, 
+            Holo = 7
+            RagdollBits["lefthip",entity] = propSpawn("models/sprops/cuboids/height12/size_1/cube_12x12x12.mdl",holoEntity(Holo):pos(),holoEntity(Holo):toWorld(ang(0,90,0)),1)
+            Holo = 94
+            RagdollBits["leftknee",entity] = propSpawn("models/sprops/cuboids/height12/size_1/cube_12x12x12.mdl",holoEntity(Holo):pos(),holoEntity(Holo):toWorld(ang(0,90,0)),1)
+            Holo = 8
+            RagdollBits["leftrearfoot",entity] = propSpawn("models/sprops/cuboids/height06/size_2/cube_12x12x6.mdl",holoEntity(Holo):pos(),holoEntity(Holo):toWorld(ang(0,90,0)),1)
+            break
+        case 4, 
+            Holo = 9
+            RagdollBits["righthip",entity] = propSpawn("models/sprops/cuboids/height12/size_1/cube_12x12x12.mdl",holoEntity(Holo):pos(),holoEntity(Holo):toWorld(ang(0,90,0)),1)
+            Holo = 95
+            RagdollBits["rightknee",entity] = propSpawn("models/sprops/cuboids/height12/size_1/cube_12x12x12.mdl",holoEntity(Holo):pos(),holoEntity(Holo):toWorld(ang(0,90,0)),1)
+            Holo = 10
+            RagdollBits["rightrearfoot",entity] = propSpawn("models/sprops/cuboids/height06/size_2/cube_12x12x6.mdl",holoEntity(Holo):pos(),holoEntity(Holo):toWorld(ang(0,90,0)),1)
+            break
+        case 5,
+            Holo = 11
+            RagdollBits["tail",entity] = propSpawn("models/sprops/cuboids/non_set/cube_18x18x18.mdl",holoEntity(Holo):pos(),holoEntity(Holo):toWorld(ang(0,90,0)),1)
+            break
+        case 6, 
+            Holo = 12
+            RagdollBits["leftwingjoint",entity] = propSpawn("models/sprops/cuboids/height12/size_1/cube_12x12x12.mdl",holoEntity(Holo):pos(),holoEntity(Holo):toWorld(ang(0,90,0)),1)
+            #Holo = 70
+            #RagdollBits["leftwinghand1",entity] = propSpawn("models/sprops/rectangles/size_1/rect_3x36x3.mdl",holoEntity(Holo):pos(),holoEntity(Holo):toWorld(ang(0,90,0)),1)
+            #Holo = 71
+            #RagdollBits["leftwinghand2",entity] = propSpawn("models/sprops/rectangles/size_1/rect_3x36x3.mdl",holoEntity(Holo):pos(),holoEntity(Holo):toWorld(ang(0,90,0)),1)
+            #Holo = 72
+            #RagdollBits["leftwinghand3",entity] = propSpawn("models/sprops/rectangles/size_1/rect_3x36x3.mdl",holoEntity(Holo):pos(),holoEntity(Holo):toWorld(ang(0,90,0)),1)
+            break
+        case 7, 
+            Holo = 14
+            RagdollBits["rightwingjoint",entity] = propSpawn("models/sprops/cuboids/height12/size_1/cube_12x12x12.mdl",holoEntity(Holo):pos(),holoEntity(Holo):toWorld(ang(0,90,0)),1)
+            #Holo = 80
+            #RagdollBits["rightwinghand1",entity] = propSpawn("models/sprops/rectangles/size_1/rect_3x36x3.mdl",holoEntity(Holo):pos(),holoEntity(Holo):toWorld(ang(0,90,0)),1)
+            #Holo = 81
+            #RagdollBits["rightwinghand2",entity] = propSpawn("models/sprops/rectangles/size_1/rect_3x36x3.mdl",holoEntity(Holo):pos(),holoEntity(Holo):toWorld(ang(0,90,0)),1)
+            #Holo = 82
+            #RagdollBits["rightwinghand3",entity] = propSpawn("models/sprops/rectangles/size_1/rect_3x36x3.mdl",holoEntity(Holo):pos(),holoEntity(Holo):toWorld(ang(0,90,0)),1)
+            break
+        default,
+            
+            break
+    }
+}
+function void ragdollConstrain(){
+    RagdollBits["body",entity]:setMass(5000)
+    RagdollBits["neck",entity]:setMass(2000)
+    RagdollBits["head",entity]:setMass(1000)
+    
+    RagdollBits["leftshoulder",entity]:setMass(2000)
+    RagdollBits["leftelbow",entity]:setMass(1000)
+    RagdollBits["leftfrontfoot",entity]:setMass(500)
+    
+    RagdollBits["rightshoulder",entity]:setMass(2000)
+    RagdollBits["rightelbow",entity]:setMass(1000)
+    RagdollBits["rightfrontfoot",entity]:setMass(500)
+    
+    RagdollBits["lefthip",entity]:setMass(2000)
+    RagdollBits["leftknee",entity]:setMass(1000)
+    RagdollBits["leftrearfoot",entity]:setMass(500)
+    
+    RagdollBits["righthip",entity]:setMass(2000)
+    RagdollBits["rightknee",entity]:setMass(1000)
+    RagdollBits["rightrearfoot",entity]:setMass(500)
+    
+    RagdollBits["tail",entity]:setMass(2000)
+    
+    RagdollBits["leftwingjoint",entity]:setMass(2000)
+    #RagdollBits["leftwinghand1",entity]:setMass(500)
+    #RagdollBits["leftwinghand2",entity]:setMass(500)
+    #RagdollBits["leftwinghand3",entity]:setMass(500)
+    
+    RagdollBits["rightwingjoint",entity]:setMass(2000)
+    #RagdollBits["rightwinghand1",entity]:setMass(500)
+    #RagdollBits["rightwinghand2",entity]:setMass(500)
+    #RagdollBits["rightwinghand3",entity]:setMass(500)
+    
+    
+    #Nocollides
+    noCollideAll(RagdollBits["neck",entity],1)
+    
+    noCollideAll(RagdollBits["leftshoulder",entity],1)
+    noCollide(RagdollBits["leftelbow",entity],RagdollBits["body",entity])
+    noCollideAll(RagdollBits["rightshoulder",entity],1)
+    noCollide(RagdollBits["rightelbow",entity],RagdollBits["body",entity])
+    
+    noCollideAll(RagdollBits["lefthip",entity],1)
+    noCollide(RagdollBits["leftknee",entity],RagdollBits["body",entity])
+    noCollideAll(RagdollBits["righthip",entity],1)
+    noCollide(RagdollBits["rightknee",entity],RagdollBits["body",entity])
+    
+    noCollideAll(RagdollBits["tail",entity],1)
+    
+    noCollideAll(RagdollBits["leftwingjoint",entity],1)
+    #noCollideAll(RagdollBits["leftwinghand1",entity],1)
+    #noCollideAll(RagdollBits["leftwinghand2",entity],1)
+    #noCollideAll(RagdollBits["leftwinghand3",entity],1)
+    
+    noCollideAll(RagdollBits["rightwingjoint",entity],1)
+    #noCollideAll(RagdollBits["rightwinghand1",entity],1)
+    #noCollideAll(RagdollBits["rightwinghand2",entity],1)
+    #noCollideAll(RagdollBits["rightwinghand3",entity],1)
+    
+    #Ball Sockets
+    ballsocket(RagdollBits["neck",entity],vec(),RagdollBits["body",entity],vec(-15,-5,-30),vec(15,5,30),vec())
+    ballsocket(RagdollBits["head",entity],vec(),RagdollBits["neck",entity],vec(-45,-5,-90),vec(45,5,90),vec())
+    
+    ballsocket(RagdollBits["leftshoulder",entity],vec(),RagdollBits["body",entity],vec(-90,-15,-15),vec(90,15,15),vec())
+    ballsocket(RagdollBits["leftelbow",entity],vec(),RagdollBits["leftshoulder",entity],vec(-0.1,-0.1,-0.1),vec(135,0.1,0.1),vec())
+    ballsocket(RagdollBits["leftfrontfoot",entity],vec(),RagdollBits["leftelbow",entity],vec(-120,-0.1,-0.1),vec(60,0.1,0.1),vec())
+    
+    ballsocket(RagdollBits["rightshoulder",entity],vec(),RagdollBits["body",entity],vec(-90,-15,-15),vec(90,15,15),vec())
+    ballsocket(RagdollBits["rightelbow",entity],vec(),RagdollBits["rightshoulder",entity],vec(-0.1,-0.1,-0.1),vec(135,0.1,0.1),vec())
+    ballsocket(RagdollBits["rightfrontfoot",entity],vec(),RagdollBits["rightelbow",entity],vec(-120,-0.1,-0.1),vec(60,0.1,0.1),vec())
+    
+    ballsocket(RagdollBits["lefthip",entity],vec(),RagdollBits["body",entity],vec(-90,-15,-15),vec(90,15,15),vec())
+    ballsocket(RagdollBits["leftknee",entity],vec(),RagdollBits["lefthip",entity],vec(-135,-0.1,-0.1),vec(0.1,0.1,0.1),vec())
+    ballsocket(RagdollBits["leftrearfoot",entity],vec(),RagdollBits["leftknee",entity],vec(-75,-0.1,-0.1),vec(75,0.1,0.1),vec())
+    
+    ballsocket(RagdollBits["righthip",entity],vec(),RagdollBits["body",entity],vec(-90,-15,-15),vec(90,15,15),vec())
+    ballsocket(RagdollBits["rightknee",entity],vec(),RagdollBits["righthip",entity],vec(-135,-0.1,-0.1),vec(0.1,0.1,0.1),vec())
+    ballsocket(RagdollBits["rightrearfoot",entity],vec(),RagdollBits["rightknee",entity],vec(-75,-0.1,-0.1),vec(75,0.1,0.1),vec())
+    
+    ballsocket(RagdollBits["tail",entity],vec(),RagdollBits["body",entity],vec(-15,-0.1,-20),vec(15,0.1,20),vec())
+    
+    ballsocket(RagdollBits["leftwingjoint",entity],vec(),RagdollBits["body",entity],vec(-45,-45,-30),vec(90,90,30),vec())
+    #ballsocket(RagdollBits["leftwinghand1",entity],vec(),RagdollBits["leftwingjoint",entity],vec(-15,-15,-45),vec(15,15,90),vec())
+    #ballsocket(RagdollBits["leftwinghand2",entity],vec(),RagdollBits["leftwingjoint",entity],vec(-15,-15,-30),vec(15,15,60),vec())
+    #ballsocket(RagdollBits["leftwinghand3",entity],vec(),RagdollBits["leftwingjoint",entity],vec(-15,-15,-15),vec(15,15,30),vec())
+    
+    ballsocket(RagdollBits["rightwingjoint",entity],vec(),RagdollBits["body",entity],vec(-45,-90,-30),vec(90,45,30),vec())
+    #ballsocket(RagdollBits["rightwinghand1",entity],vec(),RagdollBits["rightwingjoint",entity],vec(-15,-15,-90),vec(15,15,45),vec())
+    #ballsocket(RagdollBits["rightwinghand2",entity],vec(),RagdollBits["rightwingjoint",entity],vec(-15,-15,-60),vec(15,15,30),vec())
+    #ballsocket(RagdollBits["rightwinghand3",entity],vec(),RagdollBits["rightwingjoint",entity],vec(-15,-15,-30),vec(15,15,15),vec())
+    
+    #Parenting!
+    holoParent(0,RagdollBits["body",entity])
+    holoParent(1,RagdollBits["neck",entity])
+    holoParent(2,RagdollBits["head",entity])
+    
+    holoParent(3,RagdollBits["leftshoulder",entity])
+    holoParent(92,RagdollBits["leftelbow",entity])
+    holoParent(4,RagdollBits["leftfrontfoot",entity])
+    
+    holoParent(5,RagdollBits["rightshoulder",entity])
+    holoParent(93,RagdollBits["rightelbow",entity])
+    holoParent(6,RagdollBits["rightfrontfoot",entity])
+    
+    holoParent(7,RagdollBits["lefthip",entity])
+    holoParent(94,RagdollBits["leftknee",entity])
+    holoParent(8,RagdollBits["leftrearfoot",entity])
+    
+    holoParent(9,RagdollBits["righthip",entity])
+    holoParent(95,RagdollBits["rightknee",entity])
+    holoParent(10,RagdollBits["rightrearfoot",entity])
+    
+    holoParent(11,RagdollBits["tail",entity])
+    
+    holoParent(12,RagdollBits["leftwingjoint",entity])
+    #holoParent(70,RagdollBits["leftwinghand1",entity])
+    #holoParent(71,RagdollBits["leftwinghand2",entity])
+    #holoParent(72,RagdollBits["leftwinghand3",entity])
+    
+    holoParent(14,RagdollBits["rightwingjoint",entity])
+    #holoParent(80,RagdollBits["rightwinghand1",entity])
+    #holoParent(81,RagdollBits["rightwinghand2",entity])
+    #holoParent(82,RagdollBits["rightwinghand3",entity])
+    
+    #Color
+    if(1){
+        foreach(K,V:entity=RagdollBits){
+            V:setAlpha(0)
+        }
+    }
+}
+
+function void holos1(P0:vector, PH:vector, ColorBody:vector, Material:string, Scale, Baby){
+    local Ang0 = ang()
+    local PLS = P0 + vec(24,7,0)*Scale
+    local PRS = P0 + vec(24,-7,0)*Scale
+    local PLH = P0 + vec(-20,7,0)*Scale
+    local PRH = P0 + vec(-20,-7,0)*Scale
+    
+    local ScaleH = vec(Scale)
+    if(Baby){ #Baby
+        ScaleH = vec(Scale,0.6,0.6)
+    }
+    
+    
+    
+    #Main Body
+    holoCreate(16,P0+vec(0,0,0)*Scale,vec(6,2.5,2.5)*Scale,Ang0,ColorBody,"sphere3")
+    holoMaterial(16,Material)
+    holoParent(16,0)
+    #Neck
+    holoCreate(17,P0+vec(36,0,12)*Scale,vec(1,1,2)*Scale,ang(50,0,0),ColorBody,"cylinder")
+    holoParent(17,1)
+    holoMaterial(17,Material)
+    holoCreate(18,P0+vec(36,0,8)*Scale,vec(2,2,2)*Scale,ang(60,0,0),ColorBody,"cone")
+    holoParent(18,1)
+    holoMaterial(18,Material)
+    #Head
+    holoCreate(19,PH,vec(1.5)*Scale,Ang0,ColorBody,"sphere2")
+    holoMaterial(19,Material)
+    holoCreate(20,PH+vec(8,0,-2)*Scale,vec(2,1.375,1)*Scale,Ang0,ColorBody,"sphere2")
+    holoMaterial(20,Material)
+    holoCreate(21,PH+vec(14,0,-2)*Scale,vec(1,1,1)*Scale,Ang0,ColorBody,"sphere2")
+    holoMaterial(21,Material)
+    holoCreate(22,PH+vec(15,2,-8)*Scale,vec(0.25,0.25,0.375)*Scale,ang(180,0,0),vec(255),"hq_cone")
+    holoCreate(23,PH+vec(15,-2,-8)*Scale,vec(0.25,0.25,0.375)*Scale,ang(180,0,0),vec(255),"hq_cone")
+    holoCreate(24,PH+vec(1,3,6.5)*Scale,vec(0.75,0.75,0.5)*Scale,Ang0,ColorBody,"sphere2")
+    holoMaterial(24,Material)
+    holoCreate(25,PH+vec(1,-3,6.5)*Scale,vec(0.75,0.75,0.5)*Scale,Ang0,ColorBody,"sphere2")
+    holoMaterial(25,Material)
+    holoCreate(26,PH+vec(18.5,2,0)*Scale,vec(0.0625,0.125,0.125)*Scale,Ang0,vec(),"sphere")
+    holoCreate(27,PH+vec(18.5,-2,0)*Scale,vec(0.0625,0.125,0.125)*Scale,Ang0,vec(),"sphere")
+    
+    holoCreate(28,PH+vec(5,3,6.5)*Scale,vec(0.125,0.25,0.35)*ScaleH,ang(0,0,-30),vec(255),"hq_sphere") #Eyes
+    holoMaterial(28,"debug/debugdrawflat")
+    holoCreate(29,PH+vec(5,-3,6.5)*Scale,vec(0.125,0.25,0.35)*ScaleH,ang(0,0,30),vec(255),"hq_sphere")
+    holoMaterial(29,"debug/debugdrawflat")
+    
+    holoClipEnabled(28,1,1)
+    holoClipEnabled(28,2,1)
+    holoClipEnabled(29,1,1)
+    holoClipEnabled(29,2,1)
+    
+    holoCreate(30,PH+vec(5.5,3,6.5)*Scale,vec(0.125)*ScaleH,ang(0,0,-15),vec(),"sphere") #Pupils
+    holoMaterial(30,"debug/debugdrawflat")
+    holoCreate(31,PH+vec(5.5,-3,6.5)*Scale,vec(0.125)*ScaleH,ang(0,0,15),vec(),"sphere")
+    holoMaterial(31,"debug/debugdrawflat")
+
+    holoCreate(32,PH+vec(-4,7.5,11)*Scale,vec(0.375,0.375,1)*Scale,ang(-30,0,-30),vec(255),"hq_cone") #Horns
+    holoCreate(33,PH+vec(-4,-7.5,11)*Scale,vec(0.375,0.375,1)*Scale,ang(-30,0,30),vec(255),"hq_cone")
+    
+    #Jaw
+    #holoCreate(34,PH+vec(9,0,-6.5),vec(1.25,0.875,0.25),ang(180,0,0),vec(200,100,100),"sphere3")
+    #holoMaterial(34,Material)
+    local PJ = PH+vec(6,0,-8)*Scale
+    holoCreate(35,PJ,vec(1.5,0.875,0.375)*Scale,Ang0,ColorBody,"sphere3")
+    holoMaterial(35,Material)
+    holoCreate(36,PJ+vec(0,0,1)*Scale,vec(1.25,0.75,0.25)*Scale,Ang0,vec(200,100,100),"sphere3")
+    holoParent(36,35)
+    holoMaterial(36,Material)
+    holoCreate(37,PJ+vec(7,1,1.5)*Scale,vec(0.125,0.125,0.25)*Scale,Ang0,vec(255),"hq_cone")
+    holoParent(37,35)
+    holoCreate(38,PJ+vec(7,-1,1.5)*Scale,vec(0.125,0.125,0.25)*Scale,Ang0,vec(255),"hq_cone")
+    holoParent(38,35)
+    for(N=19,35){
+        holoParent(N,2)
+    }
+    
+    #Left Front Leg
+    holoCreate(39,PLS,vec(1.5,1.25,1.5)*Scale,Ang0,ColorBody,"sphere3")
+    holoMaterial(39,Material)
+    holoParent(39,3)
+    holoCreate(40,PLS+vec(0,0,-9)*Scale,vec(0.75,0.75,1.5)*Scale,Ang0,ColorBody,"cylinder")
+    holoMaterial(40,Material)
+    holoParent(40,3)
+    holoCreate(96,PLS+vec(0,0,-18)*Scale,vec(0.75)*Scale,Ang0,ColorBody,"sphere3")
+    holoMaterial(96,Material)
+    holoParent(96,92)
+    holoCreate(97,PLS+vec(0,0,-27)*Scale,vec(0.75,0.75,1.5)*Scale,Ang0,ColorBody,"cylinder")
+    holoMaterial(97,Material)
+    holoParent(97,92)
+    holoCreate(41,PLS+vec(2,0,-36)*Scale,vec(1.25,1,0.75)*Scale,Ang0,ColorBody,"sphere")
+    holoMaterial(41,Material)
+    holoParent(41,4)
+    holoCreate(42,PLS+vec(10,0,-36)*Scale,vec(0.25,0.25,0.625)*Scale,ang(90,0,0),vec(255),"cone")
+    holoParent(42,4)
+    holoCreate(43,PLS+vec(9,3,-36)*Scale,vec(0.25,0.25,0.625)*Scale,ang(90,15,0),vec(255),"cone")
+    holoParent(43,4)
+    holoCreate(44,PLS+vec(9,-3,-36)*Scale,vec(0.25,0.25,0.625)*Scale,ang(90,-15,0),vec(255),"cone")
+    holoParent(44,4)
+    
+    #Right Front Leg
+    holoCreate(45,PRS,vec(1.5,1.25,1.5)*Scale,Ang0,ColorBody,"sphere3")
+    holoMaterial(45,Material)
+    holoParent(45,5)
+    holoCreate(46,PRS+vec(0,0,-9)*Scale,vec(0.75,0.75,1.5)*Scale,Ang0,ColorBody,"cylinder")
+    holoMaterial(46,Material)
+    holoParent(46,5)
+    holoCreate(98,PRS+vec(0,0,-18)*Scale,vec(0.75)*Scale,Ang0,ColorBody,"sphere3")
+    holoMaterial(98,Material)
+    holoParent(98,93)
+    holoCreate(99,PRS+vec(0,0,-27)*Scale,vec(0.75,0.75,1.5)*Scale,Ang0,ColorBody,"cylinder")
+    holoMaterial(99,Material)
+    holoParent(99,93)
+    holoCreate(47,PRS+vec(2,0,-36)*Scale,vec(1.25,1,0.75)*Scale,Ang0,ColorBody,"sphere")
+    holoMaterial(47,Material)
+    holoParent(47,6)
+    holoCreate(48,PRS+vec(10,0,-36)*Scale,vec(0.25,0.25,0.625)*Scale,ang(90,0,0),vec(255),"cone")
+    holoParent(48,6)
+    holoCreate(49,PRS+vec(9,-3,-36)*Scale,vec(0.25,0.25,0.625)*Scale,ang(90,-15,0),vec(255),"cone")
+    holoParent(49,6)
+    holoCreate(50,PRS+vec(9,3,-36)*Scale,vec(0.25,0.25,0.625)*Scale,ang(90,15,0),vec(255),"cone")
+    holoParent(50,6)
+    
+    #Left Rear Leg
+    holoCreate(51,PLH+vec(0,0,-2)*Scale,vec(1.5,1.5,2.25)*Scale,Ang0,ColorBody,"sphere") 
+    holoMaterial(51,Material)
+    holoParent(51,7)
+    holoCreate(52,PLH+vec(0,0,-24)*Scale,vec(0.75,0.75,2)*Scale,Ang0,ColorBody,"cylinder")
+    holoMaterial(52,Material)
+    holoParent(52,94)
+    holoCreate(100,PLH+vec(0,0,-12)*Scale,vec(0.75)*Scale,Ang0,ColorBody,"sphere3")
+    holoMaterial(100,Material)
+    holoParent(100,94)
+    holoCreate(53,PLH+vec(2,0,-36)*Scale,vec(2,1,0.75)*Scale,Ang0,ColorBody,"sphere2")
+    holoMaterial(53,Material)
+    holoParent(53,8)
+    holoCreate(54,PLH+vec(15,0,-36)*Scale,vec(0.25,0.25,0.625)*Scale,ang(90,0,0),vec(255),"cone")
+    holoParent(54,8)
+    holoCreate(55,PLH+vec(14,3,-36)*Scale,vec(0.25,0.25,0.625)*Scale,ang(90,15,0),vec(255),"cone")
+    holoParent(55,8)
+    holoCreate(56,PLH+vec(14,-3,-36)*Scale,vec(0.25,0.25,0.625)*Scale,ang(90,-15,0),vec(255),"cone")
+    holoParent(56,8)
+    
+    #Right Rear Leg
+    holoCreate(57,PRH+vec(0,0,-2)*Scale,vec(1.5,1.5,2.25)*Scale,Ang0,ColorBody,"sphere") 
+    holoMaterial(57,Material)
+    holoParent(57,9)
+    holoCreate(58,PRH+vec(0,0,-24)*Scale,vec(0.75,0.75,2)*Scale,Ang0,ColorBody,"cylinder")
+    holoMaterial(58,Material)
+    holoParent(58,95)
+    holoCreate(101,PRH+vec(0,0,-12)*Scale,vec(0.75)*Scale,Ang0,ColorBody,"sphere3")
+    holoMaterial(101,Material)
+    holoParent(101,95)
+    holoCreate(59,PRH+vec(2,0,-36)*Scale,vec(2,1,0.75)*Scale,Ang0,ColorBody,"sphere2")
+    holoMaterial(59,Material)
+    holoParent(59,10)
+    holoCreate(60,PRH+vec(15,0,-36)*Scale,vec(0.25,0.25,0.625)*Scale,ang(90,0,0),vec(255),"cone")
+    holoParent(60,10)
+    holoCreate(61,PRH+vec(14,-3,-36)*Scale,vec(0.25,0.25,0.625)*Scale,ang(90,-15,0),vec(255),"cone")
+    holoParent(61,10)
+    holoCreate(62,PRH+vec(14,3,-36)*Scale,vec(0.25,0.25,0.625)*Scale,ang(90,15,0),vec(255),"cone")
+    holoParent(62,10)
+    
+    #Tail
+    holoCreate(63,PT,vec(4,1.5,1.5)*Scale,Ang0,ColorBody,"sphere3")
+    holoMaterial(63,Material)
+    holoParent(63,11)
+    holoCreate(64,PT+vec(-16,0,0)*Scale,vec(4,1.25,1.25)*Scale,Ang0,ColorBody,"sphere3")
+    holoMaterial(64,Material)
+    holoParent(64,63)
+    holoCreate(65,PT+vec(-32,0,0)*Scale,vec(4,1,1)*Scale,Ang0,ColorBody,"sphere3")
+    holoMaterial(65,Material)
+    holoParent(65,64)
+    holoCreate(66,PT+vec(-48,0,0)*Scale,vec(4,0.75,0.75)*Scale,Ang0,ColorBody,"sphere3")
+    holoMaterial(66,Material)
+    holoParent(66,65)
+    
+    return void
+}
+
+function void holos2(PLWJ:vector, PLWH:vector, PRWJ:vector, PRWH:vector, ColorBody:vector, ColorWings:vector, Material:string, Scale){
+    
+    local Ang0 = ang()
+    local V1 = vec(1)
+    
+    #Left Wing
+    holoCreate(67,PLWJ,vec(0.75,0.75,0.75)*Scale,Ang0,ColorBody,"sphere2")
+    holoMaterial(67,Material)
+    holoParent(67,12)
+    holoCreate(68,PLWJ+vec(0,18,0)*Scale,vec(0.375,0.375,3)*Scale,ang(0,0,90),ColorBody,"cylinder")
+    holoMaterial(68,Material)
+    holoParent(68,12)
+    holoCreate(69,PLWH,vec(0.5)*Scale,Ang0,ColorBody,"sphere2")
+    holoMaterial(69,Material)
+    holoParent(69,70)
+
+    holoCreate(73,PLWH+vec(0,24,0)*Scale,vec(0.375,0.375,4)*Scale,ang(0,0,90),ColorBody,"cylinder")
+    holoMaterial(73,Material)
+    holoParent(73,70)
+    holoAng(70,ang(0,22.5+90,0))
+    
+    holoCreate(74,PLWH+vec(0,24,0)*Scale,vec(0.375,0.375,4)*Scale,ang(0,0,90),ColorBody,"cylinder")
+    holoMaterial(74,Material)
+    holoParent(74,71)
+    holoAng(71,ang(0,45+90,0))
+    
+    holoCreate(75,PLWH+vec(0,24,0)*Scale,vec(0.375,0.375,4)*Scale,ang(0,0,90),ColorBody,"cylinder")
+    holoMaterial(75,Material)
+    holoParent(75,72)
+    holoAng(72,ang(0,67.5+90,0))
+    
+    holoCreate(76,PLWH,vec(1),ang(),ColorWings,"cube")
+    holoMaterial(76,Material)
+    holoParent(76,70)
+    holoClipEnabled(76,1,1)
+    holoClipEnabled(76,2,1)
+    holoClipEnabled(76,3,1)
+    
+    holoCreate(77,PLWH,vec(1),ang(),ColorWings,"cube")
+    holoMaterial(77,Material)
+    holoParent(77,71)
+    holoClipEnabled(77,1,1)
+    holoClipEnabled(77,2,1)
+    holoClipEnabled(77,3,1)
+    
+    holoCreate(78,PLWH,vec(1),ang(),ColorWings,"cube")
+    holoMaterial(78,Material)
+    holoParent(78,72)
+    holoClipEnabled(78,1,1)
+    holoClipEnabled(78,2,1)
+    holoClipEnabled(78,3,1)
+    
+    return void
+}
+
+function void holos3(PLWJ:vector, PLWH:vector, PRWJ:vector, PRWH:vector, ColorBody:vector, ColorWings:vector, Material:string, Scale){
+    
+    local Ang0 = ang()
+    local V1 = vec(1)
+    
+    #Right Wing
+    holoCreate(83,PRWJ,vec(0.75,0.75,0.75)*Scale,Ang0,ColorBody,"sphere2")
+    holoMaterial(83,Material)
+    holoParent(83,14)
+    holoCreate(84,PRWJ+vec(0,-18,0)*Scale,vec(0.375,0.375,3)*Scale,ang(0,0,90),ColorBody,"cylinder")
+    holoMaterial(84,Material)
+    holoParent(84,14)
+    holoCreate(85,PRWH,vec(0.5)*Scale,Ang0,ColorBody,"sphere2")
+    holoMaterial(85,Material)
+    holoParent(85,80)
+
+    holoCreate(86,PRWH+vec(0,-24,0)*Scale,vec(0.375,0.375,4)*Scale,ang(0,0,90),ColorBody,"cylinder")
+    holoMaterial(86,Material)
+    holoParent(86,80)
+    holoAng(80,ang(0,-22.5-90,0))
+    
+    holoCreate(87,PRWH+vec(0,-24,0)*Scale,vec(0.375,0.375,4)*Scale,ang(0,0,90),ColorBody,"cylinder")
+    holoMaterial(87,Material)
+    holoParent(87,81)
+    holoAng(81,ang(0,-45-90,0))
+    
+    holoCreate(88,PRWH+vec(0,-24,0)*Scale,vec(0.375,0.375,4)*Scale,ang(0,0,90),ColorBody,"cylinder")
+    holoMaterial(88,Material)
+    holoParent(88,82)
+    holoAng(82,ang(0,-67.5-90,0))
+    
+    holoCreate(89,PRWH,vec(1),ang(),ColorWings,"cube")
+    holoMaterial(89,Material)
+    holoParent(89,80)
+    holoClipEnabled(89,1,1)
+    holoClipEnabled(89,2,1)
+    holoClipEnabled(89,3,1)
+    
+    holoCreate(90,PRWH,vec(1),ang(),ColorWings,"cube")
+    holoMaterial(90,Material)
+    holoParent(90,81)
+    holoClipEnabled(90,1,1)
+    holoClipEnabled(90,2,1)
+    holoClipEnabled(90,3,1)
+    
+    holoCreate(91,PRWH,vec(1),ang(),ColorWings,"cube")
+    holoMaterial(91,Material)
+    holoParent(91,82)
+    holoClipEnabled(91,1,1)
+    holoClipEnabled(91,2,1)
+    holoClipEnabled(91,3,1)
+    
+    return void
+}
+function void holosEyelashes(P0:vector, PH:vector, ColorBody:vector, Material:string, Scale){
+    
+    local Ang0 = ang()
+    local V1 = vec(1)
+    
+    local PLE = PH+vec(5,3,6.5)*Scale
+    local PRE = PH+vec(5,-3,6.5)*Scale
+    
+    holoCreate(103,PLE+vec(0,0.3,2.25)*Scale,vec(0.03125,0.03125,0.0625)*Scale,Ang0,vec(36),"cone")
+    holoParent(103,2)
+    holoCreate(104,PLE+vec(0,1.25,2)*Scale,vec(0.03125,0.03125,0.0625)*Scale,ang(0,0,-30),vec(36),"cone")
+    holoParent(104,2)
+    holoCreate(105,PLE+vec(0,1.75,1.25)*Scale,vec(0.03125,0.03125,0.0625)*Scale,ang(0,0,-60),vec(36),"cone")
+    #holoCreate(105,PLE+vec(0,-0.75,1.8),vec(0.03125,0.03125,0.0625),ang(0,0,30),vec(36),"cone")
+    holoParent(105,2)
+    
+    holoCreate(106,PRE+vec(0,-0.3,2.25)*Scale,vec(0.03125,0.03125,0.0625)*Scale,Ang0,vec(36),"cone")
+    holoParent(106,2)
+    holoCreate(107,PRE+vec(0,-1.25,2)*Scale,vec(0.03125,0.03125,0.0625)*Scale,ang(0,0,30),vec(36),"cone")
+    holoParent(107,2)
+    holoCreate(108,PRE+vec(0,-1.75,1.25)*Scale,vec(0.03125,0.03125,0.0625)*Scale,ang(0,0,60),vec(36),"cone")
+    #holoCreate(108,PRE+vec(0,0.75,1.8),vec(0.03125,0.03125,0.0625),ang(0,0,-30),vec(36),"cone")
+    holoParent(108,2)
+    
+    
+    return void
+}
+
+function void holoEyeClips(P0:vector, PH:vector, ColorBody:vector, Material:string, Scale, Baby){
+    local Ang0 = ang()
+    local V1 = vec(1)
+    
+    local ScaleH = vec(Scale)
+    if(Baby){ #Baby
+        ScaleH = vec(Scale,0.6,0.6)
+    }
+    
+    local PLE = PH+vec(5,3,6.5)*Scale
+    local PRE = PH+vec(5,-3,6.5)*Scale
+    
+    holoCreate(109,PH+vec(5,3,6.5)*Scale,vec(0.125,0.25,0.35)*ScaleH,ang(0,0,-30),ColorBody*0.75,"hq_sphere") #Eyes Clipped
+    holoMaterial(109,Material)
+    holoParent(109,2)
+    holoClipEnabled(109,1)
+    holoCreate(110,PH+vec(5,-3,6.5)*Scale,vec(0.125,0.25,0.35)*ScaleH,ang(0,0,30),ColorBody*0.75,"hq_sphere")
+    holoMaterial(110,Material)
+    holoParent(110,2)
+    holoClipEnabled(110,1)
+}
+function void holosMisc(P0:vector, PH:vector, ColorBody:vector, Material:string, Scale){
+    local Ang0 = ang()
+    local V1 = vec(1)
+    local PJ = PH+vec(6,0,-8)*Scale
+    
+    #Lantern
+    holoCreate(116,PJ+vec(6.75,0,6)*Scale,vec(1),ang(),vec(255),"models/editor/axis_helper_thick.mdl")
+    holoParent(116,35)
+    holoAlpha(116,0)
+    holoCreate(117,PJ+vec(6.75,0,-17.5)*Scale,vec(0.75,0.75,0.5)*Scale,ang(),vec(255),"models/props_2fort/lantern001_off.mdl")
+    holoEntity(117):setSubMaterial(1,"models/cs_italy/light_orange")
+    holoParent(117,116)
+    holoAlpha(117,0)
+    
+    #Fireball
+    holoCreate(118,PH,vec(2)*Scale,ang(0,180,0),vec(255),"models/effects/muzzleflash/minigunmuzzle.mdl")
+    holoAlpha(118,0)
+    holoParent(118,2)
+    
+    return void
+}
+function void holosFX(){
+    holoCreate(113,vec(48,0,22),vec(1),ang(),vec(255),"cube")
+    holoCreate(114,vec(48,0,22),vec(1),ang(),vec(255),"cube")
+    holoCreate(115,vec(48,0,22),vec(1),ang(),vec(255),"cube")
+    for(N=113,115){
+        holoAlpha(N,0)
+        holoParent(N,2)
+        holoMaterial(N,"debug/debugdrawflat")
+    }
+    return void
+}
+

@@ -1,0 +1,70 @@
+@name dragonscript/Cosmetic Tool
+@inputs LookupTable:table
+@outputs 
+@persist 
+@trigger 
+@model models/props_interiors/Furniture_Vanity01a.mdl
+
+#Version 2.0.0
+
+#Which dragon's cosmetics would you like to adjust?
+#include "dragonscript/settings/grayscale_hat"
+
+#HOW TO USE:
+
+#In the Dragon E2, set the "NoCosmetics" variable to 1.
+#Spawn this E2 on the ground near the dragon and wire "LookupTable[TABLE]" to the Dragon E2.
+#Make changes to the dragon's config, SAVE THE CONFIG, then upload (left click) the Cosmetic tool into the existing Cosmetic Tool. It should instantly apply the changes.
+
+if(->LookupTable){
+    local Index = 119
+    
+    
+    for(N=1, CosmeticTable:count()){
+        #array(Bone,Model,Scale,Pos,Ang,Mat,Color)
+        #Index, Position, Scale, Angle, Color (RGB), Model | holocreate
+        
+        local Array = CosmeticTable[N,array]
+        local Bone = LookupTable[Array[1,string],entity]
+        
+        local Pos = Bone:toWorld(Array[4,vector])
+        local Scale = Array[3,vector]
+        local Ang = Bone:toWorld(Array[5,angle])
+        local Color = Array[8,vector]
+        local Alpha = Array[9,number]
+        local Model = Array[2,string]
+        local Material = Array[6,string]
+        local Skin = Array[7,number]
+        
+        holoCreate(Index,Pos,Scale,Ang,Color,Model)
+        holoMaterial(Index,Material)
+        holoSkin(Index,Skin)
+        holoAlpha(Index,Alpha)
+        holoParent(Index,Bone)
+        
+        #submaterials
+        
+        local SubArray = SubMCosmeticTable[N,array]
+        local BodyGArray = BodyGCosmeticTable[N,array]
+                
+        for(N2=1, SubArray:count()){
+            
+            local SubSplit = SubArray[N2,string]:explode(":")
+            local SubIndex = SubSplit[1,string]:toNumber()
+            local SubMat = SubSplit[2,string]
+            
+            holoEntity(Index):setSubMaterial(SubIndex,SubMat)
+            
+        }
+        
+        for(N3=1, BodyGArray:count()){
+            
+            local BodyG = BodyGArray[N3,vector2]
+            
+            holoBodygroup(Index,BodyG:x(), BodyG:y())
+            
+        }
+        
+        Index++
+    }
+}

@@ -1,0 +1,430 @@
+@name dragonscript/How_To_Maintain_Your_Dragon
+@model models/props_lab/binderredlabel.mdl
+setName("How to Maintain your Dragon\nRelease 2.0.1")
+#[
+    
+    
+      _   _                 _          __  __       _       _        _                                  ____                                
+     | | | | _____      __ | |_ ___   |  \/  | __ _(_)_ __ | |_ __ _(_)_ __    _   _  ___  _   _ _ __  |  _ \ _ __ __ _  __ _  ___  _ __  _ 
+     | |_| |/ _ \ \ /\ / / | __/ _ \  | |\/| |/ _` | | '_ \| __/ _` | | '_ \  | | | |/ _ \| | | | '__| | | | | '__/ _` |/ _` |/ _ \| '_ \(_)
+     |  _  | (_) \ V  V /  | || (_) | | |  | | (_| | | | | | || (_| | | | | | | |_| | (_) | |_| | |    | |_| | | | (_| | (_| | (_) | | | |_ 
+     |_| |_|\___/ \_/\_/    \__\___/  |_|  |_|\__,_|_|_| |_|\__\__,_|_|_| |_|  \__, |\___/ \__,_|_|    |____/|_|  \__,_|\__, |\___/|_| |_(_)
+                                                                               |___/                                    |___/               
+    
+    ========================================================================================================================================
+                                                                Release Version 2.0.0-2.0.1
+                                                      An Operation, Maintenance, and Survival Guide
+                                                        Copyright 2018-19 Magnum Technologies Inc.
+    ========================================================================================================================================
+    
+    Thank you for purchasing this manual from Magnum Technologies Inc. We at MTI understand that dragonkeeping can be a confusing, difficult,
+    and outright dangerous task at times. It is our hope that you use the knowledge contained within this manual to help you understand your
+    new draconic friend and make him/her into the faithful companion/adorable fluffball/destroyer of worlds you intended them to be.
+    
+    The Magnum Technologies Corporation is not responsible for any damages, injury, loss of life, or illegal parking caused by your dragon.
+    
+    
+     ______     __   __           ___  _____          __           __    
+    /_  __/__ _/ /  / /__   ___  / _/ / ___/__  ___  / /____ ___  / /____
+     / / / _ `/ _ \/ / -_) / _ \/ _/ / /__/ _ \/ _ \/ __/ -_) _ \/ __(_-<
+    /_/  \_,_/_.__/_/\__/  \___/_/   \___/\___/_//_/\__/\__/_//_/\__/___/
+                                                                         
+    
+    I: Configuration
+    II: Operation
+    III: Care & Maintenance
+    
+       ____  _   _____          ____                    __  _         
+      /  _/ (_) / ___/__  ___  / _(_)__ ___ _________ _/ /_(_)__  ___ 
+     _/ /  _   / /__/ _ \/ _ \/ _/ / _ `/ // / __/ _ `/ __/ / _ \/ _ \
+    /___/ (_)  \___/\___/_//_/_//_/\_, /\_,_/_/  \_,_/\__/_/\___/_//_/
+                                  /___/                               
+                                
+    Before you can start running around and lighting things on fire, you need to set up your dragon. The default config gives you a pretty bland dragon
+    named Grayscale (Get it? Because he's gray, and has scales?). While he is an affable ambassador between the two species, he's probably not what
+    you're envisioning as your ideal dragon companion.
+    
+    First, open the E2 editor. Create a folder in your main Expression 2 folder called "dragonscript", and make a folder inside that called "settings".
+    Then, press the [UPDATE] button on the E2 browser.
+    
+    Then open the three E2s on the inside of the dragon's complementary code crate. They are "dragonscript/hologen.txt", "dragonscript/animations.txt",
+    and "dragonscript/settings/grayscale.txt". In each one, press [SAVE AS] and save as the default names. Once you're done with all three, press [UPDATE] again!
+    
+    Then, navigate to the folder dragonscript/settings, and open up "grayscale.txt".
+    Pick a name for your dragon. Right on line 1, change "@name dragonscript/settings/grayscale" to "@name dragonscript/settings/<dragon name here>".
+    Avoid using any special characters like periods, commas, dollar signs, etc. Underscores ( _ ) and spaces are Okay.
+    
+    Click [SAVE AS] and save your new dragon config using whatever E2 puts in the box (This is why you changed the @name line!).
+    
+    Note: make sure you use [SAVE AS] and not [SAVE AND EXIT!]
+    
+    Now that the overhead is taken care of, we can get to the good stuff! Most of the config variables are pretty self-explanatory, but you can find
+    descriptions for everything as follows:
+    
+    Name: The dragon's name. You can use special characters, but a dragon with the @ sign in its name is going to get laughed at by its classmates.
+    Sex: Stifle your giggle. This parameter determines whether a dragon is Male or Female. 0 for Male, 1 for Female.
+    ColorBody: The color of the dragon's body, formatted as a vector.
+    ColorWings: The color of the dragon's wings, also formatted as a vector.
+    Material: The dragon's skin texture. It's fine to leave this as "sprops/textures/sprops_metal5", but you can change it as desired.
+    
+    Cosmetics:
+    Ever wanted to give your dragon a hat? Or a gun holster? Or maybe a Voodoo necklace and hot pink sunglasses? You can do all these and more!
+    The config file comes with a very in-depth tutorial on how to add cosmetics, and for the sake of ease of use, it will not be relocated here.
+    
+    Randomization:
+    Randomization works fine in the dragon config files! Say you wanted to make a randomized dragon employee for your company.
+    "Sex = random() > 0.5" gives a 50/50 probability of making the dragon male or female.
+    "ColorBody = randvec(0,100)" randomizes the dragon's body color. Darker tones (Limiting it to 100 instead of 255) Generally look better.
+    The same also works with ColorWings!
+    
+    Once you're done making the configuration file, save it (Ctrl+S) and press [Update] on the E2 editor's file browser.
+    
+    Now, open the main E2 (dragonscript/Magnums_Dragon_2.txt) and find Line 43.
+    Go ahead and replace the file there with the config file for the dragon you want (Do not include the .txt)!
+    For example, replace #include "dragonscript/settings/grayscale" with #include "dragonscript/settings/<dragon name here>" !
+    
+    Now, spawn the dragon dupe and upload the Main E2 into the dragon's body (The 075x075 PHX Block where the dragon stands).
+    
+    Your dragon should now be standing in front of you, ready to take on the world!
+    
+    Adjusting the config:
+    Say you want to make a minor edit, like you're trying to get the color just right or position a hat on the dragon's head.
+    Simply make the changes to the config file, SAVE, then manually reupload the Main E2 into the dragon's body.
+    If adjusting the cosmetics, check out the cosmetic tool! "dragonscript/cosmetic_tool.txt"
+    
+       ________  _   ____                    __  _         
+      /  _/  _/ (_) / __ \___  ___ _______ _/ /_(_)__  ___ 
+     _/ /_/ /  _   / /_/ / _ \/ -_) __/ _ `/ __/ / _ \/ _ \
+    /___/___/ (_)  \____/ .__/\__/_/  \_,_/\__/_/\___/_//_/
+                       /_/                                 
+    
+    So now that you've got your dragon, what can you do with it?
+    
+    The most basic application of a dragon is mobility. The dragon is faster than a speeding bullet (1), more powerful than a locomotive (2), and able to
+    leap tall builings in a single bound (3)!
+    
+    (1) Bullet max speed must be no greater than 72.7 Miles Per Hour.
+    (2) Setpos is more powerful than any known Applyforce, Thruster, or ACF locomotive.
+    (3) Flying counts as a single bound as long as the dragon's feet don't touch the ground.
+    
+    The dragon is capable of six movement modes. These include:
+    
+    *Walking/Standing
+    *Running
+    *Freefall
+    *Flight
+    *Sliding
+    *Swimming
+    
+    WALKING/STANDING
+    
+    When you first climb onto the dragon's back (There are two invisible seats on the dragon's back; the front one is for the driver), the dragon will be at a
+    standstill. Use [W] and [S] to walk forward or backward, and use [A] and [D] to turn left and right.
+    
+    Pressing [V] while standing or walking will toggle the dragon's crouch. This makes it easier for the dragon to climb onto props.
+    
+    Pressing [Shift] while the dragon is walking forward will cause it to break into a run.
+    
+    You can walk around on moving props as well, though beware: if the prop rotates and the dragon isn't standing near the center, it may fall off.
+    
+    RUNNING
+    
+    While the dragon's walking speed is slow and precise, at a full sprint, dragons can outrun a cheetah (1)!
+    Press [W] to increase the dragon's speed and keep it going. Again, [A] and [D] are used to steer.
+    While running, the dragon's speed will slowly decay to walking speed if [W] is not pressed.
+    
+    Pressing [S] will cause the dragon to go into a slide for quick braking.
+    
+    Pressing [Space] will make the dragon jump into the air, and go into freefall. If you hold [Space], the dragon will spread its wings and fly.
+    
+    (1) A cheetah running at 72.7 Miles Per Hour
+    
+    FREEFALL
+    
+    While falling, the dragon's trajectory is pretty much ballistic. The only force acting on it will be gravity.
+    
+    Pressing [Space] while in freefall will cause the dragon to spread its wings and enter flight.
+    
+    FLIGHT
+    
+    Flight is the trickiest but most useful movement mode. Factors such as lift, drag, gravity, and thrust all play a part in how the dragon handles.
+    
+    Pressing [Space] will cause the dragon to flap its wings downward, providing extra lift. This is especially useful at low speeds.
+    
+    Pressing [Shift] will cause the dragon to flap its wings backwards, providing less lift, but more thrust. You can use this to gain more speed, but
+    be careful not to stall at low speeds!
+    
+    Pressing [Alt] will cause the dragon to flap its wings forwards, reducing speed. Useful for when tight maneuvers are required.
+    
+    Pressing [V] will cause the dragon to stop flying and drop into freefall. This is useful for quick landings.
+    
+    [W] and [S] adjust the dragon's pitch (Up/Down tilt). Much like an airplane, [W] pitches downward and [S] pitches upwards.
+    [A] and [D] are used to steer the dragon left and right.
+    
+    Some important things to consider when flying:
+    *Crashing into obstacles (such as the skybox) has a noticeable impact (haha) on the dragon. He/She might look hurt for a moment, but don't worry,
+    they'll shake it off!
+    *The dragon can't hover. It can come really close, but if you're not flying forward, there isn't enough lift from flapping the wings to keep it from
+    slowly descending.
+    *Altitude can be exchanged for speed. If you need to speed up, pitch down and dive.
+    *Turning sharply costs a lot of speed.
+    
+    SLIDING
+    
+    If you attempt to climb too steep of a slope, or if you need to brake in a hurry, the dragon will slide like Scooby-Doo, complete with cartoonish
+    tire screeching noise.
+    
+    Pressing [W] while sliding will revert the dragon to a walk or run, depending on how fast you're sliding.
+    Pressing [S] while sliding will slow you down a lot more.
+    Pressing [Space] while sliding will cause the dragon to jump, just like if they were running.
+    Not pressing anything will allow you to slide quite a long distance.
+    
+    SWIMMING
+    
+    Should you walk, run, or land in a sufficiently deep body of water, the dragon will swim on the surface, doing the doggie-paddle.
+    The controls are identical to walking, except that [V] and [Shift] don't do anything.
+    
+    WEAPONS
+    
+    While riding on the dragon's back, you have at your disposal a number of "weapons." These include:
+    
+    *Fire Breath
+    *Fire Balls
+    *Prop Eating
+    *Pickup/Drop
+    *Button User
+    *Follow
+    
+    To select your weapon, hold [Mouse 2] and use the scroll wheel to highlight the weapon of your choice.
+    
+    FIRE BREATH
+    
+    Press and hold [Mouse 1] to loose a steady stream of fire from the dragon's mouth. You can use this to set props and players (1) on fire!
+    
+    (1) Player and prop ignition may depend on prop protection and/or server settings.
+    
+    FIRE BALLS
+    
+    Press [Mouse 1] to spit a fast, explosive fireball in the direction you're looking. If you charge the fireball by holding [Mouse 1], the dragon will
+    huff, puff, and blow out a much larger fireball that packs a much larger explosive punch.
+    
+    PROP EATING
+    
+    Point at a prop and press [Mouse 1], and the dragon will eat that prop if it is close and small enough. After you eat three props, the dragon will burp adorably!
+    The dragon will not eat players, other dragons, or important parts of itself. Ragdolls, however, are not an issue, as long as you have prop protection.
+    
+    PICKUP/DROP
+    
+    Point at a prop and press [Mouse 1], and the dragon will pick up that prop with its mouth if it is close and small enough. Pressing [Mouse 1] again will make
+    the dragon drop the item.
+    
+    BUTTON USER
+    
+    Point at a usable object (Door, Button, Etc.) and press [Mouse 1]. The dragon will reach out with its paw and use whatever you're pointing at. Great for throwing
+    railroad switches or operating garage doors!
+    
+    FOLLOW
+    
+    Point at a prop or player and press [Mouse 1]. The dragon will follow that prop or player in a manner similar to the .follow chat command. Point at the world and press
+    [Mouse 1] to make the dragon stop following.
+    
+    CHAT COMMANDS
+    
+    The dragon has at its disposal a multitude of useful commands, accessible by the chat.
+    
+    All commands are one word and use the period as a control character. (Parenthetical) parameters are required, [Bracketed] paramters are optional.
+    
+    You can target specific dragons by putting part of the dragon's name right after the command, separated by a colon.
+    For example, suppose you have two dragons, Alice and Bob. You want Alice to sit down, and you want Bob to teleport to [xXx]n00bSl4yer69[xXx].
+    You could type,
+    
+    .sit:alice
+    and
+    .goto:bob n00b
+    
+    ---
+    
+    .list
+    The .list command prints a list of all useful chat commands to the chat.
+    
+    -----
+    POSES
+    -----
+    
+    .stand
+    The .stand command makes the dragon stand up.
+    
+    .sit
+    The .sit command makes the dragon sit down. It doesn't matter where the dragon is or what it's doing. When sitting, the dragon cannot move (except by teleporting).
+    
+    .lie
+    The .lie command makes the dragon to down. When lying down, the dragon cannot move (except by teleporting).
+    
+    .sleep
+    The .sleep command makes the dragon fall asleep, complete with snoring and cartoon "ZZZ" effects. When asleep, the dragon can't move (except by teleporting) or do
+    anything else but wake up.
+    
+    .wake
+    The .wake command makes the dragon wake up, if asleep.
+    
+    --------
+    MOBILITY
+    --------
+    
+    .come
+    The .come command makes the dragon teleport to wherever you are pointing. Great for if you get it stuck somewhere!
+    Tip: if someone is driving the dragon around, the .come command may not work. Make it .sit first and then try!
+    
+    .goto (string player name)
+    The .goto command makes the dragon teleport to the specified player. Right behind them. Perfect for spooking people!
+    Tip: see tip for .come command.
+    
+    .follow [string player name]
+    The .follow command makes the dragon follow the given player name. The dragon will walk and run to try and catch up to the player, and teleport if they get stuck.
+    If no player name is given, the dragon will follow you.
+    If no player name is given and the dragon is already following someone, the dragon will stop following.
+    If no player name is given and you're pointing at a prop, the dragon will follow that prop instead.
+    
+    .cmere [string player name]
+    The .cmere command is the same as .follow, except it only works for players, and the dragon stops and greets the target when it gets close enough.
+    
+    .gohere
+    The .gohere command makes the dragon walk to the coordinates you point at.
+    
+    .grab
+    The .grab command makes the dragon ride whatever it's standing, sitting, or lying on. When riding a prop, the dragon will be unable to move.
+    
+    .release
+    The .release command makes the dragon release from whichever prop it's riding.
+    
+    -------
+    UTILITY
+    -------
+    
+    .light
+    The .light command toggles the dragon's handy lantern that it carries around in its mouth.
+    
+    .cam [number mode]
+    The .cam command controls spectating the dragon first-person. Passing a parameter of 1 lets you see through the dragon's eyes, while a parameter of 0 (or nothing)
+    returns you to your own view. A parameter of 2 enables the firstperson camera and makes the dragon look around as you do.
+    
+    .lookat [string player name]
+    The .lookat command makes the dragon look at a specific player, if specified.
+    If no player name is given, the dragon will revert to its normal looking-at behavior.
+    If no player name is given and you're pointing at a prop, the dragon will look at that prop.
+    
+    .pickup
+    The .pickup command makes the dragon pick up whatever it's looking at, subject to the same restrictions as the pickup/drop weapon mode. If you're pointing at a prop,
+    the dragon will attempt to pick that up instead.
+    
+    .drop
+    The .drop command makes the dragon drop whatever is in its mouth.
+    
+    .eat
+    The .eat command makes the dragon consider eating whatever it's looking at. If the dragon is carrying something in its mouth, it will eat that first.
+    Pointing at a prop will make the dragon target that instead.
+    Subject to the same restrictions as the prop eating weapon mode.
+    
+    .eject
+    The .eject command kicks anyone who is riding the dragon off the dragon. Note: other players should only be able to do anything on your dragon if they have
+    your prop protection, otherwise the dragon will kick them out of the driver's seat.
+    
+    .fire [number duration]
+    The .fire command makes the dragon breathe fire at whatever or whomever it's looking at. Supplying the duration parameter changes how long the fire lasts.
+    
+    .headlock [number pitch] [number yaw] [number roll]
+    The .headlock command forces the dragon to point its head to the specified 3D Angle. Pitches > 0 look upwards, Yaw > 0 looks left, Roll > 0 tilts left.
+    This command is useful for when the dragon is riding a prop, so that it doesn't spaz its head when looking at nearby players.
+    Typing .headlock without any arguments while the dragon is head-locked will allow it to look around freely again.
+    
+    -----------
+    PERSONALITY
+    -----------
+    
+    .roar
+    The .roar command makes the dragon roar. The exact sound it makes depends on what mood it's in (expression).
+    
+    .love [string expression]
+    The .love command makes the dragon show their contentment or affection by roaring at you happily as hearts drift out of its head cartoonishly.
+    Including an argument for the expression will make the dragon switch to that expression in the process.
+    
+    .expr [string expression] [bool eyelids] [bool squint]
+    
+    The .expr command changes the dragon's expression. The Expression paramter can be one of the following:
+    
+    normal
+    sad
+    annoyed
+    angry
+    confused
+    smug
+    concerned
+    
+    A blank string reverts the dragon to normal (happy) expression.
+    Putting a 1 for the Eyelids parameter makes the dragon's eyelids more prominent. This can have a significant effect on what the expression shows.
+    For example, eyelids can be the difference between "F*** you" and "F*** me."
+    
+    Putting a 1 for the Squint parameter makes the dragon appear to be squinting. This can change an annoyed look into a suspicious one, or amplify confusion.
+    
+    .wink [number Eye]
+    The .wink command causes the dragon to wink. Passing a zero forces it to stop winking. Passing a 1 makes the left eye wink, and 2 makes the right eye wink. If no
+    parameter is given, it wil toggle between winking the left eye and not winking at all.
+    
+    .dance
+    The .dance command toggles the dragon's dancing mode! While dancing, the dragon is unable to move (except by teleporting). Comes with music note effects.
+    
+    .say [string expression] "(string speech)"
+    The .say command can be used to make the dragon talk! Note that the speech must be encased in quotes.
+    Supplying an expression parameter will make the dragon's expression shift, incorporating the functionality of the .expr command.
+    
+    .burp
+    The .burp command forces the dragon to belch. It does not say "Excuse me" unless told to.
+    
+    DEBUG COMMANDS
+    A couple of commands that aren't really useful, but made for testing and left in.
+    
+    .splat
+    The .splat command stuns the dragon momentarily and makes it flop on the ground for no apparent reason.
+    
+    .jaw [number angle]
+    The .jaw command makes the dragon open its mouth to the specified angle in degrees. Clamped from 0 to 30.
+    
+    
+    
+       ____________  _   _____               ____      __  ___     _      __                            
+      /  _/  _/  _/ (_) / ___/__ ________   / __/___  /  |/  /__ _(_)__  / /____ ___  ___ ____  _______ 
+     _/ /_/ /_/ /  _   / /__/ _ `/ __/ -_)  > _/_ _/ / /|_/ / _ `/ / _ \/ __/ -_) _ \/ _ `/ _ \/ __/ -_)
+    /___/___/___/ (_)  \___/\_,_/_/  \__/  |_____/  /_/  /_/\_,_/_/_//_/\__/\__/_//_/\_,_/_//_/\__/\__/ 
+                                                                                                        
+                                                                                                        
+    The Northern Dragon (Scientific name Draco Borealis) is a quadrupedal winged creature native to parts of North America and Europe. Known since
+    ancient times as evil, even demonic bringers of fire and destruction, Dragons are actually friendly and adorable bringers of fire and destruction.
+    Because there is so much misunderstanding and stigma surrounding these beautiful creatures, we've assembled this FAQ list to help dispel misinformation
+    and increase public awareness.
+    
+    Q: What do dragons eat?
+    A: Dragons primarily subsist on radioactive minerals and materials in the Earth's crust. They also eat metals when available, as many organs in the dragon's body
+    require them. They are perfectly capable of digesting 'traditional' food, however, and sometimes eat human food for the taste.
+    Warning: Dragons have a high sensitivity to capsaicin (the chemical responsible for spicy foods) and ingesting even small amounts of it will cause them
+    great pain and discomfort.
+    
+    Q: Dragons eat radioactive materials? Am I in danger from radiation exposure?
+    A: Of course not! Dragon skin is incredibly thick and is an excellent radiation reflector. This is only efficient, as it prevents radioactive losses to the environment.
+    
+    Q: How do dragons go to the bathroom?
+    A: They use a toilet. A fireproof one, but similar to what humans use. It's also lower to the floor, usually.
+    
+    Q: Where do dragons live?
+    A: Dragons historically lived underground, in caves and caverns. In modern times, this is still largely true, but many dragons have moved to the surface in order to
+    seek work or for other reasons.
+    
+    Q: Are dragons reptiles?
+    A: Nope! That's a common misconception; they are mammals! They have hair (visible as eyelashes), mammary glands (fortunately not visible), and are warm-blooded.
+    
+    Q: How do dragons breathe fire?
+    A: The fire is actually produced by igniting a highly flammable mucous produced in the dragon's sinuses. They effectively sneeze napalm!
+    
+    Q: Do dragons like music?
+    A: Many of them do. Their tastes are usually for the classics, but dragons will dance to just about anything!
+
+]#

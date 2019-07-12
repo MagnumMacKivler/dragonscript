@@ -1,0 +1,4296 @@
+@name dragonscript/Magnums Dragon 2
+@inputs [Seat1 Seat2 PodController1 PodController2 FlamePlate Igniter EGP FireLight LanternLight Crate Explosive User]:wirelink NextWeapon PrevWeapon
+@outputs Eject Eject2 CPU Flame_M Flame_F Ignite Explosion_M Explosion_F [FireColor LanternColor]:vector LookupTable:table DragonHead:entity Following Cmere GoHere FollowTarget:entity LanternPos LanternEnergy LanternForce HoloEnts:array HoloScales:array
+@persist [P0 PH PLWJ PRWJ PLWH PRWH]:vector Ang0:angle [LH1 LH2 LH3 RH1 RH2 RH3]:entity CIndex CStart CEnd #Holo/Skeleon Shit
+@persist Loading Driveable Driving Riding Sleeping Following #States
+@persist IdleLookTarget:entity HasLookTarget TailTheta StandMode StandTransitionQ #Idling Data
+@persist WalkSpeed WalkSpeedMax WalkAccel WalkTurnSpeed WalkTurnSpeedMax WalkTurnAccel Pm1 Pm2 BodyAngle:angle NeedsReset BPitch WalkBobTheta WalkBobTheta2 Moving EjectQ #Walking Data
+@persist StandOn StandOnEntity:entity StandOnPos:vector Climbing VkeyQ #Walking 2
+@persist RunSpeed RunSpeedMax RunAccel RunTheta1 JumpQ JumpPower RunRoll #Running Data
+@persist FallVelF FallVelZ #Freefall Data
+@persist FlyVelW:vector FlapQ FlapTheta FlapResetQ FlyTerminalVelocity FlyTurnMul FlyPitchVel FlyYawVel FlyRollVel FlyBobTheta #Flying Data
+@persist SlideSpeed SlideAccel #Sliding Data
+@persist SwimSpeed SwimSpeedMax SwimAccel SwimTurnSpeed SwimTurnSpeedMax SwimTurnAccel SwimTheta SwimTheta2 SwishQ TreadWater #Swimming Data
+@persist FireQ Flaming FireExpression:string FireColorFactor ForceFire #Fire Breath
+@persist FireBallPos:vector FireBallVelW:vector FireBallQ FireBallLaunchVel FireBallGravity FireBallRoll Supercharged FireChargeQ #Fireball
+@persist UserStep Pressing PressParm PressTarget:vector FootPos:vector #User
+@persist RoarQ VoScale #Rawr Colon Three
+@persist RidingEntity:entity HeadLock HeadLockAngle:angle #Prop Surfing
+@persist CurlDirection ShutEyesQ Snoring ZTheta1 ZTheta2 ZTheta3 ZQ #Sleeping
+@persist LanternQ LanternOn DefaultLanternColor:vector #Lantern
+@persist SpeakBubbleTimeout SpeakAlpha SpeakFading Speaking SpeakIndex [TargetText]:string #Speaking
+@persist Eating EatIndex Chewing ChewN Bite EATarget:entity CannotEat:array PropsEaten Belching EatQ #Eating
+@persist Dazed DazedTheta Recovering Crashing ShakeAng ShakeQ #Fender Bender
+@persist Loving LoveTheta1 LoveTheta2 LoveTheta3 LoveQ #Love and Affection
+@persist Dancing DanceTheta1 NoteTheta1 NoteTheta2 NoteTheta3 NoteQ DanceStyle #Get down and Boogey
+@persist [E O]:entity IdleBlinkInterval IdleBlinkHoldtime Blinking GetInQ1 GetInQ2 DefaultExpression:string DefaultExpressionEyelids DefaultSquint Wink ForceEyesClosed JawAngleMaster SitAngleCorrect Active1 Weapon WeaponQ WeaponAlpha Freeze MinScale MaxScale PopPitch #Misc
+@persist CameraOn FirstPerson #Camera
+@persist GTpos:vector GTang:angle TeleLock #Needateleportahere
+@persist Carrying CarryObject:entity PickupQ DragonPos:vector #Object Carrying
+@persist FollowTarget:entity GoHerePos:vector GoHere Cmere Greet FollowDisp:vector FollowSpeedTarget FWL:wirelink FollowQ #Follow Freeman!
+@persist Ragdoll RagdollStep NoCosmetics #Ragdoll stuff
+@persist Version:string AnimVersion:string HoloVersion:string SettingsVersion:string #Version Info
+@trigger NextWeapon PrevWeapon
+@model models/hunter/blocks/cube075x075x075.mdl
+
+#For draconic care instructions, please see dragonscript/How_To_Maintain_Your_Dragon.txt!
+
+if(first()|duped()){
+    Version = "2.0.1"
+    
+    #Config: Which Dragon Settings file do you want to load?
+    
+    #include "dragonscript/settings/grayscale"
+    
+    #Include Libraries: don't touch these.
+    
+    #include "dragonscript/animations"
+    #include "dragonscript/hologen"
+    
+    #Launch Options
+    
+    Ragdoll = 0 #Turn the dragon into a ragdoll? Results may vary.
+    NoCosmetics = 0 #Prevent cosmetics from loading?
+    ForceScale = 0 #If anything other than 0, force the dragon's scale to this (max 3):
+    ForceBaby = 0 #Force your dragon to be a baby? Overrides everything.
+    Freeze = 0 #Disable Blinking and Idle Animations.
+    
+    #The following three variables can be set in the settings config:
+    #DefaultExpression [normal/annoyed/sad/angry/concerned/confused/smug]
+    #DefaultExpressionEyelids [1/0]
+    #DefaultSquint [1/0]
+    
+    #Don't touch anything past this point.
+    
+    E = entity()
+    O = owner()
+        
+    WalkSpeedMax = 16
+    WalkAccel = 2
+    WalkTurnSpeedMax = 10
+    WalkTurnAccel = 2
+    
+    RunSpeedMax = 128
+    RunAccel = 4
+    
+    JumpPower = 72
+    
+    FlyTerminalVelocity = 192
+    FlyTurnMul = 0.5
+    
+    SlideAccel = 8
+    
+    SwimSpeedMax = 12
+    SwimAccel = 1
+    SwimTurnSpeedMax = 3
+    SwimTurnAccel = 1
+    
+    IdleBlinkInterval = 3000
+    IdleBlinkHoldtime = 500
+    
+    Loading = 1
+    
+    StandMode = 0 #Testing only
+    StandTransitionQ = 1
+    
+    if(DefaultExpression==""){
+        DefaultExpression = "normal"
+    }
+    #DefaultExpressionEyelids = 0
+    
+    FireExpression = "angry"
+    
+    SpeakBubbleTimeout = 10
+    
+    DefaultLanternColor = vec(255,255,200)
+    
+    FireBallLaunchVel = 256
+    FireBallGravity = 2
+    
+    if(Baby|ForceBaby){
+        Scale = 0.5
+        Baby = 1
+    }elseif(ForceScale!=0){
+        Scale = min(ForceScale,3)
+    }
+    
+    MinScale = 0.65
+    
+    VoScale = 1 + (Scale-1)/3  
+    runOnChat(1)
+    runOnLast(1)
+    PodController1["Crosshairs",number] = 1
+
+    setName(Name + "\n" + (Sex ? "(Female)" : "(Male)")+"\nVersion "+Version)
+    
+    
+    Crate:entity():setColor(ColorBody)
+    
+    #LanternPos = 30
+    #LanternEnergy = 15
+    
+    Dancing = 0
+    Weapon = 1
+    if(Ragdoll){
+        E:setAng(ang(0,-90,0))
+    }
+    
+    function dprint(Message:string){
+        printColor(ColorBody,"[Dragonscript] ",vec(191),Message)
+    }
+    function entity:dprintDriver(Message:string){
+        This:printColorDriver(ColorBody,"[Dragonscript] ",vec(191),Message)
+    }
+    function cprint(Message:string){
+        printColor(vec(191),Message)
+    }
+    
+    function number compatCheck(Need:string, Have:string){
+        local NA = Need:explode(".")
+        local HA = Have:explode(".")
+        
+        if(((HA[2,string]:toNumber()) < (NA[2,string]:toNumber()))|((HA[3,string]:toNumber()) < (NA[3,string]:toNumber()))){
+            return 0
+        }else{
+            return 1
+        }
+        
+    }
+    
+    #Compatibility Checking
+    
+    local NeedAnim = "2.0.0"
+    local NeedHolo = "2.0.0"
+    local NeedSettings = "2.0.0"
+    
+    
+    local AnimCompat = compatCheck(NeedAnim,AnimVersion)
+    local HoloCompat = compatCheck(NeedHolo,HoloVersion)
+    local SettingsCompat = compatCheck(NeedSettings,SettingsVersion)
+    
+    if(!(AnimCompat & HoloCompat & SettingsCompat)){
+        
+        soundPlay(0,2,"buttons/combine_button_locked.wav")
+        dprint("Compatibility Error!")
+        cprint("Animations: "+AnimVersion+" ("+(AnimCompat ? "OK" : "NEED "+NeedAnim)+")")
+        cprint("Hologen: "+HoloVersion+" ("+(HoloCompat ? "OK" : "NEED "+NeedHolo)+")")
+        cprint("Settings: "+SettingsVersion+" ("+(SettingsCompat ? "OK" : "NEED "+NeedSettings)+")")
+        E:propShadow(1)
+        E:setAlpha(255)
+    }else{
+        E:propShadow(0)
+        E:setAlpha(0)
+    
+        #ifdef httpRequest(string)
+            httpRequest("https://raw.githubusercontent.com/MagnumMacKivler/dragonscript/master/version.txt")
+            runOnHTTP(1)
+        #else
+            dprint("HTTP Core is disabled on your server. Automatic version checking is disabled.")
+        #endif
+        
+        PopPitch = 100
+        soundPlay(0,1,"garrysmod/balloon_pop_cute.wav")
+        soundPitch(0,PopPitch)
+        PopPitch += 10
+        timer("holos1",100)
+    }
+}elseif(clk("holos1")){
+    
+    Ang0 = ang()
+    local V1 = vec(1)
+    
+    P0 = E:pos()
+    PH = P0+vec(48,0,22)*Scale
+    PLWJ = P0 + vec(12,13,0)*Scale
+    PLWH = PLWJ + vec(0,36,0)*Scale
+    PRWJ = P0 + vec(12,-13,0)*Scale
+    PRWH = PRWJ + vec(0,-36,0)*Scale
+    holoSkeleton(P0,PH,PLWJ,PLWH,PRWJ,PRWH,Scale)
+    holos1(P0, PH, ColorBody, Material, Scale, Baby)
+    DragonHead = holoEntity(2)
+    E:poseJaw(0,Scale)
+    
+    #ifdef cameraCreate(number,vector,angle)
+        cameraCreate(1,holoEntity(2):toWorld(vec(6,0,8)),holoEntity(2):angles())
+        cameraParent(1,holoEntity(2))
+    #endif
+    
+    
+    soundPlay(0,1,"garrysmod/balloon_pop_cute.wav")
+    soundPitch(0,PopPitch)
+    PopPitch += 10
+    timer("holos2",1000)
+}elseif(clk("holos2")){
+    holos2(PLWJ, PLWH, PRWJ, PRWH, ColorBody, ColorWings, Material, Scale)
+    soundPlay(0,1,"garrysmod/balloon_pop_cute.wav")
+    soundPitch(0,PopPitch)
+    PopPitch += 10
+    timer("holos3",1000)
+}elseif(clk("holos3")){
+    
+    holos3(PLWJ, PLWH, PRWJ, PRWH, ColorBody, ColorWings, Material, Scale)
+    
+    dytri(76,PLWH,PLWH-48*LH1:right()*Scale,PLWH-48*LH2:right()*Scale)
+    dytri(77,PLWH,PLWH-48*LH2:right()*Scale,PLWH-48*LH3:right()*Scale)
+    dytri(78,PLWH,PLWH-48*LH3:right()*Scale,PLWJ)
+    
+    dytri(89,PRWH,PRWH+48*RH1:right()*Scale,PRWH+48*RH2:right()*Scale)
+    dytri(90,PRWH,PRWH+48*RH2:right()*Scale,PRWH+48*RH3:right()*Scale)
+    dytri(91,PRWH,PRWH+48*RH3:right()*Scale,PRWJ)
+    soundPlay(0,1,"garrysmod/balloon_pop_cute.wav")
+    soundPitch(0,PopPitch)
+    PopPitch += 10
+    timer("holos4",1000)
+    
+}elseif(clk("holos4")){
+
+    if(Sex){
+        holosEyelashes(P0, PH, ColorBody, Material, Scale)
+    }
+    holoEyeClips(P0, PH, ColorBody, Material, Scale, Baby)
+    holosMisc(P0, PH, ColorBody, Material, Scale)
+    holoColor(118,Sex ? vec(127,255,0) : vec(255))
+    holosFX()
+    soundPlay(0,1,"garrysmod/balloon_pop_cute.wav")
+    soundPitch(0,PopPitch)
+    PopPitch += 10
+    timer("holos5",1000)
+}elseif(clk("holos5")){
+    
+    holoPos(0,E:toWorld(vec(0,0,-18 + 36*Scale)))
+    holoAng(0,E:angles())
+    E:poseTail(-15,0,0,0,Scale)
+    
+    if(->Seat1){
+        holoCreate(102,E:toWorld(vec(8,0,28)*Scale),vec(1),E:angles(),vec(255),"models/editor/axis_helper_thick.mdl") #Pilot Seat
+        holoAlpha(102,0)
+        holoParent(102,0)
+        Seat1:entity():propFreeze(1)
+        Seat1:entity():setPos(E:toWorld(scp(vec(8,0,28),Scale)))
+        Seat1:entity():setAng(E:toWorld(ang(0,-90,0)))
+        Seat1:entity():propNotSolid(Baby)
+            
+    }
+    if(->Seat2){
+        holoCreate(111,E:toWorld(scp(vec(-16,0,28),Scale)),vec(1),E:angles(),vec(255),"models/editor/axis_helper_thick.mdl") #Passenger Seat
+        holoAlpha(111,0)
+        holoParent(111,0)
+        Seat2:entity():propFreeze(1)
+        Seat2:entity():setPos(E:toWorld(scp(vec(-16,0,28),Scale)))
+        Seat2:entity():setAng(E:toWorld(ang(0,-90,0)))
+        Seat2:entity():propNotSolid(Baby)
+    }
+    if(->FlamePlate){
+        FlamePlate:entity():propFreeze(1)
+        FlamePlate:entity():setPos(E:toWorld(scp(vec(50,0,32),Scale)))
+        FlamePlate:entity():setAng(E:angles())
+    }
+    if(->Igniter){
+        Igniter:entity():propFreeze(1)
+        Igniter:entity():setPos(E:toWorld(scp(vec(48,0,35),Scale)))
+        Igniter:entity():setAng(E:toWorld(ang(90,0,0)))
+    }
+    if(->FireLight){
+        FireLight:entity():propFreeze(1)
+        FireLight:entity():setPos(E:toWorld(scp(vec(56,0,32),Scale)))
+        FireLight:entity():setAng(E:toWorld(ang(90,0,0)))
+    }
+    if(->LanternLight){
+        LanternLight:entity():propFreeze(1)
+        LanternLight:entity():setPos(E:toWorld(scp(vec(63,0,22),Scale)))
+        LanternLight:entity():setAng(E:toWorld(ang(90,0,0)))
+    }
+    if(->EGP){
+        holoCreate(112,E:toWorld(scp(vec(48,0,40),Scale)),vec(1),E:angles(),vec(255),"cube") #Speech Bubble
+        holoAlpha(112,0)
+        holoParent(112,2)
+        EGP:entity():propFreeze(1)
+        EGP:entity():setPos(E:toWorld(scp(vec(48,0,40),Scale)))
+        EGP:entity():setAng(E:toWorld(ang(0,90,0)))
+        
+        EGP:egpClear()
+        local Text = "This is a work in progress."
+        local Ylevel = 440
+        
+        #Speech
+        local OF = 32
+        local Offset1 = vec2(0,OF*1.5) + vec2(0,-OF*1.5)*Scale
+        local Offset2 = vec2(-OF,OF) + vec2(OF,-OF)*Scale
+        
+        EGP:egpRoundedBox(1,vec2(256,Ylevel)+Offset1,vec2(Text:length()*12,32))
+        EGP:egpColor(1,vec(192))
+        EGP:egpTriangle(2,vec2(256-4,Ylevel+16)+Offset1,vec2(256+4,Ylevel+16)+Offset1,vec2(256,Ylevel+36)+Offset1)
+        EGP:egpColor(2,vec(192))
+        
+        EGP:egpText(3,Text,vec2(256,Ylevel)+Offset1)
+        EGP:egpSize(3,24)
+        EGP:egpAlign(3,1,1)
+        EGP:egpColor(3,ColorBody/3)
+        
+        for(N=1,3){
+            EGP:egpAlpha(N,0)
+        }
+        
+        #Weapon Select Thought Bubble
+        
+        local TBP = vec2(320,440)+Offset2
+        
+        EGP:egpRoundedBox(4,TBP,vec2(96,76))
+        EGP:egpColor(4,vec(191))
+        EGP:egpCircle(5,TBP + vec2(-12,54),vec2(12))
+        EGP:egpColor(5,vec(191))
+        EGP:egpCircle(6,TBP + vec2(-24,72),vec2(8))
+        EGP:egpColor(6,vec(191))
+        
+        EGP:egpText(7,"Fire Breath",TBP+vec2(0,-30))
+        EGP:egpSize(7,12)
+        EGP:egpAlign(7,1,1)
+        EGP:egpColor(7,vec())
+        
+        EGP:egpText(8,"Fire Ball",TBP+vec2(0,-18))
+        EGP:egpSize(8,12)
+        EGP:egpAlign(8,1,1)
+        EGP:egpColor(8,vec(127))
+        
+        EGP:egpText(9,"Eat Props",TBP+vec2(0,-6))
+        EGP:egpSize(9,12)
+        EGP:egpAlign(9,1,1)
+        EGP:egpColor(9,vec(127))
+        
+        EGP:egpText(10,"Pickup/Drop",TBP+vec2(0,6))
+        EGP:egpSize(10,12)
+        EGP:egpAlign(10,1,1)
+        EGP:egpColor(10,vec(127))
+        
+        EGP:egpText(11,"Use Buttons",TBP+vec2(0,18))
+        EGP:egpSize(11,12)
+        EGP:egpAlign(11,1,1)
+        EGP:egpColor(11,vec(127))
+        
+        EGP:egpText(12,"Follow",TBP+vec2(0,30))
+        EGP:egpSize(12,12)
+        EGP:egpAlign(12,1,1)
+        EGP:egpColor(12,vec(127))
+        
+        
+        for(N=4,12){
+            EGP:egpAlpha(N,0)
+        }
+    }
+    CannotEat = array(E,Seat1:entity(),Seat2:entity(),FlamePlate:entity(),Igniter:entity(),FireLight:entity(),LanternLight:entity(),EGP:entity())
+    
+    LookupTable = table()
+    LookupTable["Body",entity] = holoEntity(0)
+    LookupTable["Neck",entity] = holoEntity(1)
+    LookupTable["Head",entity] = holoEntity(2)
+    LookupTable["LeftShoulder",entity] = holoEntity(3)
+    LookupTable["LeftElbow",entity] = holoEntity(92)
+    LookupTable["LeftFrontFoot",entity] = holoEntity(4)    
+    LookupTable["RightShoulder",entity] = holoEntity(5)
+    LookupTable["RightElbow",entity] = holoEntity(93)
+    LookupTable["RightFrontFoot",entity] = holoEntity(6)    
+    LookupTable["LeftHip",entity] = holoEntity(7)
+    LookupTable["LeftKnee",entity] = holoEntity(94)
+    LookupTable["LeftRearFoot",entity] = holoEntity(8)    
+    LookupTable["RightHip",entity] = holoEntity(9)
+    LookupTable["RightKnee",entity] = holoEntity(95)
+    LookupTable["RightRearFoot",entity] = holoEntity(10)
+    LookupTable["Tail",entity] = holoEntity(11)
+    LookupTable["Tail1",entity] = holoEntity(63)
+    LookupTable["Tail2",entity] = holoEntity(64)
+    LookupTable["Tail3",entity] = holoEntity(65)
+    LookupTable["Tail4",entity] = holoEntity(66)
+    LookupTable["LeftWingJoint",entity] = holoEntity(12)
+    LookupTable["LeftHand1",entity] = holoEntity(70)
+    LookupTable["LeftHand2",entity] = holoEntity(71)
+    LookupTable["LeftHand3",entity] = holoEntity(72)
+    LookupTable["RightWingJoint",entity] = holoEntity(14)
+    LookupTable["RightHand1",entity] = holoEntity(80)
+    LookupTable["RightHand2",entity] = holoEntity(81)
+    LookupTable["RightHand3",entity] = holoEntity(82)
+    
+    soundPlay(0,1,"garrysmod/balloon_pop_cute.wav")
+    soundPitch(0,PopPitch)
+    PopPitch += 10
+    
+    if(CosmeticTable:count() == 0){ #load faster if we have no cosmetics
+        timer("parentseats",500)
+    }else{
+        CIndex = 119
+        CStart = 1
+        CEnd = 1
+        #print("Total "+CosmeticTable:count())
+        timer("holos6",1000)
+    }
+}elseif(clk("holos6")){
+    local NeedAnotherCycle = 0
+    if(!NoCosmetics){
+        
+        
+        local NumCosmetics = CosmeticTable:count()
+        
+        if((NumCosmetics-CStart+1)>15){
+            NeedAnotherCycle = 1
+            CEnd = CStart+14
+        }else{
+            CEnd = NumCosmetics
+        }
+        
+        for(N=CStart, CEnd){
+            #array(Bone,Model,Scale,Pos,Ang,Mat,Color)
+            #Index, Position, Scale, Angle, Color (RGB), Model | holocreate
+            
+            local Array = CosmeticTable[N,array]
+            local Bone = LookupTable[Array[1,string],entity]
+            
+            local Pos = Bone:toWorld(Array[4,vector]*Scale)
+            local CScale = Array[3,vector]*Scale
+            local Ang = Bone:toWorld(Array[5,angle])
+            local Color = Array[8,vector]
+            local Alpha = Array[9,number]
+            local Model = Array[2,string]
+            local Material = Array[6,string]
+            local Skin = Array[7,number]
+            
+            holoCreate(CIndex,Pos,CScale,Ang,Color,Model)
+            holoMaterial(CIndex,Material)
+            holoSkin(CIndex,Skin)
+            holoAlpha(CIndex,Alpha)
+            holoParent(CIndex,Bone)
+            
+            #submaterials
+            
+            local SubArray = SubMCosmeticTable[N,array]
+            local BodyGArray = BodyGCosmeticTable[N,array]
+                    
+            for(N2=1, SubArray:count()){
+                
+                local SubSplit = SubArray[N2,string]:explode(":")
+                local SubIndex = SubSplit[1,string]:toNumber()
+                local SubMat = SubSplit[2,string]
+                
+                holoEntity(CIndex):setSubMaterial(SubIndex,SubMat)
+                
+            }
+            
+            for(N3=1, BodyGArray:count()){
+                
+                local BodyG = BodyGArray[N3,vector2]
+                
+                holoBodygroup(CIndex,BodyG:x(), BodyG:y())
+                
+            }
+            
+            CIndex++
+        }
+        
+        
+    }
+    soundPlay(0,1,"garrysmod/balloon_pop_cute.wav")
+    soundPitch(0,PopPitch)
+    PopPitch += 10
+    #print(CStart,CEnd)
+    if(NeedAnotherCycle){
+        CStart = CEnd+1
+        timer("holos6",2000)
+    }else{
+        timer("parentseats",500)
+    }
+}elseif(clk("parentseats")){
+    if(->Seat1){
+        Seat1:entity():parentTo(holoEntity(102))
+    }
+    if(->Seat2){
+        Seat2:entity():parentTo(holoEntity(111))
+    }
+    if(->FlamePlate){
+        FlamePlate:entity():parentTo(holoEntity(2))
+    }
+    if(->Igniter){
+        Igniter:entity():parentTo(holoEntity(2))
+    }
+    if(->FireLight){
+        FireLight:entity():parentTo(holoEntity(2))
+    }
+    if(->LanternLight){
+        LanternLight:entity():parentTo(holoEntity(116))
+    }
+    if(->EGP){
+        EGP:entity():parentTo(holoEntity(112))
+    }
+    
+    holoEntity(2):eyeExpression(DefaultExpression,DefaultExpressionEyelids,Sex,Scale,Baby,DefaultSquint,Wink)
+    
+    Loading = 0
+    Driveable = (StandMode==0)
+    Driving = 0
+    
+    if(Ragdoll & (Scale==1)){
+        RagdollStep = 0
+        timer("ragdollassemble",500)
+    }else{
+        holoEntity(0):poseWings(30,0,75,22.5,0,0,Scale)
+        timer("clk",100)
+        if(!Freeze){
+            timer("blink_close",IdleBlinkInterval) #FreezeDarg
+        }
+    }
+    #E:poseWings(ang(0,-22.5,22.5*sin(Theta)),45,1)
+    vocalizeRoar(DefaultExpression,Sex,1,VoScale)
+    
+}elseif(~NextWeapon | ~PrevWeapon){
+
+    local WeaponMin = 1
+    local WeaponMax = 6
+    if(WeaponQ & !PodController1["Mouse1",number]){
+        if(NextWeapon){
+            Weapon++
+            if(Weapon>WeaponMax){Weapon=WeaponMin}
+            soundPlay(2,0.1,"buttons/lightswitch2.wav")
+            soundVolume(2,0.5)
+        }elseif(PrevWeapon){
+            Weapon--
+            if(Weapon<WeaponMin){Weapon=WeaponMax}
+            soundPlay(2,0.1,"buttons/lightswitch2.wav")
+            soundVolume(2,0.5)
+        }
+        
+        switch(Weapon){
+            case 1, #Fire Breath
+                EGP:egpColor(7,vec())
+                EGP:egpColor(8,vec(127))
+                EGP:egpColor(9,vec(127))
+                EGP:egpColor(10,vec(127))
+                EGP:egpColor(11,vec(127))
+                EGP:egpColor(12,vec(127))
+                break
+            case 2, #Fire Ball
+                EGP:egpColor(7,vec(127))
+                EGP:egpColor(8,vec())
+                EGP:egpColor(9,vec(127))
+                EGP:egpColor(10,vec(127))
+                EGP:egpColor(11,vec(127))
+                EGP:egpColor(12,vec(127))
+                break
+            case 3, #Eating
+                EGP:egpColor(7,vec(127))
+                EGP:egpColor(8,vec(127))
+                EGP:egpColor(9,vec())
+                EGP:egpColor(10,vec(127))
+                EGP:egpColor(11,vec(127))
+                EGP:egpColor(12,vec(127))
+                break
+            case 4, #Pickup/Drop
+                EGP:egpColor(7,vec(127))
+                EGP:egpColor(8,vec(127))
+                EGP:egpColor(9,vec(127))
+                EGP:egpColor(10,vec())
+                EGP:egpColor(11,vec(127))
+                EGP:egpColor(12,vec(127))
+                break
+            case 5, #User
+                EGP:egpColor(7,vec(127))
+                EGP:egpColor(8,vec(127))
+                EGP:egpColor(9,vec(127))
+                EGP:egpColor(10,vec(127))
+                EGP:egpColor(11,vec(0))
+                EGP:egpColor(12,vec(127))
+                break
+            case 6, #Follow
+                EGP:egpColor(7,vec(127))
+                EGP:egpColor(8,vec(127))
+                EGP:egpColor(9,vec(127))
+                EGP:egpColor(10,vec(127))
+                EGP:egpColor(11,vec(127))
+                EGP:egpColor(12,vec(0))
+                break
+            default,
+                break
+        }
+        
+    }
+}elseif(clk("clk")){
+    
+    Active1 = PodController1["Active",number]
+    Active2 = PodController2["Active",number]
+    
+    Driveable = ((!Dazed) & (!Crashing) & (StandMode==0) & (StandTransitionQ==0) & (!Riding) & !(Dancing) & (!TeleLock))
+    local Driver = Seat1:entity():driver()
+    if(Active1 & !Eject & (O!=Driver) & !O:trusts(Driver)){
+        Eject = 1
+        timer("eject",100)
+    }
+    
+    if((Scale<MinScale) & (Active1|Active2)){
+        Eject = 1
+        Eject2 = 1
+        soundStop(1)
+        StandMode = 4
+        StandTransitionQ = 1
+        Dazed = 1
+        E:soundPlay(2,1,(random()>0.5) ? "player/pl_fallpain1.wav" : "player/pl_fallpain3.wav")
+        soundPitch(2,75)
+        dprint(Name + " is too small to support the weight of a rider!")
+        timer("eject",100)
+    }else{
+        Eject = Eject2 = 0
+    }
+    
+    
+    if(Driveable & (Active1 | Following)){ #Riding & Mobile
+        if(!Driving){
+            Driving = TreadWater ? 6 : 1
+            E:propFreeze(1)
+            E:propNotSolid(1)
+            FlamePlate:entity():propNotSolid(1)
+            Igniter:entity():propNotSolid(1)
+            FireLight:entity():propNotSolid(1)
+            LanternLight:entity():propNotSolid(1)
+            EGP:entity():propNotSolid(1)
+            #Eject = 0
+            StandOn = 0
+            
+        }
+        
+        
+        
+        local W = PodController1["W",number]
+        local A = PodController1["A",number]
+        local S = PodController1["S",number]
+        local D = PodController1["D",number]
+        local Alt = PodController1["Alt",number]
+        local Shift = PodController1["Shift",number]
+        local Space = PodController1["Space",number]
+        local Driver = Seat1:entity():driver()
+        local Vkey = Driver:keyPressed("V")
+        
+            
+        if(Driving==1){ #Walking
+            
+            #Let's Go Swimming
+            #rangerHitWater(1)
+            #rangerIgnoreWorld(1)
+            #rangerHitEntities(0)
+            rangerFlags("IW")
+        local EnterWater = rangerOffset(8*Scale,E:toWorld(scp(vec(0,0,36),Scale)),vec(0,0,-1))
+            rangerFlags("E")
+            #rangerHitWater(0)
+            #rangerIgnoreWorld(0)
+            #rangerHitEntities(1)
+            
+            #local Plunk = holoEntity(0):isUnderWater()
+            
+            if(EnterWater:hit()){
+            #if(Plunk){
+                Driving = 6
+                SwimSpeed = WalkSpeed
+                Moving = 0
+                SwimTheta = 0
+                SwimTurnSpeed = 0
+                #print("splash")
+            }
+            
+            rangerFilter(E)
+            rangerFilter(Seat1:entity())
+            rangerFilter(Seat2:entity())
+            rangerDefaultZero(0)
+            
+            #Hop Off
+            
+            if(Alt){
+                Eject = 1
+                timer("eject",100)
+            }
+            
+            #Climb Toggle
+            if(Vkey & !VkeyQ){
+                VkeyQ = 1
+                Climbing = !Climbing
+            }elseif(!Vkey & VkeyQ){
+                VkeyQ = 0
+            }
+            
+            #Forward/Backward
+            
+            local CanMove = 0
+            if(Climbing){
+                rangerHitEntities(0)
+            }
+            local ForceCheck = (Following) & (FollowDisp:length() > 1024)
+            if(W | (WalkSpeed>0) | (FollowSpeedTarget>0) | ForceCheck){
+                local BlockRanger = rangerOffset(72,E:toWorld(scp(vec(0,0,18),Scale)),BodyAngle:forward()+0.5*BodyAngle:up())
+                CanMove = !BlockRanger:hit()
+            }elseif(S | (WalkSpeed<0)){
+                local BlockRanger = rangerOffset(72,E:toWorld(scp(vec(0,0,18),Scale)),-BodyAngle:forward()+0.5*BodyAngle:up())
+                CanMove = !BlockRanger:hit()
+            }
+            rangerHitEntities(1)
+            
+            #Follow Mode
+            
+            if(Following){
+                FollowTargetPos = GoHere ? GoHerePos : FollowTarget:pos()
+                FollowDisp = (FollowTargetPos - E:pos())*vec(1,1,0)
+                if(GoHere){
+                    FollowSpeedTarget = (FollowDisp:length()>32)*WalkSpeedMax
+                }else{
+                    local HeadHolo = FWL["DragonHead",entity]
+                    FollowSpeedTarget = (FollowDisp:length()>((FollowTarget:isPlayer()|HeadHolo) ? 192 : 128)*Scale)*WalkSpeedMax
+                }
+                
+                if(FollowSpeedTarget>0){
+                    FollowBearing = clamp(-E:bearing(FollowTargetPos),-90,90)
+                    FollowTurnSpeedTarget = clamp(FollowBearing,-45,45)*WalkTurnSpeedMax/45
+                    
+                    if((FollowDisp:length() > 1024) & !CanMove){
+                        
+                        if(!GoHere){rangerFilter(FollowTarget)}
+                        local FindStuckRanger = rangerOffset(GoHere ? FollowTargetPos+vec(0,0,32)*Scale : FollowTargetPos,E:pos())
+                        
+                        GTpos = FindStuckRanger:pos() + 60*FindStuckRanger:hitNormal()*Scale
+                        GTang = BodyAngle*ang(0,1,0)#ang(0,-bearing(vec(),ang(),FindStuckRanger:hitNormal()),0)
+                        TeleLock = 1
+                        #print("Door Stuck!")
+                        
+                        timer("teleport",100)
+                    }elseif(FollowDisp:length()>(384)){
+                        Shift = 1
+                    }
+                    if(abs(FollowBearing)>45){
+                        FollowSpeedTarget=0
+                    }
+                }else{
+                    FollowTurnSpeedTarget = 0
+                }
+            }
+            
+            #Walk Speed Modulation
+            
+            if(CanMove){
+                
+                local WalkSpeedMaxMod = Climbing ? WalkSpeedMax/2 : WalkSpeedMax
+                
+                
+                if(Following){
+                    if(FollowSpeedTarget > WalkSpeed){
+                        if(WalkSpeed < WalkSpeedMaxMod){
+                            WalkSpeed += WalkAccel
+                            if(WalkSpeed>WalkSpeedMaxMod){WalkSpeed=WalkSpeedMaxMod}
+                        }
+                        if(WalkSpeed > FollowSpeedTarget){WalkSpeed = FollowSpeedTarget}
+                    }elseif(FollowSpeedTarget < WalkSpeed){
+                        if(WalkSpeed > 0){
+                            WalkSpeed += -WalkAccel*2
+                            if(WalkSpeed<0){WalkSpeed=0}
+                        }
+                        if(WalkSpeed < FollowSpeedTarget){WalkSpeed = FollowSpeedTarget}
+                    }
+                }else{
+                
+                    if(W & !S){
+                        if(WalkSpeed < WalkSpeedMaxMod){
+                            if(WalkSpeed <= 0){
+                                WalkSpeed += WalkAccel*2*(1+Shift)
+                            }elseif(WalkSpeed > 0){
+                                WalkSpeed += WalkAccel
+                            }elseif(WalkSpeed > WalkSpeedMaxMod){
+                                WalkSpeed = WalkSpeedMaxMod
+                            }
+                        }
+                    }elseif(S & !W){
+                        if(WalkSpeed > -WalkSpeedMaxMod){
+                            if(WalkSpeed >= 0){
+                                WalkSpeed += -WalkAccel*2
+                            }elseif(WalkSpeed < 0){
+                                WalkSpeed += -WalkAccel
+                            }elseif(WalkSpeed < -WalkSpeedMaxMod){
+                                WalkSpeed = -WalkSpeedMaxMod
+                            }
+                        }
+                    }elseif(!W & !S & (WalkSpeed!=0)){
+                        if(WalkSpeed > 0){
+                            WalkSpeed += -WalkAccel*2
+                            if(WalkSpeed <= 0){WalkSpeed = 0}
+                        }elseif(WalkSpeed < 0){
+                            WalkSpeed += WalkAccel*2
+                            if(WalkSpeed >= 0){WalkSpeed = 0}
+                        }
+                    }
+                }
+                if((WalkSpeed>=WalkSpeedMax) & Shift){
+                    RunSpeed = WalkSpeedMax
+                    Driving = 2
+                    RunTheta1 = 0
+                    RunRoll = 0
+                }
+            }else{
+                WalkSpeed = 0
+                #print("STAHP")
+            }
+            
+            #Ranger Danger
+            
+            local FloorTouchRanger = rangerOffset(96,E:pos()+vec(0,0,18)*Scale,vec(0,0,-1))
+            local ANR1 = rangerOffset(96,E:pos()+24*BodyAngle:forward()*Scale+18*BodyAngle:up()*Scale,-BodyAngle:up())
+            local ANR2 = rangerOffset(96,E:pos()-24*BodyAngle:forward()*Scale+18*BodyAngle:up()*Scale,-BodyAngle:up())
+            #local FloorNormal = ((ANR1:hitNormal() + ANR2:hitNormal())/2):normalized()
+            local FloorNormal = (ANR1:pos()-ANR2:pos()):normalized():rotateAroundAxis(E:right(),90)
+            local StandPos = FloorTouchRanger:pos() + vec(0,0,Climbing ? 12 : 18)#*Scale
+            #local StandPos = (ANR1:pos() + ANR2:pos())/2 + 18*FloorNormal
+            
+            local NewStandOnEntity = FloorTouchRanger:entity()
+            
+            if(NewStandOnEntity:isValidPhysics()){
+                if(!StandOn | (StandOnEntity!=NewStandOnEntity)){
+                    StandOnEntity = NewStandOnEntity
+                    StandOn = 1
+                    StandOnPos = StandOnEntity:pos()
+                }
+                
+                local NewStandOnPos = StandOnEntity:pos()
+                local StandVel = NewStandOnPos - StandOnPos
+                StandPos += StandVel
+                #print(StandVel)
+                StandOnPos = NewStandOnPos
+                if(Driving==2){
+                    RunSpeed += StandVel:dot(E:forward())
+                }
+            }elseif(StandOn){
+                StandOn = 0
+                StandOnEntity = noentity()
+            }
+            
+            
+            
+            if(!FloorTouchRanger:hit()){ #Begin Falling
+                Driving = 3
+                FallVelF = WalkSpeed
+                FallVelZ = 0
+                Moving = 0
+            }
+            
+            #Turn Speed Modulation
+            
+            if(Following){
+                
+                WalkTurnSpeed = FollowTurnSpeedTarget
+                
+            }else{
+                
+                if(A & !D){
+                    if(WalkTurnSpeed < WalkTurnSpeedMax){
+                        if(WalkTurnSpeed < 0){
+                            WalkTurnSpeed += WalkTurnAccel*2
+                        }elseif(WalkTurnSpeed >= 0){
+                            WalkTurnSpeed += WalkTurnAccel
+                        }elseif(WalkTurnSpeed > WalkTurnSpeedMax){
+                            WalkTurnSpeed = WalkTurnSpeedMax
+                        }
+                    }
+                }elseif(D & !A){
+                    if(WalkTurnSpeed > -WalkTurnSpeedMax){
+                        if(WalkTurnSpeed > 0){
+                            WalkTurnSpeed += -WalkTurnAccel*2
+                        }elseif(WalkTurnSpeed <= 0){
+                            WalkTurnSpeed += -WalkTurnAccel
+                        }elseif(WalkTurnSpeed < -WalkTurnSpeedMax){
+                            WalkTurnSpeed = -WalkTurnSpeedMax
+                        }
+                    }
+                }elseif(!A & !D & (WalkTurnSpeed!=0)){
+                    if(WalkTurnSpeed > 0){
+                        WalkTurnSpeed += -WalkTurnAccel*2
+                        if(WalkTurnSpeed <= 0){WalkTurnSpeed = 0}
+                    }elseif(WalkTurnSpeed < 0){
+                        WalkTurnSpeed += WalkTurnAccel*2
+                        if(WalkTurnSpeed >= 0){WalkTurnSpeed = 0}
+                    }
+                }
+            }
+            
+            #Head Tracking
+            local AimPos = vec()
+            if(Following){
+                local HeadHolo = FWL["DragonHead",entity]
+                AimPos = (FollowTarget==E) ? GoHerePos + Scale*(vec(0,0,32)+64*BodyAngle:forward()) : (HeadHolo ? HeadHolo:pos() : FollowTarget:isPlayer() ? FollowTarget:shootPos() : FollowTarget:pos()) - vec(0,0,6.5)*Scale
+            }else{
+                if(FirstPerson){
+                    local LookDir = PodController1["AimPos",vector] - Driver:shootPos()
+                    AimPos = holoEntity(2):pos() + LookDir - vec(0,0,6.5)*Scale
+                }else{
+                    AimPos = PodController1["AimPos",vector] - vec(0,0,6.5)*Scale
+                }
+            }
+            local TargetAngle = -heading(holoEntity(0):toWorld(vec(48,0,22)*Scale),E:angles(),AimPos)
+            
+            (Following ? E : holoEntity(0)):poseHead(Flaming ? TargetAngle : TargetAngle*0.75,Climbing ? -15 : 0)
+            EyeVec = holoEntity(2):aimEyes(AimPos)
+            holoEntity(2):poseEyes(EyeVec,Blinking,0,Sex,Scale,Baby,Wink)
+            
+            #Cmere/GoHere Reset
+            if((GoHere|Greet) & (FollowSpeedTarget==0) & (abs(FollowBearing)<5)){
+                Following = 0
+                GoHere = 0
+                if(Greet){
+                    Greet = 0
+                    RoarQ = 1
+                    vocalizeRoar(DefaultExpression,Sex,1,VoScale)
+                    if(Carrying){
+                        CarryObject:propNotSolid(0)
+                        CarryObject:deparent()
+                        CarryObject:propFreeze(0)
+                        Carrying = 0
+                        if(Driving==3){CarryObject:applyForce(CarryObject:mass()*FlyVelW)}
+                    }
+                }
+            }
+            
+            #Angles and Stuff
+            
+            local StandAngle = E:angles()*ang(0,1,0)
+            local Dot = FloorTouchRanger:hit() ? (vec(0,0,1):dot(FloorNormal)) : 1
+            local NormalAngle = acos(Dot)
+            local NewAngle = (StandAngle + ang(0,WalkTurnSpeed,0))
+            local SlopeAxis = vec(0,0,1):cross(FloorNormal)
+            local TargetAngle = NewAngle:rotateAroundAxis(SlopeAxis,NormalAngle)
+            
+            #Smoothing Angles
+            
+            local TPitch = TargetAngle:pitch()
+            
+            if(Climbing){
+                TPitch = clamp(TPitch,-60,60)
+                TargetAngle = ang(TPitch,TargetAngle:yaw(),TargetAngle:roll())
+            }
+            BPitch = BodyAngle:pitch()
+            
+            if(TPitch > BPitch){
+                BPitch += 7.5
+                if(BPitch > TPitch){
+                    BPitch = TPitch
+                }
+            }elseif(TPitch < BPitch){
+                BPitch += -7.5
+                if(BPitch < TPitch){
+                    BPitch = TPitch
+                }
+            }
+            BodyAngle = ang(BPitch,TargetAngle:yaw(),0)
+            
+            if((abs(TPitch)>60)){
+                Driving = 5 #Slide!
+                SlideSpeed = sign(TPitch)
+                Moving = 0
+            }
+            
+            local WalkSpeedEffective = WalkSpeed*cos(BPitch)
+            local WalkSpeedCombo = (abs(WalkSpeedEffective) > 0) ? WalkSpeedEffective : abs(WalkTurnSpeed)/2
+            
+            local NewPos = StandPos + WalkSpeedEffective*BodyAngle:forward()
+            
+            #Move/Align E2
+            
+            E:setPos(NewPos)
+            E:setAng(NewAngle)
+            #holoPos(0,FloorTouchRanger:pos()+FloorNormal*18)
+            
+            #Feets
+            
+            local StepAR1 = ikstep(WalkSpeedCombo*2,WalkSpeedCombo/Scale,0,Pm1,Scale)
+            Pm1 = StepAR1[2,number]
+            local Vw1 = StepAR1[1,vector]
+            
+            local StepAR2 = ikstep(WalkSpeedCombo*2,WalkSpeedCombo/Scale,1,Pm2,Scale)
+            Pm2 = StepAR2[2,number]
+            local Vw2 = StepAR2[1,vector]
+            
+            if(Driving==1 & (abs(WalkSpeedEffective)>0)){
+                if(!Moving){
+                    Moving = 1
+                    soundPlay(1,0,"npc/crow/flap2.wav")
+                }
+                WalkBobTheta += WalkSpeedEffective*4
+                WalkBobTheta2 += WalkSpeedCombo
+                if(WalkBobTheta>360){WalkBobTheta-=360}
+                if(WalkBobTheta2>360){WalkBobTheta2-=360}
+                #holoPos(0,E:pos()+vec(0,0,18+1*sin(WalkBobTheta)))
+                holoAng(0,BodyAngle+ang(sin(WalkBobTheta),0,2*sin(WalkBobTheta2)))
+                soundPitch(1,abs(WalkSpeedEffective)*4/Scale)
+            }else{
+                if(Moving){
+                    Moving = 0
+                    soundStop(1)
+                }
+                WalkBobTheta = 0
+                WalkBobTheta2 = 0
+                #holoPos(0,E:pos()+vec(0,0,18))
+                holoAng(0,BodyAngle)
+            }
+            
+                
+            #Feet
+            
+            local FLP = Vw1 + (Climbing*vec(4,0,0)*Scale + vec(0,0,-1)) #Offset for foot tilting while walking
+            local FRP = Vw2 + ((FootPos + Climbing*vec(4,0,0))*Scale + vec(0,0,-1))
+            local RLP = Vw2 + (Climbing*vec(-4,0,0)*Scale + vec(0,0,-1))
+            local RRP = Vw1 + (Climbing*vec(-4,0,0)*Scale + vec(0,0,-1))
+            #print(RLP,RRP)
+            holoEntity(0):iklegs(FLP,FRP,RLP,RRP,Scale)
+            
+            #Tail/Wing Waggle
+            TailTheta += (Moving ? WalkSpeedEffective*4 : 5)/Scale
+            if(TailTheta>360){TailTheta-=360}
+            holoEntity(0):poseTail(-15 + 5*sin(WalkBobTheta2),5*sin(TailTheta) - WalkTurnSpeed,0,0,Scale)
+            holoEntity(0):poseWingsCheap(30,(Climbing ? 60 : 75) + 2.5*sin(TailTheta))
+            
+        }elseif(Driving==2){ #Running
+            
+            #Let's Go Swimming
+            #rangerHitWater(1)
+            #rangerIgnoreWorld(1)
+            #rangerHitEntities(0)
+            rangerFlags("IW")
+            local EnterWater = rangerOffset(8*Scale,E:toWorld(scp(vec(0,0,36),Scale)),vec(0,0,-1))
+            rangerFlags("E")
+            #rangerHitWater(0)
+            #rangerIgnoreWorld(0)
+            #rangerHitEntities(1)
+
+            if(EnterWater:hit()){
+                Driving = 6
+                SwimSpeed = clamp(RunSpeed,-SwimSpeedMax,SwimSpeedMax)
+                Moving = 0
+                SwimTheta = 0
+                SwimTurnSpeed = 0
+                E:soundPlay(2,2,"ambient/water/water_splash"+randint(1,3)+".wav")
+            }
+            
+            rangerFilter(E)
+            rangerFilter(Seat1:entity())
+            rangerFilter(Seat2:entity())
+            rangerDefaultZero(0)
+            
+            
+            local BlockRanger = rangerOffset(72*Scale+RunSpeed,E:toWorld(scp(vec(0,0,24),Scale)),BodyAngle:forward()+0.5*BodyAngle:up())
+            #local BlockRanger = rangerOffset(72+RunSpeed,E:toWorld(vec(0,0,128)),E:forward())
+            
+            if(BlockRanger:hit() & !isnan(BlockRanger:pos():x())){
+                Driving = 1
+                #print(round(BlockRanger:pos()))
+                WalkSpeed = 0
+                RunSpeed = 0
+            }else{ #Not Hitting Something
+                
+                #Follow Mode
+                if(Following){
+                    FollowTargetPos = GoHere ? GoHerePos : FollowTarget:pos()
+                    FollowDisp = (FollowTargetPos - E:pos())*vec(1,1,0)
+                    
+                    if(GoHere){
+                        FollowSpeedTarget = clamp((FollowDisp:dot(E:forward()) - 256)/8,0,128)
+                    }else{
+                        FollowSpeedTarget = FollowTarget:vel():dot(E:forward())/10 + clamp((FollowDisp:dot(E:forward()) - 256)/8,0,128) #+ ($FollowDisp):dot(E:forward())*0
+                    }
+                    #FollowAccel = ($FollowDisp):dot(E:forward())*4
+                    
+                    local FollowBearing = clamp(-E:bearing(FollowTargetPos),-90,90)
+                    FollowTurnSpeedTarget = FollowBearing*WalkTurnSpeedMax/90
+                    
+                }
+                
+                
+                #Run Speed Modulation
+                if(Following){
+                    if(FollowSpeedTarget > RunSpeed){
+                        if(RunSpeed < RunSpeedMax){
+                            RunSpeed += RunAccel
+                            if(RunSpeed>RunSpeedMax){RunSpeed=RunSpeedMax}
+                        }
+                        if(RunSpeed > FollowSpeedTarget){RunSpeed = FollowSpeedTarget}
+                    }elseif(FollowSpeedTarget < RunSpeed){
+                        if(RunSpeed > 0){
+                            RunSpeed += -RunAccel*2
+                            if(RunSpeed<WalkSpeedMax){
+                                Driving = 1
+                                #print("Slow")
+                                WalkSpeed = RunSpeed
+                            }
+                        }
+                        if(RunSpeed < FollowSpeedTarget){RunSpeed = FollowSpeedTarget}
+                    }
+                }else{
+                
+                    if(W & (RunSpeed<RunSpeedMax)){
+                        RunSpeed += RunAccel*(1+Shift)
+                        if(RunSpeed>RunSpeedMax){RunSpeed=RunSpeedMax}
+                    }elseif(S & (RunSpeed>0)){
+                        Driving = 5 #Slide!
+                        SlideSpeed = RunSpeed
+                        Moving = 0
+                        #print("Slide!")
+                    }elseif(!W & !S & (RunSpeed>0)){
+                        RunSpeed += -RunAccel*2
+                        #print("Slowing Down Naturally")
+                        if(RunSpeed<WalkSpeedMax){
+                            Driving = 1
+                            #print("Slow")
+                            WalkSpeed = RunSpeed
+                        }
+                    }
+                }
+            
+                local FloorTouchRanger = rangerOffset(96,E:pos()+vec(0,0,18)*Scale,vec(0,0,-1))
+                local StandPos = FloorTouchRanger:pos() + vec(0,0,18)#*Scale
+                local FloorNormal = FloorTouchRanger:hitNormal()
+                
+                if(!FloorTouchRanger:hit()){ #Begin Falling
+                    Driving = 3
+                    FallVelF = RunSpeed
+                    FallVelZ = 0
+                    Moving = 0
+                }
+                
+                
+                #Turning
+                if(Following){
+                    WalkTurnSpeed = FollowTurnSpeedTarget
+                }else{
+                    WalkTurnSpeed = (A-D)*(WalkTurnSpeedMax - 0.75*WalkTurnSpeedMax*((RunSpeed-WalkSpeedMax)/(RunSpeedMax-WalkSpeedMax)))
+                }
+                local TargetRoll = -WalkTurnSpeed*2
+                if(RunRoll < TargetRoll){
+                    RunRoll += 1
+                    if(RunRoll > TargetRoll){
+                        RunRoll = TargetRoll
+                    }
+                }elseif(RunRoll > TargetRoll){
+                    RunRoll += -1
+                    if(RunRoll < TargetRoll){
+                        RunRoll = TargetRoll
+                    }
+                }
+                
+                #Head Tracking
+                local AimPos = vec()
+                if(Following){
+                    local HeadHolo = FWL["DragonHead",entity]
+                    AimPos = GoHere ? GoHerePos : (HeadHolo ? HeadHolo:pos() : FollowTarget:isPlayer() ? FollowTarget:shootPos() : FollowTarget:pos()) - vec(0,0,6.5)*Scale
+                }else{
+                    if(FirstPerson){
+                        local LookDir = PodController1["AimPos",vector] - Driver:shootPos()
+                        AimPos = holoEntity(2):pos() + LookDir - vec(0,0,6.5)*Scale
+                    }else{
+                        AimPos = PodController1["AimPos",vector] - vec(0,0,6.5)*Scale
+                    }
+                }
+                local TargetAngle = -heading(holoEntity(0):toWorld(vec(48,0,22)*Scale),E:angles(),AimPos)
+                #local AimPos = PodController1["AimPos",vector] - vec(0,0,6.5)
+                #local TargetAngle = -heading(holoEntity(2):pos(),E:angles(),AimPos)
+                (Following ? E : holoEntity(0)):poseHead(TargetAngle,0)
+                holoEntity(2):poseEyes(vec2(),Blinking,0,Sex,Scale,Baby,Wink)
+                
+                #Angles and Stuff
+            
+                local StandAngle = E:angles()*ang(0,1,0)
+                local Dot = FloorTouchRanger:hit() ? (vec(0,0,1):dot(FloorNormal)) : 1
+                local NormalAngle = acos(Dot)
+                local NewAngle = (StandAngle + ang(0,WalkTurnSpeed,0))
+                SlopeAxis = vec(0,0,1):cross(FloorNormal)
+                local TargetAngle = (SlopeAxis:length()>0) ? NewAngle:rotateAroundAxis(SlopeAxis,NormalAngle) : NewAngle
+                
+                #Smoothing Angles
+                
+                local TPitch = TargetAngle:pitch()
+                BPitch = BodyAngle:pitch()
+                
+                if(TPitch > BPitch){
+                    BPitch += 7.5
+                    if(BPitch > TPitch){
+                        BPitch = TPitch
+                    }
+                }elseif(TPitch < BPitch){
+                    BPitch += -7.5
+                    if(BPitch < TPitch){
+                        BPitch = TPitch
+                    }
+                }
+                BodyAngle = ang(BPitch,TargetAngle:yaw(),0)
+                
+                local RunSpeedEffective = RunSpeed*cos(BPitch)
+                
+                local NewPos = StandPos + RunSpeedEffective*BodyAngle:forward()
+                
+                if(Space & !JumpQ){ #Jumping!
+                    JumpQ = 1
+                    Driving = 3
+                    
+                    FallVelZ = RunSpeedEffective*BodyAngle:forward():z() + JumpPower*(RunSpeed/RunSpeedMax)*Scale
+                    FallVelF = RunSpeedEffective
+                    
+                    NewPos += vec(0,0,FallVelZ)
+                    Moving = 0
+                }elseif(!Space & JumpQ){
+                    JumpQ = 0
+                }
+                
+                #Move/Align E2
+                
+                E:setPos(NewPos+vec(0,0,RunSpeed/16 - RunSpeed*cos(RunTheta1)/16))
+                E:setAng(NewAngle)
+                
+                #Legs
+                
+                local H0 = holoEntity(0)
+                
+                RunTheta1 += clamp(RunSpeedEffective/1.5,64,96)/Scale
+                if(RunTheta1>360){RunTheta1-=360}
+                local RunTheta1b = RunTheta1 - 45
+                holoAng(3,H0:toWorld(ang(45*sin(RunTheta1)+10,0,0)))
+                local RunAng = H0:toWorld(ang(30*cos(RunTheta1-30)-25,0,0))
+                holoAng(92,RunAng)
+                holoAng(4,RunAng)
+                
+                holoAng(5,H0:toWorld(ang(45*sin(RunTheta1b)+10,0,0)))
+                RunAng = H0:toWorld(ang(30*cos(RunTheta1b-30)-25,0,0))
+                holoAng(93,RunAng)
+                holoAng(6,RunAng)
+                
+                local RunTheta2 = RunTheta1 - 135
+                local RunTheta2b = RunTheta2 - 30
+                
+                holoAng(7,H0:toWorld(ang(45*sin(RunTheta2),0,0)))
+                RunAng = H0:toWorld(ang(45*-cos(RunTheta2+45)+45,0,0))
+                holoAng(94,RunAng)
+                holoAng(8,RunAng)
+                
+                holoAng(9,H0:toWorld(ang(45*sin(RunTheta2b),0,0)))
+                RunAng = H0:toWorld(ang(45*-cos(RunTheta2b+45)+45,0,0))
+                holoAng(95,RunAng)
+                holoAng(10,RunAng)
+                
+                if(abs(RunSpeedEffective)>0){
+                    if(!Moving & (Driving==2)){
+                        Moving = 1
+                        soundPlay(1,0,"npc/crow/flap2.wav")
+                    }
+                    WalkBobTheta += RunSpeedEffective/1.5
+                    WalkBobTheta2 += RunSpeedEffective/3
+                    if(WalkBobTheta>360){WalkBobTheta-=360}
+                    if(WalkBobTheta2>360){WalkBobTheta2-=360}
+                    
+                    holoAng(0,BodyAngle+ang(sin(WalkBobTheta),0,RunRoll + 2*sin(WalkBobTheta2)))
+                    #holoAng(0,BodyAngle)
+                    soundPitch(1,RunSpeedEffective/(2.5*Scale))
+                    
+                    #Tail/Wing Waggle
+                    TailTheta += RunSpeedEffective/(3*Scale)
+                    if(TailTheta>360){TailTheta-=360}
+                    holoEntity(0):poseTail(-15 + RunSpeedEffective/32,10*sin(TailTheta),0,0,Scale)
+                    holoEntity(0):poseWingsCheap(30,75 + 2.5*sin(TailTheta))
+                    
+                }else{
+                    if(Moving){
+                        Moving = 0
+                        soundStop(1)
+                    }
+                    WalkBobTheta = 0
+                    WalkBobTheta2 = 0
+                    #holoPos(0,E:pos()+vec(0,0,18))
+                    holoAng(0,BodyAngle)
+                }
+                
+                
+                
+            }
+            
+            
+            
+        }elseif(Driving==3){ #Freefall
+        
+            #Let's Go Swimming
+            #rangerHitWater(1)
+            #rangerIgnoreWorld(1)
+            #rangerHitEntities(0)
+            rangerFlags("IW")
+            local EnterWater = rangerOffset(8*Scale,E:toWorld(scp(vec(0,0,36),Scale)),vec(0,0,-1))
+            rangerFlags("E")
+            #rangerHitWater(0)
+            #rangerIgnoreWorld(0)
+            #rangerHitEntities(1)
+
+            if(EnterWater:hit()){
+                Driving = 6
+                SwimSpeed = clamp(FallVelF,-SwimSpeedMax,SwimSpeedMax)
+                Moving = 0
+                SwimTheta = 0
+                SwimTurnSpeed = 0
+                E:soundPlay(2,2,"ambient/water/water_splash"+randint(1,3)+".wav")
+            }
+            
+            rangerFilter(E)
+            rangerFilter(Seat1:entity())
+            rangerFilter(Seat2:entity())
+            #rangerFilter(Seat1:entity())
+            #rangerFilter(Seat2:entity())
+            local FallSpeed = sqrt(FallVelZ^2 + FallVelF^2)
+            local CrashRanger = rangerOffset(FallVelF+72*Scale,E:pos(),BodyAngle:forward())
+            if(CrashRanger:hit()){
+                FallVelF = 0
+                #print("Crash "+CrashRanger:entity():toString())
+            }
+            rangerFilter(E)
+            rangerFilter(Seat1:entity())
+            rangerFilter(Seat2:entity())
+            local HitGroundRanger = rangerOffset(max(-FallVelZ,0)+64*Scale,E:pos()+18*E:up(),vec(0,0,-1))
+            if(HitGroundRanger:hit()){ #Hit Ground
+                #print("Land "+HitGroundRanger:entity():toString())
+                if(HitGroundRanger:entity():isValidPhysics() & !W){
+                    FallVelF = 0
+                }
+                
+                if(FallVelF > WalkSpeedMax){
+                    Driving = 2
+                    RunSpeed = FallVelF
+                }else{
+                    Driving = 1
+                    WalkSpeed = FallVelF
+                    soundStop(1)
+                }
+                Moving = 0
+                E:setPos(HitGroundRanger:pos()+vec(0,0,18)+FallVelF*E:forward())
+                
+                if(FallVelZ<=-256){
+                    Eject = 1
+                    Eject2 = 1
+                    soundStop(1)
+                    StandMode = 4
+                    StandTransitionQ = 1
+                    Dazed = 1
+                    E:soundPlay(2,1,(random()>0.5) ? "player/pl_fallpain1.wav" : "player/pl_fallpain3.wav")
+                    soundPitch(2,75)
+                    timer("eject",100)
+                    
+                }else{
+                    E:soundPlay(2,1,"physics/concrete/boulder_impact_hard"+ randint(1,4):toString() +".wav")
+                }
+            }else{
+                E:setPos(E:pos() + FallVelF*E:forward() + vec(0,0,FallVelZ))
+                if(FallVelZ > -512){
+                    FallVelZ += -38.6/2
+                    if(FallVelZ < -512){
+                        FallVelZ = -512
+                    }
+                }
+                
+                #To the Skies!
+                
+                if(Space & (FallVelZ<=0)){
+                    Driving = 4
+                    FlyVelW = FallVelF*E:forward() + vec(0,0,FallVelZ)
+                    FlapTheta = 360
+                }elseif(Space & !JumpQ){
+                    JumpQ = 1
+                    Driving = 4
+                    
+                    FlyVelW = FallVelF*E:forward() + vec(0,0,FallVelZ)
+                    FlapTheta = 360
+                }elseif(!Space & JumpQ){
+                    JumpQ = 0
+                }
+                
+                #Woosh Sound
+                if(!Moving){
+                    Moving = 1
+                    soundPlay(1,0,"vehicles/fast_windloop1.wav")
+                    #print("Woosh")
+                }
+                soundPitch(1,FallSpeed/3)
+                
+                #Tail Physics
+                holoEntity(0):poseTail(clamp(-FallVelZ/6 - 7.5,-25,25),0,0,0,Scale)
+                
+                #Head Tracking
+                local AimPos = vec()
+                if(Following){
+                    local HeadHolo = FWL["DragonHead",entity]
+                    AimPos = (HeadHolo ? HeadHolo:pos() : FollowTarget:isPlayer() ? FollowTarget:shootPos() : FollowTarget:pos()) - vec(0,0,6.5)*Scale
+                }else{
+                    if(FirstPerson){
+                        local LookDir = PodController1["AimPos",vector] - Driver:shootPos()
+                        AimPos = holoEntity(2):pos() + LookDir - vec(0,0,6.5)*Scale
+                    }else{
+                        AimPos = PodController1["AimPos",vector] - vec(0,0,6.5)*Scale
+                    }
+                }
+                local TargetAngle = -heading(holoEntity(0):toWorld(vec(48,0,22)*Scale),E:angles(),AimPos)
+                #local AimPos = PodController1["AimPos",vector] - vec(0,0,6.5)
+                #local TargetAngle = -heading(holoEntity(2):pos(),E:angles(),AimPos)
+                E:poseHead(TargetAngle,0)
+                holoEntity(2):poseEyes(vec2(),Blinking,0,Sex,Scale,Baby,Wink)
+                
+                #Legs
+                
+                local LegAng = 35 - clamp(abs(FallVelZ/8),0,30)
+                local H0 = holoEntity(0)
+                
+                holoAng(3,H0:toWorld(ang(-LegAng,0,0)))
+                local FootAngle = ang(-LegAng - 15,0,0)
+                holoAng(92,H0:toWorld(FootAngle))
+                holoAng(4,H0:toWorld(FootAngle))
+                
+                holoAng(5,H0:toWorld(ang(-LegAng,0,0)))
+                FootAngle = ang(-LegAng - 15,0,0)
+                holoAng(93,H0:toWorld(FootAngle))
+                holoAng(6,H0:toWorld(FootAngle))
+                
+                holoAng(7,H0:toWorld(ang(LegAng,0,0)))
+                FootAngle = ang(LegAng + 15,0,0)
+                holoAng(94,H0:toWorld(FootAngle))
+                holoAng(8,H0:toWorld(FootAngle))
+                
+                holoAng(9,H0:toWorld(ang(LegAng,0,0)))
+                FootAngle = ang(LegAng + 15,0,0)
+                holoAng(95,H0:toWorld(FootAngle))
+                holoAng(10,H0:toWorld(FootAngle))
+                
+            }
+        }elseif(Driving==4){ #Flying
+            
+            #Let's Go Swimming
+            #rangerHitWater(1)
+            #rangerIgnoreWorld(1)
+            #rangerHitEntities(0)
+            rangerFlags("IW")
+            local EnterWater = rangerOffset(8*Scale,E:toWorld(scp(vec(0,0,36),Scale)),vec(0,0,-1))
+            rangerFlags("E")
+            #rangerHitWater(0)
+            #rangerIgnoreWorld(0)
+            #rangerHitEntities(1)
+
+            if(EnterWater:hit()){
+                Driving = 6
+                SwimSpeed = clamp(FlyVelW:dot(E:forward()),-SwimSpeedMax,SwimSpeedMax)
+                Moving = 0
+                SwimTheta = 0
+                SwimTurnSpeed = 0
+                E:soundPlay(2,2,"ambient/water/water_splash"+randint(1,3)+".wav")
+                holoEntity(0):poseWings(30,0,75,22.5,0,0,Scale)
+            }
+            
+            rangerFilter(E)
+            rangerFilter(Seat1:entity())
+            rangerFilter(Seat2:entity())
+            if(CarryObject:isValidPhysics()){rangerFilter(CarryObject)}
+            
+            local FlySpeed = FlyVelW:length()
+            local FlyVelZ = FlyVelW:z()
+            
+            local FlyingForward = (FlyVelW:dot(BodyAngle:forward())) > 0
+            
+            local CrashRanger = rangerOffset(FlySpeed+64*Scale,E:pos()+18*E:up(),FlyingForward ? BodyAngle:forward() : -BodyAngle:forward())
+            
+            if(CrashRanger:hit() & (CrashRanger:hitNormal():dot(BodyAngle:up()) < 0.75)){
+                
+                Driving = 3
+                FallVelF = 0
+                FallVelZ = FlyVelZ
+                
+                FlyPitchVel = 0
+                FlyYawVel = 0
+                FlyRollVel = 0
+                
+                holoEntity(0):poseWings(30,0,75,22.5,0,0,Scale)
+                
+                if(FlySpeed>128){
+                    #E:setPos(CrashRanger:pos()+vec(0,0,18) - 8*E:forward())
+                    E:soundPlay(2,4,"physics/metal/metal_large_debris2.wav")
+                    
+                    Eject = 1
+                    Eject2 = 1
+                    Crashing = 1
+                    
+                    E:propNotSolid(0)
+                    E:propFreeze(0)
+                    E:applyForce(E:mass()*FlyVelW*5)
+                    
+                    holoEntity(2):eyeExpression("angry",0,Sex,Scale,Baby,1,Wink)
+                    holoEntity(2):poseEyes(vec2(),1,0,Sex,Scale,Baby,Wink)
+                    
+                    stoptimer("blink_open")
+                    stoptimer("blink_close")
+                    
+                    timer("eject",100)
+                    soundStop(1)
+                        
+                        
+                }else{
+                    E:setPos(CrashRanger:pos()+vec(0,0,18) - 72*E:forward())
+                    E:soundPlay(2,1,"physics/concrete/boulder_impact_hard"+ randint(1,4):toString() +".wav")
+                }
+            }elseif(Vkey){ #Drag'n Drop
+                Driving = 3
+                FallVelF = FlyVelW:dot(holoEntity(2):forward())
+                FallVelZ = FlyVelZ
+                
+                FlyPitchVel = 0
+                FlyYawVel = 0
+                FlyRollVel = 0
+                
+                holoEntity(0):poseWings(30,0,75,22.5,0,0,Scale)
+                E:setPos(E:pos() + FlyVelW)
+                
+            }elseif(Driving==4){
+                
+                rangerFilter(E)
+                rangerFilter(Seat1:entity())
+                rangerFilter(Seat2:entity())
+                
+                local LandingRanger = rangerOffset(max(-FlyVelZ,0)+64*Scale,E:pos()+18*E:up(),vec(0,0,-1))
+                
+                if(LandingRanger:hit()){ #Landing
+                    local GroundSpeed = 0
+                    if(!LandingRanger:entity():isValidPhysics()){
+                        GroundSpeed = max(FlyVelW:dot(E:forward()),0)
+                    }
+                     
+                    
+                    if(GroundSpeed > WalkSpeedMax){
+                        Driving = 2
+                        RunSpeed = GroundSpeed
+                    }else{
+                        Driving = 1
+                        WalkSpeed = GroundSpeed
+                        if(GroundSpeed==0){soundStop(1)}
+                    }
+                    
+                    FlyPitchVel = 0
+                    FlyYawVel = 0
+                    FlyRollVel = 0
+                    
+                    Moving = 0
+                    holoEntity(0):poseWings(30,0,75,22.5,0,0,Scale)
+                    E:setPos(LandingRanger:pos()+vec(0,0,18)+FlyVelW:dot(E:forward())*E:forward())
+                    E:soundPlay(2,1,"physics/concrete/boulder_impact_hard"+ randint(1,4):toString() +".wav")
+                    if(FlyVelZ<=-128){
+                        E:soundPlay(2,4,"physics/metal/metal_large_debris2.wav")
+                    
+                        Eject = 1
+                        Eject2 = 1
+                        Crashing = 1
+                        
+                        E:propNotSolid(0)
+                        E:propFreeze(0)
+                        E:applyForce(E:mass()*FlyVelW*5)
+                        
+                        holoEntity(2):eyeExpression("angry",0,Sex,Scale,Baby,1,Wink)
+                        holoEntity(2):poseEyes(vec2(),1,0,Sex,Scale,Baby,Wink)
+                        
+                        stoptimer("blink_open")
+                        stoptimer("blink_close")
+                        
+                        timer("eject",100)
+                        soundStop(1)
+                    }
+                }else{
+    
+                    #Ceiling Touch
+                    local Zvel = FlyVelW:z()
+                    if(Zvel>=0){
+                        rangerFilter(Seat1:entity())
+                        rangerFilter(Seat2:entity())
+                        local CeilingRanger = rangerOffset(Zvel+96*Scale,E:pos(),vec(0,0,1))
+                        if(CeilingRanger:hit()){
+                            FlyVelW *= vec(1,1,0)
+                        }
+                    }
+                    
+                    local FlyPitch = BodyAngle:pitch()
+                    local FlyYaw = BodyAngle:yaw()
+                    local FlyRoll = BodyAngle:roll()
+                    
+                    #Newtonian Physics
+                    Lift = (FlySpeed)*0.05 + (Space ? 8 : Shift*4) + Alt*2
+                    local DragF = (FlyVelW:dot(BodyAngle:right()))*(0.125)
+                    local DragR = (FlyVelW:dot(BodyAngle:right()))*(0.25)
+                    local DragU = (FlyVelW:dot(BodyAngle:up()))*(0.03125)
+                    local Thrust = (Shift)*2
+                    
+                    
+                    FlyVelW += vec(0,0,-19.3/2) + (Thrust - DragF - (Alt*5))*BodyAngle:forward() + (-DragR)*BodyAngle:right() + (Lift-DragU)*BodyAngle:up()
+                    FlyVelW = clamp(FlyVelW:length(),0,FlyTerminalVelocity)*FlyVelW:normalized()
+                    
+                    FlySpeed = FlyVelW:length()
+                    
+                    #Pitch and Yaw and Roll
+                    
+                    local Heading = -heading(vec(),BodyAngle,FlyVelW)
+                    
+                    FlyPitch += Heading:pitch()/32
+                    if(((FlyVelW*vec(1,1,0)):length()>64) & (FlyVelW:dot(E:forward())>0)){FlyYaw += Heading:yaw()/4}
+                    
+                    if(S & (FlyPitchVel > -5)){
+                        FlyPitchVel += -1
+                    }elseif(W & (FlyPitchVel < 5)){
+                        FlyPitchVel += 1
+                    }elseif(!W & !S){
+                        if(FlyPitchVel > 0){
+                            FlyPitchVel += -1
+                        }elseif(FlyPitchVel<0){
+                            FlyPitchVel += 1
+                        }
+                    }
+                    
+                    local FlyYawVelMax = 7.5
+                    if(FlySpeed <= FlyTerminalVelocity*0.5){
+                        FlyYawVelMax = 7.5
+                    }elseif(FlySpeed >= FlyTerminalVelocity*0.875){
+                        FlyYawVelMax = 3
+                    }else{
+                        FlyYawVelMax = linterp(FlySpeed,vec2(FlyTerminalVelocity*0.5,7.5),vec2(FlyTerminalVelocity*0.875,3))
+                    }
+                    
+                    if(D & (FlyYawVel > -FlyYawVelMax)){
+                        FlyYawVel += -1.5
+                    }elseif(A & (FlyYawVel < FlyYawVelMax)){
+                        FlyYawVel += 1.5
+                    }elseif(!A & !D){
+                        if(FlyYawVel > 0){
+                            FlyYawVel += -1.5
+                            if(FlyYawVel < 0){FlyYawVel=0}
+                        }elseif(FlyYawVel<0){
+                            FlyYawVel += 1.5
+                            if(FlyYawVel > 0){FlyYawVel=0}
+                        }
+                    }
+                    
+                    FlyYawVel = clamp(FlyYawVel,-FlyYawVelMax,FlyYawVelMax)
+                    
+                    FlyPitch += FlyPitchVel
+                    FlyYaw += FlyYawVel
+                    FlyRoll = -FlyYawVel*3
+                    FlyRoll = clamp(FlyRoll,-30,30) + 2.5*sin(FlyBobTheta)
+                    
+                    FlyBobTheta += 10
+                    if(FlyBobTheta > 360){
+                        FlyBobTheta += -360
+                    }
+                    
+                    if(FlyPitch>180){
+                        FlyPitch += -360
+                    }elseif(FlyPitch<-180){
+                        FlyPitch += 360
+                    }
+                    if(FlyYaw>360){
+                        FlyYaw -= 360
+                    }elseif(FlyYaw<-360){
+                        FlyYaw += 360
+                    }
+                
+                    BodyAngle = ang(FlyPitch,FlyYaw,FlyRoll)
+                    
+                    #Wing Flapping
+    
+                    if(Space){
+                        if(!FlapResetQ){
+                            FlapResetQ = 1
+                            FlapTheta = 180
+                        }
+                        FlapTheta += 75
+                        
+                        local Flappy = sin(FlapTheta)
+                        holoEntity(0):poseWings(30,0,15 + 15*cos(FlapTheta),45,Flappy,0,Scale)
+                        if(FlapTheta>360){
+                            FlapTheta += -360
+                            (FlapQ ? E : holoEntity(0)):soundPlay(FlapQ+2,0.6,"npc/scanner/scanner_nearmiss2.wav")
+                            soundPitch(FlapQ+2,randint(75,85))
+                            FlapQ = !FlapQ
+                        }
+                    }elseif(Shift){
+                        if(!FlapResetQ){
+                            FlapResetQ = 1
+                            FlapTheta = 180
+                        }
+                        FlapTheta += 75
+                        
+                        local Flappy = sin(FlapTheta)
+                        holoEntity(0):poseWings(15,-20,15 + 15*cos(FlapTheta),45,Flappy,0,Scale)
+                        if(FlapTheta>360){
+                            FlapTheta += -360
+                            (FlapQ ? E : holoEntity(0)):soundPlay(FlapQ+2,0.6,"npc/scanner/scanner_nearmiss2.wav")
+                            soundPitch(FlapQ+2,randint(75,85))
+                            FlapQ = !FlapQ
+                        }
+                        
+                    }elseif(Alt){
+                        if(!FlapResetQ){
+                            FlapResetQ = 1
+                            FlapTheta = 180
+                        }
+                        FlapTheta += 75
+                        
+                        local Flappy = sin(FlapTheta)
+                        holoEntity(0):poseWings(30,60,30,45,Flappy,0,Scale)
+                        if(FlapTheta>360){
+                            FlapTheta += -360
+                            (FlapQ ? E : holoEntity(0)):soundPlay(FlapQ+2,0.6,"npc/scanner/scanner_nearmiss2.wav")
+                            soundPitch(FlapQ+2,randint(75,85))
+                            FlapQ = !FlapQ
+                        }
+                    }else{
+                        if(FlapResetQ){
+                            FlapResetQ = 0
+                        }
+                        FlapTheta += 15
+                        
+                        local Flappy = sin(FlapTheta)/8
+                        holoEntity(0):poseWings(30,0,15 + 5*cos(FlapTheta),45,-0.5,2.5*sin(FlapTheta),Scale)
+                        if(FlapTheta>360){
+                            FlapTheta += -360
+                        }
+                    }
+                    
+                    #Head Tracking
+                    local AimPos = vec()
+                    if(FirstPerson){
+                        local LookDir = PodController1["AimPos",vector] - Driver:shootPos()
+                        AimPos = holoEntity(2):pos() + LookDir - vec(0,0,6.5)*Scale
+                    }else{
+                        AimPos = PodController1["AimPos",vector] - vec(0,0,6.5)*Scale
+                    }
+                    local TargetAngle = -heading(holoEntity(0):toWorld(vec(48,0,22)*Scale),E:angles(),AimPos)
+                    #local AimPos = PodController1["AimPos",vector] - vec(0,0,6.5)
+                    #local TargetAngle = -heading(holoEntity(0):pos(),E:angles(),AimPos)
+                    holoEntity(0):poseHead(TargetAngle,0)
+                    holoEntity(2):poseEyes(vec2(),Blinking,0,Sex,Scale,Baby,Wink)
+                    
+                    #Legs
+                    
+                    local LegAng = clamp(abs(FlySpeed/3),0,75) - 2.5*sin(FlapTheta)
+                    local SplayAng1 = 5 + FlyYawVel
+                    local SplayAng2 = -5 + FlyYawVel
+                    local SplayAng3 = -10 - FlyYawVel
+                    local SplayAng4 = 10 - FlyYawVel
+                    local H0 = holoEntity(0)
+                    
+                    holoAng(3,H0:toWorld(ang(-LegAng,SplayAng1,0)))
+                    local FootAngle = ang(-LegAng - 30,SplayAng1,0)
+                    holoAng(92,H0:toWorld(FootAngle))
+                    holoAng(4,H0:toWorld(FootAngle+ang(75,0,0)))
+                    
+                    holoAng(5,H0:toWorld(ang(-LegAng,SplayAng2,0)))
+                    FootAngle = ang(-LegAng - 30,SplayAng2,0)
+                    holoAng(93,H0:toWorld(FootAngle))
+                    holoAng(6,H0:toWorld(FootAngle+ang(75,0,0)))
+                    
+                    holoAng(7,H0:toWorld(ang(LegAng*0.5,SplayAng3,0)))
+                    FootAngle = ang(LegAng + 30,SplayAng3,0)
+                    holoAng(94,H0:toWorld(FootAngle))
+                    holoAng(8,H0:toWorld(FootAngle+ang(45,0,0)))
+                    
+                    holoAng(9,H0:toWorld(ang(LegAng*0.5,SplayAng4,0)))
+                    FootAngle = ang(LegAng + 30,SplayAng4,0)
+                    holoAng(95,H0:toWorld(FootAngle))
+                    holoAng(10,H0:toWorld(FootAngle+ang(45,0,0)))
+                    
+                    #Tail
+                    holoEntity(0):poseTail(-5 + -FlyPitchVel*3, -FlyYawVel*1.5 + 2.5*sin(FlyBobTheta),0,0,Scale)
+                    
+                    #Woosh Sound
+                    soundPitch(1,FlySpeed/2)
+                    
+                    local NewAngle = BodyAngle*ang(0,1,0)
+                    
+                    E:setAng(NewAngle)
+                    E:setPos(E:pos() + FlyVelW)
+                    holoAng(0,BodyAngle)
+                    
+                }
+            }
+            
+        }elseif(Driving==5){ #Sliding
+            #Let's Go Swimming
+            #rangerHitWater(1)
+            #rangerIgnoreWorld(1)
+            #rangerHitEntities(0)
+            rangerFlags("IW")
+            local EnterWater = rangerOffset(8*Scale,E:toWorld(scp(vec(0,0,36),Scale)),vec(0,0,-1))
+            rangerFlags("E")
+            #rangerHitWater(0)
+            #rangerIgnoreWorld(0)
+            #rangerHitEntities(1)
+
+            if(EnterWater:hit()){
+                Driving = 6
+                SwimSpeed = clamp(SlideSpeed,-SwimSpeedMax,SwimSpeedMax)
+                Moving = 0
+                SwimTheta = 0
+                SwimTurnSpeed = 0
+                E:soundPlay(2,2,"ambient/water/water_splash"+randint(1,3)+".wav")
+                holoEntity(4):removeTrails()
+                holoEntity(6):removeTrails()
+            }
+            
+            rangerFilter(E)
+            rangerFilter(Seat1:entity())
+            rangerFilter(Seat2:entity())
+            rangerDefaultZero(0)
+            
+            
+            local BlockRanger = rangerOffset(36*Scale+abs(SlideSpeed),E:toWorld(scp(vec(0,0,24),Scale)),sign(SlideSpeed)*BodyAngle:forward()+0.5*BodyAngle:up())
+            #local BlockRanger = rangerOffset(72+RunSpeed,E:toWorld(vec(0,0,128)),E:forward())
+            
+            if(BlockRanger:hit() & !isnan(BlockRanger:pos():x())){
+                Driving = 1
+                #print(round(BlockRanger:pos()))
+                WalkSpeed = 0
+                RunSpeed = 0
+                SlideSpeed = 0
+                E:soundPlay(2,1,"physics/concrete/boulder_impact_hard"+ randint(1,4):toString() +".wav")
+                soundStop(1)
+                holoEntity(4):removeTrails()
+                holoEntity(6):removeTrails()
+            }else{ #Not Hitting Something
+            
+                rangerFilter(E)
+                rangerFilter(Seat1:entity())
+                rangerFilter(Seat2:entity())
+                rangerDefaultZero(0)
+            
+                local FloorTouchRanger = rangerOffset(96,E:pos()+vec(0,0,18),vec(0,0,-1))
+                local StandPos = FloorTouchRanger:pos() + vec(0,0,18)
+                local FloorNormal = FloorTouchRanger:hitNormal()
+                
+                if(!FloorTouchRanger:hit()){ #Begin Falling
+                    Driving = 3
+                    FallVelF = SlideSpeed
+                    FallVelZ = 0
+                    Moving = 0
+                    holoEntity(4):removeTrails()
+                    holoEntity(6):removeTrails()
+                    soundStop(1)
+                }
+                
+                #Sliding Speed
+                if(SlideSpeed>0){
+                    SlideSpeed += (S ? -SlideAccel*1.5 : -SlideAccel/4) + SlideAccel*sin(BPitch)
+                    if(SlideSpeed<0){SlideSpeed=0}
+                }elseif(SlideSpeed<0){
+                    SlideSpeed += -(S ? -SlideAccel : -SlideAccel/4) + SlideAccel*sin(BPitch)
+                    if(SlideSpeed>0){SlideSpeed=0}
+                }
+                if(SlideSpeed==0){
+                    SlideSpeed = 0
+                    WalkSpeed = 0
+                    Driving = 1
+                    Moving = 0
+                    holoEntity(4):removeTrails()
+                    holoEntity(6):removeTrails()
+                    soundStop(1)
+                }
+                BPitch = BodyAngle:pitch()
+                if(W & (abs(BPitch)<45)){
+                    if(SlideSpeed>WalkSpeedMax){
+                        Driving = 2
+                        Moving = 0
+                        RunSpeed = SlideSpeed
+                        holoEntity(4):removeTrails()
+                        holoEntity(6):removeTrails()
+                        soundStop(1)
+                    }else{
+                        Driving = 1
+                        Moving = 0
+                        WalkSpeed = SlideSpeed
+                        holoEntity(4):removeTrails()
+                        holoEntity(6):removeTrails()
+                        soundStop(1)
+                    }
+                }
+                
+                #Turning
+                #WalkTurnSpeed = (A-D)*2.5
+                WalkTurnSpeed = (A-D)*(WalkTurnSpeedMax - 0.75*WalkTurnSpeedMax*((SlideSpeed-WalkSpeedMax)/(RunSpeedMax-WalkSpeedMax)))*0.75
+                
+                #Head Tracking
+                
+                local AimPos = vec()
+                if(FirstPerson){
+                    local LookDir = PodController1["AimPos",vector] - Driver:shootPos()
+                    AimPos = holoEntity(2):pos() + LookDir - vec(0,0,6.5)*Scale
+                }else{
+                    AimPos = PodController1["AimPos",vector] - vec(0,0,6.5)*Scale
+                }
+                local TargetAngle = -heading(holoEntity(0):toWorld(vec(48,0,22)*Scale),E:angles(),AimPos)
+                
+                #local AimPos = PodController1["AimPos",vector] - vec(0,0,6.5)
+                #local TargetAngle = -heading(holoEntity(2):pos(),E:angles(),AimPos)
+                holoEntity(0):poseHead(TargetAngle,0)
+                holoEntity(2):poseEyes(vec2(),Blinking,0,Sex,Scale,Baby,Wink)
+                
+                #Angles and Stuff
+            
+                local StandAngle = E:angles()*ang(0,1,0)
+                local Dot = FloorTouchRanger:hit() ? (vec(0,0,1):dot(FloorNormal)) : 1
+                local NormalAngle = acos(Dot)
+                local NewAngle = (StandAngle + ang(0,WalkTurnSpeed,0))
+                SlopeAxis = vec(0,0,1):cross(FloorNormal)
+                local TargetAngle = (SlopeAxis:length()>0) ? NewAngle:rotateAroundAxis(SlopeAxis,NormalAngle) : NewAngle
+                
+                #Smoothing Angles
+                
+                local TPitch = TargetAngle:pitch()
+                BPitch = BodyAngle:pitch()
+                
+                if(TPitch > BPitch){
+                    BPitch += 7.5
+                    if(BPitch > TPitch){
+                        BPitch = TPitch
+                    }
+                }elseif(TPitch < BPitch){
+                    BPitch += -7.5
+                    if(BPitch < TPitch){
+                        BPitch = TPitch
+                    }
+                }
+                BodyAngle = ang(BPitch,TargetAngle:yaw(),0)
+                
+                local SlideSpeedEffective = SlideSpeed*cos(BPitch)
+                
+                local NewPos = StandPos + SlideSpeedEffective*BodyAngle:forward()
+                
+                if((SlideSpeed>WalkSpeedMax) & Space & !JumpQ){ #Jumping!
+                    JumpQ = 1
+                    Driving = 3
+                    
+                    FallVelZ = SlideSpeedEffective*BodyAngle:forward():z() + JumpPower*(SlideSpeed/RunSpeedMax)
+                    FallVelF = SlideSpeedEffective
+                    
+                    NewPos += vec(0,0,FallVelZ)
+                    Moving = 0
+                    holoEntity(4):removeTrails()
+                    holoEntity(6):removeTrails()
+                }elseif(!Space & JumpQ){
+                    JumpQ = 0
+                }
+                
+                #Move/Align E2
+                
+                E:setPos(NewPos)
+                E:setAng(NewAngle)
+                
+                #Legs
+                
+                local FLP = vec(12,2,-4)*Scale #Vertical Offset for foot tilting while sliding
+                local FRP = vec(12,-2,-4)*Scale
+                local RLP = vec(12,2,-4)*Scale
+                local RRP = vec(12,-2,-4)*Scale
+                
+                holoEntity(0):iklegs(FLP,FRP,RLP,RRP,Scale)
+                
+                #Tail/Wing
+                holoEntity(0):poseTail(-15 + 5*sin(WalkBobTheta2),5*sin(TailTheta) - WalkTurnSpeed,0,0,Scale)
+                holoEntity(0):poseWingsCheap(30,75 + 2.5*sin(TailTheta))
+                
+                if(abs(SlideSpeedEffective)>0){
+                    if(!Moving & (Driving==5)){
+                        Moving = 1
+                        soundPlay(1,0,"sfx/skidding.wav")
+                        soundPitch(1,100/VoScale)
+                        holoEntity(4):setTrails(8*Scale,16*Scale,1,"trails/smoke",vec(127),191)
+                        holoEntity(6):setTrails(8*Scale,16*Scale,1,"trails/smoke",vec(127),191)
+                    }
+                    WalkBobTheta += SlideSpeedEffective*4
+                    WalkBobTheta2 += SlideSpeedEffective
+                    if(WalkBobTheta>360){WalkBobTheta-=360}
+                    if(WalkBobTheta2>360){WalkBobTheta2-=360}
+                    
+                    holoAng(0,BodyAngle+ang(sin(WalkBobTheta),0,-WalkTurnSpeed*2 + 2*sin(WalkBobTheta2)))
+                    #holoAng(0,BodyAngle)
+                    #soundPitch(1,SlideSpeedEffective+50)
+                    
+                    #Tail/Wing Waggle
+                    TailTheta += SlideSpeedEffective/2
+                    if(TailTheta>360){TailTheta-=360}
+                    holoEntity(0):poseTail(-15,2.5*sin(TailTheta)-2.5*WalkTurnSpeed,0,0,Scale)
+                    holoEntity(0):poseWingsCheap(30,75 + 2.5*sin(TailTheta))
+                    
+                }else{
+                    if(Moving){
+                        Moving = 0
+                        soundStop(1)
+                    }
+                    WalkBobTheta = 0
+                    WalkBobTheta2 = 0
+                    #holoPos(0,E:pos()+vec(0,0,18))
+                    holoAng(0,BodyAngle)
+                }
+            }
+        }elseif(Driving==6){ #Swimming
+        
+            if(Alt){
+                Eject = 1
+                timer("eject",100)
+            }
+            
+            rangerFilter(E)
+            rangerFilter(Seat1:entity())
+            rangerFilter(Seat2:entity())
+            rangerHitWater(0)
+            local FloorTouchRanger = rangerOffset(18,E:pos(),vec(0,0,-1))
+            
+            
+            if(FloorTouchRanger:hit()){ #Back on Land
+                Driving = 1
+                WalkSpeed = SwimSpeed
+                Moving = 0
+                soundStop(1)
+                soundStop(3)
+                #print("Bonk")
+            }else{
+                
+                rangerFilter(E)
+                rangerFilter(Seat1:entity())
+                rangerFilter(Seat2:entity())
+                local CanMove = 0
+            
+                if(W | (SwimSpeed>0) | (FollowSpeedTarget>0)){
+                    local BlockRanger = rangerOffset(72*Scale,E:toWorld(scp(vec(0,0,18),Scale)),E:forward()+0.5*E:up())
+                    CanMove = !BlockRanger:hit()
+                }elseif(S | (SwimSpeed<0)){
+                    local BlockRanger = rangerOffset(72*Scale,E:toWorld(scp(vec(0,0,18),Scale)),-E:forward()+0.5*E:up())
+                    CanMove = !BlockRanger:hit()
+                }
+                
+                
+                if(Following){
+                    FollowTargetPos = GoHere ? GoHerePos : FollowTarget:pos()
+                    FollowDisp = (FollowTargetPos - E:pos())*vec(1,1,0)
+                    
+                    if(GoHere){
+                        FollowSpeedTarget = (FollowDisp:length()>32)*SwimSpeedMax
+                    }else{
+                        FollowSpeedTarget = (FollowDisp:length()>(FollowTarget:isValidPhysics() ? 128 : 192)*Scale)*SwimSpeedMax
+                    }
+                    
+                    
+                    if(FollowSpeedTarget>0){
+                        local FollowBearing = clamp(-E:bearing(FollowTargetPos),-45,45)
+                        FollowTurnSpeedTarget = FollowBearing*SwimTurnSpeedMax/45
+                        
+                        if((FollowDisp:length() > 1024) & !CanMove){
+                            
+                            if(!GoHere){rangerFilter(FollowTarget)}
+                            local FindStuckRanger = rangerOffset(FollowTargetPos,E:pos())
+                            
+                            GTpos = FindStuckRanger:pos() + 60*FindStuckRanger:hitNormal()
+                            GTang = BodyAngle*ang(0,1,0)
+                            TeleLock = 1
+                            #print("Door Stuck!")
+                            
+                            timer("teleport",100)
+                        }elseif(FollowDisp:length()>384){
+                            Shift = 1
+                        }
+                    }else{
+                        FollowTurnSpeedTarget = 0
+                    }
+                }
+                
+                if(CanMove){ #Swimmin'
+                    
+                    
+                    #Swim Speed Modulation
+                    if(Following){
+                        if(FollowSpeedTarget > SwimSpeed){
+                            if(SwimSpeed < SwimSpeedMax){
+                                SwimSpeed += SwimAccel
+                                if(SwimSpeed>SwimSpeedMax){SwimSpeed=SwimSpeedMax}
+                            }
+                            if(SwimSpeed > FollowSpeedTarget){SwimSpeed = FollowSpeedTarget}
+                        }elseif(FollowSpeedTarget < SwimSpeed){
+                            if(SwimSpeed > 0){
+                                SwimSpeed += -SwimAccel*2
+                                if(SwimSpeed<0){SwimSpeed=0}
+                            }
+                            if(SwimSpeed < FollowSpeedTarget){SwimSpeed = FollowSpeedTarget}
+                        }
+                    }else{
+                        if(W & !S){
+                            if(SwimSpeed < SwimSpeedMax){
+                                if(SwimSpeed <= 0){
+                                    SwimSpeed += SwimAccel*2*(1+Shift)
+                                }elseif(SwimSpeed > 0){
+                                    SwimSpeed += SwimAccel
+                                }elseif(SwimSpeed > SwimSpeedMax){
+                                    SwimSpeed = SwimSpeedMax
+                                }
+                            }
+                        }elseif(S & !W){
+                            if(SwimSpeed > -SwimSpeedMax/2){
+                                if(SwimSpeed >= 0){
+                                    SwimSpeed += -SwimAccel*2
+                                }elseif(SwimSpeed < 0){
+                                    SwimSpeed += -SwimAccel
+                                }elseif(SwimSpeed < -SwimSpeedMax/2){
+                                    SwimSpeed = -SwimSpeedMax
+                                }
+                            }
+                        }elseif(!W & !S & (SwimSpeed!=0)){
+                            if(SwimSpeed > 0){
+                                SwimSpeed += -SwimAccel*2
+                                if(SwimSpeed <= 0){SwimSpeed = 0}
+                            }elseif(SwimSpeed < 0){
+                                SwimSpeed += SwimAccel*2
+                                if(SwimSpeed >= 0){SwimSpeed = 0}
+                            }
+                        }
+                    }
+                }else{
+                    SwimSpeed = 0
+                }
+                
+                #Floating Ranger
+                rangerFilter(E)
+                rangerFilter(Seat1:entity())
+                rangerFilter(Seat2:entity())
+                rangerDefaultZero(0)
+                rangerHitWater(1)
+                local WaterLevelRanger = rangerOffset(72*Scale,E:toWorld(scp(vec(0,0,36),Scale)),vec(0,0,-1))
+                rangerHitWater(0)
+                
+                #Turn Speed Modulation
+                
+                if(Following){
+                    SwimTurnSpeed = FollowTurnSpeedTarget
+                }else{
+                    if(A & !D){
+                        if(SwimTurnSpeed < SwimTurnSpeedMax){
+                            if(SwimTurnSpeed < 0){
+                                SwimTurnSpeed += SwimTurnAccel*2
+                            }elseif(SwimTurnSpeed >= 0){
+                                SwimTurnSpeed += SwimTurnAccel
+                            }elseif(SwimTurnSpeed > SwimTurnSpeedMax){
+                                SwimTurnSpeed = SwimTurnSpeedMax
+                            }
+                        }
+                    }elseif(D & !A){
+                        if(SwimTurnSpeed > -SwimTurnSpeedMax){
+                            if(SwimTurnSpeed > 0){
+                                SwimTurnSpeed += -SwimTurnAccel*2
+                            }elseif(SwimTurnSpeed <= 0){
+                                SwimTurnSpeed += -SwimTurnAccel
+                            }elseif(SwimTurnSpeed < -SwimTurnSpeedMax){
+                                SwimTurnSpeed = -SwimTurnSpeedMax
+                            }
+                        }
+                    }elseif(!A & !D & (SwimTurnSpeed!=0)){
+                        if(SwimTurnSpeed > 0){
+                            SwimTurnSpeed += -SwimTurnAccel*2
+                            if(SwimTurnSpeed <= 0){SwimTurnSpeed = 0}
+                        }elseif(SwimTurnSpeed < 0){
+                            SwimTurnSpeed += SwimTurnAccel*2
+                            if(SwimTurnSpeed >= 0){SwimTurnSpeed = 0}
+                        }
+                    }
+                }
+                SwimTurnSpeed += -0.5*cos(SwimTheta2)
+                
+                #Head Tracking
+                local AimPos = vec()
+                if(Following){
+                    local HeadHolo = FWL["DragonHead",entity]
+                    AimPos = GoHere ? GoHerePos : (HeadHolo ? HeadHolo:pos() : FollowTarget:isPlayer() ? FollowTarget:shootPos() : FollowTarget:pos()) - vec(0,0,6.5)*Scale
+                }else{
+                    if(FirstPerson){
+                        local LookDir = PodController1["AimPos",vector] - Driver:shootPos()
+                        AimPos = holoEntity(2):pos() + LookDir - vec(0,0,6.5)*Scale
+                    }else{
+                        AimPos = PodController1["AimPos",vector] - vec(0,0,6.5)*Scale
+                    }
+                }
+                local TargetAngle = -heading(holoEntity(0):toWorld(vec(48,0,22)*Scale),E:angles(),AimPos)
+                #local AimPos = PodController1["AimPos",vector] - vec(0,0,6.5)
+                #local TargetAngle = -heading(holoEntity(2):pos(),E:angles(),AimPos)
+                (Following ? E : holoEntity(0)):poseHead(Flaming ? TargetAngle : TargetAngle*0.75,0)
+                EyeVec = holoEntity(2):aimEyes(AimPos)
+                holoEntity(2):poseEyes(EyeVec,Blinking,0,Sex,Scale,Baby,Wink)
+                
+                #Cmere/GoHere Reset
+                if((GoHere|Greet) & (FollowSpeedTarget==0)){
+                    Following = 0
+                    GoHere = 0
+                    if(Greet){
+                        Greet = 0
+                        RoarQ = 1
+                        vocalizeRoar(DefaultExpression,Sex,1,VoScale)
+                        if(Carrying){
+                            CarryObject:propNotSolid(0)
+                            CarryObject:deparent()
+                            CarryObject:propFreeze(0)
+                            Carrying = 0
+                            #JawAngleMaster =Carrying ? 25 : LanternOn ? 22 : 0
+                            if(Driving==3){CarryObject:applyForce(CarryObject:mass()*FlyVelW)}
+                        }
+                    }
+                }
+                
+                #Angle Stuff
+                
+                local TPitch = 0
+                BPitch = BodyAngle:pitch()
+                
+                if(TPitch > BPitch){
+                    BPitch += 7.5
+                    if(BPitch > TPitch){
+                        BPitch = TPitch
+                    }
+                }elseif(TPitch < BPitch){
+                    BPitch += -7.5
+                    if(BPitch < TPitch){
+                        BPitch = TPitch
+                    }
+                }
+                
+                local Yaw = BodyAngle:yaw()
+                Yaw += SwimTurnSpeed
+                if(Yaw > 360){
+                    Yaw += -360
+                }elseif(Yaw < -360){
+                    Yaw += 360
+                }
+                BodyAngle = ang(BPitch,Yaw,0)
+                
+                #Move/Align E2
+                # 18 + 24 = 42
+                # 18 + 3 = 21
+                #1X + b = 24
+                #0.5X + b = 3
+                #0.5X = 21
+                #X = 42?
+                #42 + b = 24 -> b = -18
+                #0.5(42) - 18 = 3
+                local NewPos = WaterLevelRanger:pos() + SwimSpeed*E:forward() - vec(0,0,Scale*42 - 18)
+                E:setPos(NewPos)
+                E:setAng(BodyAngle)
+                
+                #Sound ambient/water/lake_water.wav
+                
+                if(Driving==6 & (abs(SwimSpeed)>0)){
+                    if(!Moving){
+                        Moving = 1
+                        soundPlay(1,0,"vehicles/airboat/pontoon_stopped_water_loop1.wav")
+                    }
+
+                    soundPitch(1,abs(SwimSpeed)*4)
+                }
+                
+                WalkBobTheta += (abs(SwimSpeed*2) + 10)/Scale
+                WalkBobTheta2 += (abs(SwimSpeed) + 10)/Scale
+                if(WalkBobTheta>360){WalkBobTheta-=360}
+                if(WalkBobTheta2>360){WalkBobTheta2-=360}
+                holoAng(0,BodyAngle+ang(sin(WalkBobTheta),0,2*sin(WalkBobTheta2) - 2*SwimTurnSpeed))
+                
+                #Doggie Paddle
+                SwimTheta += ((SwimSpeed==0) ? 10 + abs(SwimTurnSpeed*3) : SwimSpeed*4)/Scale
+                if(SwimTheta > 360){
+                    SwimTheta += -360
+                    (SwishQ ? E : holoEntity(0)):soundPlay(SwishQ+2,1,"player/footsteps/wade"+randint(1,4)+".wav")
+                    soundPitch(SwishQ+2,randint(75,85))
+                    SwishQ = !SwishQ
+                }elseif(SwimTheta < -360){
+                    SwimTheta += 360
+                }
+                
+                SwimTheta2 += (max(SwimSpeed*1.5,5))/Scale
+                if(SwimTheta2 > 360){
+                    SwimTheta2 += -360
+                }elseif(SwimTheta2 < -360){
+                    SwimTheta2 += 360
+                }
+                local H0 = holoEntity(0)
+                
+                
+                holoAng(3,H0:toWorld(ang(0 + 30*sin(SwimTheta),0,0)))
+                local RunAng = H0:toWorld(ang(-75 + 60*cos(SwimTheta),0,0))
+                holoAng(92,RunAng)
+                holoAng(4,H0:toWorld(ang(30 + 45*cos(SwimTheta),0,0)))
+                
+                holoAng(5,H0:toWorld(ang(0 + -30*sin(SwimTheta),0,0)))
+                RunAng = H0:toWorld(ang(-75 + -60*cos(SwimTheta),0,0))
+                holoAng(93,RunAng)
+                holoAng(6,H0:toWorld(ang(30 - 45*cos(SwimTheta),0,0)))
+                
+                
+                holoAng(7,H0:toWorld(ang(15 + 30*sin(SwimTheta),0,0)))
+                RunAng = H0:toWorld(ang(45 + 30*cos(SwimTheta),0,0))
+                local RunAng2 = H0:toWorld(ang(60 + 60*cos(SwimTheta),0,0))
+                holoAng(94,RunAng)
+                holoAng(8,RunAng2)
+                
+                holoAng(9,H0:toWorld(ang(15 + -30*sin(SwimTheta),0,0)))
+                RunAng = H0:toWorld(ang(45 + -30*cos(SwimTheta),0,0))
+                RunAng2 = H0:toWorld(ang(60 + -60*cos(SwimTheta),0,0))
+                holoAng(95,RunAng)
+                holoAng(10,RunAng2)
+                
+                #Tail/Wings
+                H0:poseTail(0,7.5*sin(SwimTheta2) - SwimTurnSpeed*1.5,0,0,Scale)
+                H0:poseWingsCheap(30,75+5*sin(SwimTheta2))
+                
+            }
+            
+            
+        }
+        
+        
+    }elseif(Crashing){ #Ballistic
+        
+        rangerFilter(Seat1:entity())
+        rangerFilter(Seat2:entity())
+        local SplatRanger = rangerOffset(36,E:pos(),vec(0,0,-1))
+        if(SplatRanger:hit()){
+            Crashing = 0
+            
+            
+            E:setPos(SplatRanger:pos() + vec(0,0,18))
+            
+            E:propFreeze(1)
+            E:setAng(E:angles()*ang(0,1,0))
+            
+            E:soundPlay(2,1,(random()>0.5) ? "player/pl_fallpain1.wav" : "player/pl_fallpain3.wav")
+            soundPitch(2,75)
+            
+            StandMode = 4
+            StandTransitionQ = 1
+        }
+        
+    }else{ #Idling
+        if(Driving){
+            Driving = 0
+            E:propNotSolid(0)
+            #FlamePlate:entity():propNotSolid(0)
+            #Igniter:entity():propNotSolid(0)
+            #FireLight:entity():propNotSolid(0)
+            #EGP:entity():propNotSolid(0)
+            soundStop(1)
+            HasLookTarget = 0
+            #FireColor = vec()
+            GetInQ1 = 1
+        }
+        if(Active1 & !GetInQ1){
+            GetInQ1 = 1
+            FlamePlate:entity():propNotSolid(1)
+            Igniter:entity():propNotSolid(1)
+            FireLight:entity():propNotSolid(1)
+            LanternLight:entity():propNotSolid(1)
+            EGP:entity():propNotSolid(1)
+        }elseif(!Active1 & GetInQ1){
+            GetInQ1 = 0
+            FlamePlate:entity():propNotSolid(0)
+            Igniter:entity():propNotSolid(0)
+            FireLight:entity():propNotSolid(0)
+            LanternLight:entity():propNotSolid(0)
+            EGP:entity():propNotSolid(0)
+            FirstPerson = 0
+            
+            #print("Dingdong")
+        }
+        
+        #Ejection
+        local Alt = PodController1["Alt",number]
+        local Alt2 = PodController2["Alt",number]
+        if(Alt){
+            Eject = 1
+            timer("eject",100)
+        }
+        if(Alt2){
+            Eject2 = 1
+            timer("eject",100)
+        }
+        if(Sleeping){
+            E:poseHead(ang(0,-120*CurlDirection,0),-50)
+            
+        }else{
+            if(Dazed){
+                E:poseHeadInstant(ang(0,ShakeAng,0),Recovering ? -25 : -50)
+            }elseif(Dancing){ #Dancing
+                DanceTheta1 += 10
+                if(DanceTheta1>=360){DanceTheta1 += -360}
+                
+                local SD1F = sin(DanceTheta1*6)
+                local SD1M = sin(DanceTheta1*3)
+                local SD1S = sin(DanceTheta1)
+                E:poseHeadInstant(ang(10*SD1F,10*SD1S,-5*SD1S),SitAngleCorrect)
+                holoEntity(2):poseEyes(vec2(),1,0,Sex,Scale,Baby,Wink)
+                holoEntity(0):poseWingsDance(30,75,7.5*SD1M)
+            }elseif(!Active1){
+                #Look @ Players
+                if(!HasLookTarget){
+                    HasLookTarget = 1
+                    findIncludeClass("player")
+                    findIncludeClass("gmod_wire_expression2")
+                    findExcludeEntity(E)
+                    findInSphere(E:pos(),1024)
+                    local LATarget = findClosest(holoEntity(2):pos())
+                    if(LATarget:isPlayer()){
+                        IdleLookTarget = LATarget
+                    }elseif(LATarget:type()=="gmod_wire_expression2"){
+                        #print("E2")
+                        local Wirelink = LATarget:wirelink()
+                        local HeadHolo = Wirelink["DragonHead",entity]
+                        
+                        if(HeadHolo){
+                            IdleLookTarget = LATarget
+                        }else{
+                            findClipToClass("player")
+                            LATarget = findClosest(holoEntity(2):pos())
+                            IdleLookTarget = LATarget
+                        }
+                    }
+                    
+                    timer("resetIdleLookTarget",5000)
+                }
+                
+                #Head Tracking
+                if(FirstPerson){
+                    local LookDir = O:aimPos() - O:shootPos()
+                    AimPos = holoEntity(2):pos() + LookDir - vec(0,0,6.5)*Scale
+                    
+                    local TargetAngle = -heading(holoEntity(0):toWorld(vec(48,0,22)*Scale),E:angles(),AimPos)
+                    E:poseHead(HeadLock ? HeadLockAngle : Flaming ? TargetAngle : TargetAngle*0.75,SitAngleCorrect)
+                    EyeVec = holoEntity(2):aimEyes(AimPos)
+                    holoEntity(2):poseEyes(EyeVec,Blinking,0,Sex,Scale,Baby,Wink)
+                }elseif(IdleLookTarget){
+                    local AimPos = vec()
+                    if(IdleLookTarget:isPlayer()){
+                        AimPos = IdleLookTarget:shootPos() - vec(0,0,6.5)*Scale
+                    }elseif(IdleLookTarget:type()=="gmod_wire_expression2"){
+                        local Wirelink = IdleLookTarget:wirelink()
+                        local HeadHolo = Wirelink["DragonHead",entity]
+                        
+                        if(HeadHolo){
+                            AimPos = HeadHolo:pos() - vec(0,0,6.5)*Scale
+                        }else{
+                            AimPos = AimPos = IdleLookTarget:boxCenterW() - vec(0,0,6.5)*Scale
+                        }
+                    }else{
+                        AimPos = IdleLookTarget:boxCenterW() - vec(0,0,6.5)*Scale
+                    }
+                    local TargetAngle = -heading(holoEntity(0):toWorld(vec(48,0,22)*Scale),E:angles(),AimPos)
+                    
+                    
+                    E:poseHead(HeadLock ? HeadLockAngle : Flaming ? TargetAngle : TargetAngle*0.75,SitAngleCorrect)
+                    EyeVec = holoEntity(2):aimEyes(AimPos)
+                    if(Freeze){EyeVec=vec2()}
+                    holoEntity(2):poseEyes(EyeVec,Blinking,0,Sex,Scale,Baby,Wink)
+                }else{
+                    E:poseHead(HeadLock ? HeadLockAngle : ang(),SitAngleCorrect)
+                    holoEntity(2):poseEyes(vec2(),Blinking,0,Sex,Scale,Baby,Wink)
+                    if(HasLookTarget){
+                        HasLookTarget = 0
+                    }
+                    
+                }
+            }else{
+                #Head Tracking
+                local AimPos = vec()
+                local Driver = Seat1:entity():driver()
+                if(FirstPerson){
+                    local LookDir = PodController1["AimPos",vector] - Driver:shootPos()
+                    AimPos = holoEntity(2):pos() + LookDir - vec(0,0,6.5)*Scale
+                }else{
+                    AimPos = PodController1["AimPos",vector] - vec(0,0,6.5)*Scale
+                }
+                local TargetAngle = -heading(holoEntity(0):toWorld(vec(48,0,22)*Scale),E:angles(),AimPos)
+                #local AimPos = PodController1["AimPos",vector] - vec(0,0,6.5)
+                #local TargetAngle = -heading(holoEntity(0):toWorld(vec(48,0,22)),E:angles(),AimPos)
+                
+                E:poseHead(HeadLock ? HeadLockAngle : Flaming ? TargetAngle : TargetAngle*0.75,SitAngleCorrect)
+                EyeVec = holoEntity(2):aimEyes(AimPos)
+                holoEntity(2):poseEyes(EyeVec,Blinking,0,Sex,Scale,Baby,Wink)
+            }
+        }
+        if(StandMode==0){ #Standing
+            
+            if(StandTransitionQ){
+                StandTransitionQ = 0
+                E:poseStand(Scale)
+                SitAngleCorrect = 0
+            }
+            
+            rangerHitWater(1)
+            rangerIgnoreWorld(1)
+            rangerHitEntities(0)
+            local SwimRanger = rangerOffset(16,E:toWorld(scp(vec(0,0,36),Scale)),vec(0,0,-1))
+            rangerHitWater(0)
+            rangerIgnoreWorld(0)
+            rangerHitEntities(1)
+            
+            TreadWater = SwimRanger:hit()
+            
+            #Feet
+            if(TreadWater){
+                #Doggie Paddle
+                SwimTheta += 10/Scale
+                if(SwimTheta > 360){
+                    SwimTheta += -360
+                    (SwishQ ? E : holoEntity(0)):soundPlay(SwishQ+2,1,"player/footsteps/wade"+randint(1,4)+".wav")
+                    soundPitch(SwishQ+2,randint(75,85))
+                    SwishQ = !SwishQ
+                }elseif(SwimTheta < -360){
+                    SwimTheta += 360
+                }
+                
+                SwimTheta2 += 5/Scale
+                if(SwimTheta2 > 360){
+                    SwimTheta2 += -360
+                }elseif(SwimTheta2 < -360){
+                    SwimTheta2 += 360
+                }
+                local H0 = holoEntity(0)
+                
+                
+                holoAng(3,H0:toWorld(ang(0 + 30*sin(SwimTheta),0,0)))
+                local RunAng = H0:toWorld(ang(-75 + 60*cos(SwimTheta),0,0))
+                holoAng(92,RunAng)
+                holoAng(4,H0:toWorld(ang(30 + 45*cos(SwimTheta),0,0)))
+                
+                holoAng(5,H0:toWorld(ang(0 + -30*sin(SwimTheta),0,0)))
+                RunAng = H0:toWorld(ang(-75 + -60*cos(SwimTheta),0,0))
+                holoAng(93,RunAng)
+                holoAng(6,H0:toWorld(ang(30 - 45*cos(SwimTheta),0,0)))
+                
+                
+                holoAng(7,H0:toWorld(ang(15 + 30*sin(SwimTheta),0,0)))
+                RunAng = H0:toWorld(ang(45 + 30*cos(SwimTheta),0,0))
+                local RunAng2 = H0:toWorld(ang(60 + 60*cos(SwimTheta),0,0))
+                holoAng(94,RunAng)
+                holoAng(8,RunAng2)
+                
+                holoAng(9,H0:toWorld(ang(15 + -30*sin(SwimTheta),0,0)))
+                RunAng = H0:toWorld(ang(45 + -30*cos(SwimTheta),0,0))
+                RunAng2 = H0:toWorld(ang(60 + -60*cos(SwimTheta),0,0))
+                holoAng(95,RunAng)
+                holoAng(10,RunAng2)
+                
+                #Tail/Wings
+                if(!Dancing){
+                    H0:poseTail(0,7.5*sin(SwimTheta2),0,0,Scale)
+                    H0:poseWingsCheap(30,75+5*sin(SwimTheta2))
+                }else{
+                    holoEntity(0):poseTail(0,5*sin(DanceTheta1*3),0,0,Scale)
+                }
+            }else{
+                
+                local FLP = vec(0,2,-1)*Scale #Vertical Offset for Foot Tilting
+                local FRP = vec(0,-2,-1)*Scale
+                local RLP = vec(0,2,-1)*Scale
+                local RRP = vec(0,-2,-1)*Scale
+                
+                holoEntity(0):iklegs(FLP,FRP,RLP,RRP,Scale)
+                
+                #Tail/Wing Wag
+                if(!Dancing){
+                    TailTheta += 5/Scale
+                    if(TailTheta>360){TailTheta-=360}
+                    if(Freeze){TailTheta=0}
+                    holoEntity(0):poseTail(-15,5*sin(TailTheta),0,0,Scale)
+                    holoEntity(0):poseWingsCheap(30,75 + 2.5*sin(TailTheta))
+                }else{
+                    holoEntity(0):poseTail(-15,5*sin(DanceTheta1*3),0,0,Scale)
+                }
+            }
+            
+        }elseif(StandMode==1){ #Sitting
+            if(StandTransitionQ){
+                StandTransitionQ = 0
+                if(Sex){
+                    E:poseSitF(Scale)
+                }else{
+                    E:poseSitM(Scale)
+                }
+                SitAngleCorrect = Sex ? 0 : -15
+            }
+            
+            if(!Dancing){
+                TailTheta += 5
+                if(TailTheta>360){TailTheta-=360}
+                if(Freeze){TailTheta=0}
+                holoEntity(0):poseWingsCheap(30,75 + 2.5*sin(TailTheta))
+            }else{
+                if(Sex){
+                    E:poseTail(-5,5*sin(DanceTheta1*3),1,0,Scale)
+                }else{
+                    E:poseTail(-2.5,5*sin(DanceTheta1*3),6,0,Scale)
+                }
+            }
+            
+        }elseif(StandMode==2){ #Lying Down
+            if(StandTransitionQ){
+                StandTransitionQ = 0
+                if(Sex){
+                    E:poseLieF(Scale)
+                }else{
+                    E:poseLieM(Scale)
+                }
+                SitAngleCorrect = 0
+                Sleeping = 0
+                timer("blink_open",100)
+            }
+            
+            if(!Dancing){
+                TailTheta += 5
+                if(TailTheta>360){TailTheta-=360}
+                if(Freeze){TailTheta=0}
+                holoEntity(0):poseWingsCheap(30,45 + 2.5*sin(TailTheta))
+            }else{
+                if(Sex){
+                    E:poseTail(-7.55,5*sin(DanceTheta1*3),-4,0,Scale)
+                }else{
+                    E:poseTail(-5,5*sin(DanceTheta1*3),-4,0,Scale)
+                }
+            }
+            
+        }elseif(StandMode==3){ #Sleepy-Bye
+            if(StandTransitionQ){
+                StandTransitionQ = 0
+                E:poseSleep1(Scale)
+                SitAngleCorrect = 0
+                Sleeping = 1
+                
+                holoEntity(2):eyeExpression(DefaultExpression,1,Sex,Scale,Baby,0,Wink)
+                
+                stoptimer("blink_open")
+                stoptimer("blink_close")
+                timer("sleep_start",1000)
+            }
+            
+            TailTheta += 5/Scale
+            if(TailTheta>360){TailTheta-=360}
+            if(Freeze){TailTheta=0}
+            holoEntity(0):poseWingsCheap(30,45 + 2.5*sin(TailTheta))
+            
+            if(Snoring){
+                ZTheta1 += 10
+                if(ZTheta1>360){
+                    ZTheta1 = 0
+                }
+                if((ZTheta1==120) & (ZQ==0)){
+                    ZQ = 1
+                }elseif((ZTheta1==240) & (ZQ==1)){
+                    ZQ = 2
+                }
+                holoPos(113,holoEntity(2):toWorld(vec((ZTheta1/16)*cos(2*ZTheta1),(ZTheta1/16)*sin(2*ZTheta1),ZTheta1/4)*Scale))
+                holoAng(113,ang(0,2*ZTheta1,0))
+                holoAlpha(113,127 - 127*cos(ZTheta1))
+                holoScale(113,(1 + ZTheta1/360)*vec(0.5)*Scale)
+                if(ZQ>=1){
+                    ZTheta2 += 10
+                    if(ZTheta2>360){
+                        ZTheta2 = 0
+                    }
+                    holoPos(114,holoEntity(2):toWorld(vec((ZTheta2/16)*cos(2*ZTheta2),(ZTheta2/16)*sin(2*ZTheta2),ZTheta2/4)*Scale))
+                    holoAng(114,ang(0,2*ZTheta2,0))
+                    holoAlpha(114,127 - 127*cos(ZTheta2))
+                    holoScale(114,(1 + ZTheta2/360)*vec(0.5)*Scale)
+                }
+                if(ZQ>=2){
+                    ZTheta3 += 10
+                    if(ZTheta3>360){
+                        ZTheta3 = 0
+                    }
+                    holoPos(115,holoEntity(2):toWorld(vec((ZTheta3/16)*cos(2*ZTheta3),(ZTheta3/16)*sin(2*ZTheta3),ZTheta3/4)*Scale))
+                    holoAng(115,ang(0,2*ZTheta3,0))
+                    holoAlpha(115,127 - 127*cos(ZTheta3))
+                    holoScale(115,(1 + ZTheta3/360)*vec(0.5)*Scale)
+                }
+            }
+        }elseif(StandMode==4){ #Splat
+            if(StandTransitionQ){
+                StandTransitionQ = 0
+                Dazed = 1
+                E:poseSplat(Scale)
+                holoEntity(0):poseWings(30,0,-30,45,0.5,0,Scale)
+                SitAngleCorrect = 0
+                Sleeping = 0
+                holoEntity(2):eyeExpression("sad",0,Sex,Scale,Baby,0,Wink)
+                
+                soundPlay(5,2,"npc/antlion_guard/antlion_guard_pain1.wav")
+                soundPitch(5,(90 + 10*Sex)/VoScale)
+                soundPlay(1,4,"ambient/animal/bird10.wav")
+                
+                
+                local Star = "models/sprops/misc/alphanum/alphanum_star_3.mdl"
+                local StarColor = vec(255,191,0)
+                for(N=113,115){
+                    holoModel(N,Star)
+                    holoColor(N,StarColor)
+                    holoScale(N,vec(0.5)*Scale)
+                }
+                
+                timer("blink_open",100)
+                timer("recover",5000)
+            }
+            
+            #E:poseHead(ang(0),-60)
+            
+            if(Recovering){
+                DazedTheta += 90
+                if(DazedTheta>360){DazedTheta -= 360}
+                
+                ShakeAng = 45*(sin(DazedTheta))
+                
+                holoEntity(2):poseEyes(vec2(),1,0,Sex,Scale,Baby,Wink)
+                
+            }else{
+                local EyeVecDazed = vec2(cos(DazedTheta),sin(DazedTheta))
+                DazedTheta += 30
+                if(DazedTheta>360){DazedTheta -= 360}
+                
+                holoPos(113,holoEntity(2):toWorld(vec(12*cos(DazedTheta),12*sin(DazedTheta),16)*Scale))
+                holoPos(114,holoEntity(2):toWorld(vec(12*cos(DazedTheta+120),12*sin(DazedTheta+120),16)*Scale))
+                holoPos(115,holoEntity(2):toWorld(vec(12*cos(DazedTheta+240),12*sin(DazedTheta+240),16)*Scale))
+                
+                holoAng(113,ang(0,-DazedTheta,0))
+                holoAng(114,ang(0,-DazedTheta+120,0))
+                holoAng(115,ang(0,-DazedTheta+240,0))
+                
+                for(N=113,115){
+                    holoAlpha(N,255*(0.5 + 0.25*sin(2*DazedTheta)))
+                }
+                
+                holoEntity(2):poseEyes(EyeVecDazed,Blinking,1,Sex,Scale,Baby,Wink)
+            }
+            
+        }
+    }
+    
+    #Mode-independent Stuff
+        
+    local Mouse1 = PodController1["Mouse1",number]
+    local Mouse2 = PodController1["Mouse2",number]
+    local F = PodController1["Light",number]
+    local Driver = Seat1:entity():driver()
+    
+    
+    #Lantern
+    if(F & !LanternQ){
+        LanternQ = 1
+        
+        LanternOn = !LanternOn
+        JawAngleMaster =Carrying ? 25 : LanternOn ? 22 : 0
+        if(LanternOn){
+            holoAlpha(117,255)
+            LanternLight:entity():setAlpha(255)
+        }else{
+            holoAlpha(117,0)
+            LanternLight:entity():setAlpha(0)
+            LanternColor = vec()
+        }
+    }elseif(!F & LanternQ){
+        LanternQ = 0
+    }
+    if(LanternOn){
+        LanternColor = DefaultLanternColor*random(0.375,0.5)
+    }
+    
+    #Weapon Switch
+    
+    if(Mouse2 & !Speaking & !WeaponQ){
+        WeaponQ = 1
+        WeaponAlpha = 0
+        
+    }elseif(((!Mouse2 & !Mouse1) | Speaking) & WeaponQ){
+        WeaponQ = 0
+        WeaponAlpha = 255
+    }
+    if(WeaponQ & (WeaponAlpha<255)){
+        WeaponAlpha += 75
+        if(WeaponAlpha>255){WeaponAlpha=255}
+        for(N=4,12){
+            EGP:egpAlpha(N,WeaponAlpha)
+        }
+    }elseif(!WeaponQ & (WeaponAlpha>0)){
+        WeaponAlpha += -75
+        if(WeaponAlpha<0){WeaponAlpha=0}
+        for(N=4,12){
+            EGP:egpAlpha(N,WeaponAlpha)
+        }
+    }
+    
+    
+    #Fire Breath (Forced)
+    
+    if(Weapon!=1){
+        if((ForceFire) & !Flaming){ 
+            Flaming = 1
+            
+            Flame_M = !Sex
+            Flame_F = Sex
+            
+            if(!Belching){
+                FlamePlate:entity():soundPlay(4,2,"weapons/flame_thrower_start.wav")
+                soundPitch(4,75 + 10*Sex)
+                holoEntity(2):eyeExpression(FireExpression,0,Sex,Scale,Baby,0,Wink)
+                JawAngleMaster = 30
+            }
+            
+            
+            FireQ = 1
+            timer("flametoloop",1000)
+        }elseif(!ForceFire & Flaming){
+            Flaming = 0
+            
+            Ignite = 0
+            FireQ = 0
+            Flame_M = Flame_F = 0
+            
+            if(!Belching){
+                FlamePlate:entity():soundPlay(4,1,"weapons/flame_thrower_end.wav")
+                JawAngleMaster =Carrying ? 25 : LanternOn ? 22 : 0
+            }
+            holoEntity(2):eyeExpression(DefaultExpression,DefaultExpressionEyelids,Sex,Scale,Baby,DefaultSquint,Wink)
+            
+            
+            stoptimer("flametoloop")
+        }
+    }
+    #Fireball
+    
+    if(FireBallQ==1){
+        FireBallVelW += vec(0,0,-FireBallGravity)
+        local FireBallRanger = rangerOffset(FireBallVelW:length(),FireBallPos,FireBallVelW)
+        if(FireBallRanger:hit()){
+            if(Supercharged){
+                Explosive:entity():setPos(FireBallRanger:pos()+FireBallRanger:hitNormal()*4)
+                Explosive["Detonate",number] = 1
+                holoEntity(118):soundPlay(6,3,"ambient/explosions/explode_3.wav")
+                if(Sex){
+                    Explosion_F = 1   
+                }else{
+                    Explosion_M = 1
+                }
+            }else{
+                local FireBOOM = propSpawn("models/props_phx/ball.mdl",FireBallRanger:pos()+FireBallRanger:hitNormal()*4,ang(),1)
+                FireBOOM:propBreak()
+            }
+            
+            holoAlpha(118,0)
+            FireBallQ = 2
+            #soundStop(6)
+            timer("fireballreset",100)
+        }else{
+            FireBallPos += FireBallVelW
+            FireBallRoll += Supercharged ? 90 : 45
+            if(FireBallRoll>360){FireBallRoll += -360}
+            holoAng(118,-heading(vec(),ang(),FireBallVelW)*ang(-1,1,1) + ang(0,180,FireBallRoll))
+            holoPos(118,FireBallPos)
+            Explosive:entity():setPos(FireBallPos)
+        }
+        
+        
+        
+    }
+    
+    
+    if(Weapon==1){
+        
+        #Fire Breath (Manual)
+        
+        if((Mouse1|ForceFire) & !Flaming){ 
+            Flaming = 1
+            
+            Flame_M = !Sex
+            Flame_F = Sex
+            
+            if(!Belching){
+                FlamePlate:entity():soundPlay(4,2,"weapons/flame_thrower_start.wav")
+                soundPitch(4,75 + 10*Sex)
+                holoEntity(2):eyeExpression(FireExpression,0,Sex,Scale,Baby,0,Wink)
+                JawAngleMaster = 30
+            }
+            
+            
+            FireQ = 1
+            timer("flametoloop",1000)
+        }elseif(!(Mouse1|ForceFire) & Flaming){
+            Flaming = 0
+            
+            Ignite = 0
+            FireQ = 0
+            Flame_M = Flame_F = 0
+            
+            if(!Belching){
+                FlamePlate:entity():soundPlay(4,1,"weapons/flame_thrower_end.wav")
+                JawAngleMaster =Carrying ? 25 : LanternOn ? 22 : 0
+            }
+            holoEntity(2):eyeExpression(DefaultExpression,DefaultExpressionEyelids,Sex,Scale,Baby,DefaultSquint,Wink)
+            
+            
+            stoptimer("flametoloop")
+        }
+    }elseif(Weapon==2){
+        #Fireball
+        if(Mouse1 & !FireChargeQ & (FireBallQ==0)){
+            FireChargeQ = 1
+            JawAngleMaster = 30
+            holoEntity(2):eyeExpression(FireExpression,0,Sex,Scale,Baby,0,Wink)
+            Supercharged = 0
+            holoEntity(2):soundPlay(5,2,"vehicles/fast_windloop1.wav")
+            soundPitch(5,50)
+            soundPitch(5,150,2)
+            timer("SuperCharge",2000)
+        }elseif(!Mouse1 & FireChargeQ & (FireBallQ==0)){
+            stoptimer("SuperCharge")
+            FireChargeQ = 0
+            FireBallQ = 1
+            holoUnparent(118)
+            holoAlpha(118,255)
+            Explosive:entity():setAlpha(0)
+            Explosive:entity():propFreeze(1)
+            Explosive:entity():propNotSolid(1)
+            local AddVelocity = Riding ? E:vel()/10 : (Driving==4) ? FlyVelW : (Driving==2) ? RunSpeed*holoEntity(0):forward() : vec(0)
+            FireBallVelW = (Driver:aimPos() - holoEntity(35):pos()):normalized()*(Supercharged ? FireBallLaunchVel*1.5 : FireBallLaunchVel)
+            FireBallPos = holoEntity(2):toWorld(vec(0,0,-8)*Scale) + 96*FireBallVelW:normalized() + AddVelocity
+            holoAng(118,-heading(vec(),ang(),FireBallVelW)*ang(-1,1,1) + ang(0,180,0))
+            holoPos(118,FireBallPos)
+            
+            if(Supercharged){
+                holoEntity(118):setTrails(128,64,1,"trails/smoke",Sex ? vec(127,255,0) : vec(255,191,144),255)
+                soundPlay(6,1,"ambient/fire/gascan_ignite1.wav")
+                holoScale(118,vec(4)*Scale)
+            }else{
+                holoEntity(118):setTrails(16,64,1,"trails/smoke",vec(72),191)
+            }
+            soundPlay(5,2,"npc/antlion_guard/angry2.wav")
+            
+            soundPitch(5,(randint(80,120) + 15*Sex)/VoScale)
+            #holoEntity(118):soundPlay(6,0,"ambient/fire/fire_med_loop1.wav")
+            JawAngleMaster = 30
+            timer("endFireBallSpit",500)
+            
+        }
+    
+    }elseif(Weapon==3){
+    
+        #Eating
+        if(Mouse1 & !EatQ){
+            EatQ = 1
+            if(!Eating){
+                if(Carrying){
+                    EATarget = CarryObject
+                    
+                }else{
+                    EATarget = Driver:aimEntity()
+                    if(!EATarget:isValidPhysics()){
+                        EATarget = noentity()
+                    }else{
+                        stoptimer("resetIdleLookTarget")
+                        HasLookTarget = 1
+                        IdleLookTarget = EATarget
+                    }
+                }
+                local Wirelink = EATarget:wirelink()
+                local EHAttempt = 0
+                foreach(K,V:entity=CannotEat){
+                    if(EATarget==V){EHAttempt = 1}
+                }
+                
+                if(EATarget:isValidPhysics()){    
+                    if(LanternOn){
+                        dprint(Name + " cannot eat with a lantern in " + (Sex ? "her " : "his ") + "mouth!")
+                    }elseif(EHAttempt){
+                        dprint(Name + " cannot eat " + (Sex ? "herself!" : "himself!"))
+                    }elseif(EATarget:isPlayer()){
+                        dprint(Name + " refuses to eat humans!")
+                    }elseif(Wirelink["DragonHead",entity]){
+                        dprint(Name + " isn't a cannibal!")
+                    }elseif(EATarget:radius()>(144*Scale)){
+                        dprint("That's too large for " + Name + " to eat!")
+                    }else{
+                        if(EATarget:boxCenterW():distance(holoEntity(2):pos())<(144*Scale)){
+                            Eating = 1
+                            Carrying = 0
+                            JawAngleMaster = 30
+                            timer("bite",500)
+                            
+                        }else{
+                            dprint("That's too far away for " + Name + " to eat!")
+                        }
+                    }
+                }
+            }
+        }elseif(!Mouse1 & EatQ){
+            EatQ = 0
+        }
+    }elseif(Weapon==4){
+    
+        #Pickup/Drop
+        
+        if(Mouse1 & !PickupQ){
+            PickupQ = 1
+            if(Carrying){
+                CarryObject:propNotSolid(0)
+                CarryObject:deparent()
+                CarryObject:propFreeze(0)
+                Carrying = 0
+                JawAngleMaster =Carrying ? 25 : LanternOn ? 22 : 0
+                DragonPos = E:pos()
+                timer("DropLaunch",10)
+            }else{
+                CarryObject = Driver:aimEntity()
+                local Wirelink = CarryObject:wirelink()
+                if(CarryObject:isValidPhysics() & !Wirelink["DragonHead",entity]){
+                    local CarryPosW = Driver:aimPos()
+                    if(CarryPosW:distance(holoEntity(2):pos())<(128*Scale)){
+                        if(CarryObject:radius()<(64*Scale)){
+                            if(!CarryObject:isConstrained() & !CarryObject:parent()){
+                                Carrying = 1
+                                
+                                local MouthPosW = holoEntity(2):toWorld(vec(14.5,0,-7)*Scale)
+                                local CarryDisp = MouthPosW - CarryPosW
+                                
+                                CarryObject:setPos(CarryObject:pos() + CarryDisp)
+                                CarryObject:propFreeze(1)
+                                CarryObject:propNotSolid(1)
+                                
+                                JawAngleMaster = 22
+                                #print(Name + " is now carrying " + CarryObject:toString() + ".")
+                                timer("carryParent",100)
+                            }else{
+                                Seat1:entity():dprintDriver("Object is connected to something!")
+                            }
+                        }else{
+                            Seat1:entity():dprintDriver("Object is too large for " + Name + " to carry!")
+                        }
+                    }else{
+                        Seat1:entity():dprintDriver("Object is too far away for " + Name + " to carry!")
+                    }
+                }
+            }
+        }elseif(!Mouse1 & PickupQ){
+            PickupQ = 0
+        }
+    }elseif(Weapon==5){
+    
+        #User
+        if(Mouse1 & (UserStep==0)){
+            rangerFilter(CannotEat)
+            local UseRanger = rangerOffset(96*Scale,holoEntity(2):pos(),Driver:aimPos()-holoEntity(2):pos())
+            
+            if(UseRanger:hit()){
+                UserStep = 1
+                local PressTargetD = holoEntity(0):toLocal(UseRanger:pos()) - vec(24,-7,-36)
+                PressTarget = clamp(PressTargetD,vec(0,-6,0),vec(32,-6,24))*Scale
+                User:entity():setAlpha(0)
+                User:entity():setPos(UseRanger:pos()+3*UseRanger:hitNormal())
+                local FwdAng = -heading(vec(),ang(),-UseRanger:hitNormal())
+                User:entity():setAng(FwdAng:rotateAroundAxis(FwdAng:right(),-90))
+            }else{
+                UserStep = 5
+            }
+
+        }elseif(UserStep==1){
+            PressParm += 0.25
+            FootPos = PressParm*PressTarget
+            if(PressParm==1){
+                UserStep = 2
+            }
+        }elseif(UserStep==2){
+            UserStep = 2.5
+            User["Fire",number] = 1
+        }elseif(UserStep==2.5){
+            UserStep = 3
+        }elseif(UserStep==3){
+            UserStep = 4
+            User["Fire",number] = 0
+            User:entity():setPos(Crate:entity():pos()+vec(0,0,4))
+            User:entity():setAng(ang(180,0,0))
+        }elseif(UserStep==4){
+            PressParm += -0.25
+            FootPos = PressParm*PressTarget
+            if(PressParm==0){
+                UserStep = 0
+                User:entity():setAlpha(255)
+            }
+        }elseif(!Mouse1 & (UserStep==5)){
+            UserStep = 0
+            PressParm = 0
+        }
+        
+        
+    }elseif(Weapon==6){ #Follow
+        if(Mouse1 & !FollowQ){
+            FollowQ = 1
+                FollowTarget = O:aimEntity()
+                if(FollowTarget==E){FollowTarget = O}
+                if(FollowTarget:isPlayer()|FollowTarget:isValidPhysics()){
+                    if(!Sleeping){
+                        if(StandMode==0){
+                            Following = 1
+                            FollowDisp = FollowTarget:pos() - E:pos()
+                            FWL = FollowTarget:wirelink()
+                            dprint(Name + " is now following " + FollowTarget:toString() + ".")
+                        }
+                    }
+                }else{
+                    Following = 0
+                    dprint(Name + " has stopped following.")
+                }
+            
+        }elseif(!Mouse1 & FollowQ){
+            FollowQ = 0
+        }
+    }
+    
+    #Fire Physics
+    if(Flaming){
+        FireQ = !FireQ
+        Ignite = Belching ? 0 : FireQ
+        
+        if(FireColorFactor<1){
+            FireColorFactor += 0.25
+            
+            FireColor = FireColorFactor*(Sex ? vec(63,191,65) : vec(255,96,0))
+        }
+    }else{
+        if(FireColorFactor>0){
+            FireColorFactor += -0.25
+            
+            FireColor = FireColorFactor*(Sex ? vec(63,191,65) : vec(255,96,0))
+        }
+    }
+    
+    #Passenger Eject
+    local Alt2 = PodController2["Alt",number]
+    if(Alt2){
+        Eject2 = 1
+        timer("eject",100)
+    }
+    
+    #Roar!
+    
+    local R = PodController1["R",number]
+    if(R & !RoarQ){
+        RoarQ = 1
+        vocalizeRoar(DefaultExpression,Sex,1,VoScale)
+        if(Carrying){
+            CarryObject:propNotSolid(0)
+            CarryObject:deparent()
+            CarryObject:propFreeze(0)
+            Carrying = 0
+            #JawAngleMaster =Carrying ? 25 : LanternOn ? 22 : 0
+            if(Driving==3){CarryObject:applyForce(CarryObject:mass()*FlyVelW)}
+        }
+    }
+    
+    
+    holoEntity(2):poseJaw(JawAngleMaster,Scale)
+    
+    #Speak Bubble
+    
+    if(Speaking){
+        
+        local ActualText = TargetText:left(min(SpeakIndex*2,TargetText:length()))
+        
+        EGP:egpSize(1,vec2((ActualText:length()+2)*12,32))
+        EGP:egpSetText(3,ActualText)
+        
+        for(N=1,3){
+            EGP:egpAlpha(N,255)
+        }
+        SpeakIndex += 1
+        
+        if((SpeakIndex%3)==0){
+            JawAngleMaster = randint(20,30)
+        }elseif((JawAngleMaster)!=0){
+            JawAngleMaster =Carrying ? 25 : LanternOn ? 22 : 0
+        }
+        
+        if((SpeakIndex*2)>TargetText:length()+1){
+            Speaking = 0
+            
+            JawAngleMaster =Carrying ? 25 : LanternOn ? 22 : 0
+            
+            timer("blink_open",100)
+            timer("speechtimeout",SpeakBubbleTimeout*1000)
+            
+        }
+    }elseif(SpeakFading){
+        SpeakAlpha += -25
+        if(SpeakAlpha<=0){
+            SpeakAlpha = 0
+            SpeakFading = 0
+        }
+        for(N=1,3){
+            EGP:egpAlpha(N,SpeakAlpha)
+        }
+    }
+    
+    #Eating
+    if(Bite){
+        Bite = 0
+        if(EATarget:isValidPhysics()){
+            if(EATarget:type()=="prop_physics"){
+                EATarget:propBreak()
+            }else{
+                EATarget:propDelete()
+            }
+            soundPlay(5,1,biteSound(EATarget))
+            EATarget = noentity()
+            JawAngleMaster = 12
+        }
+        timer("chew",500)
+    }elseif(Chewing){
+        EatIndex++
+        local JawDn = (EatIndex%3)==0
+        local ChewCrunch = EatIndex==1 | EatIndex==5 | EatIndex==11 | EatIndex==17
+        if(JawDn){
+            JawAngleMaster = randint(16,20)
+        }elseif(JawAngleMaster>12){
+            JawAngleMaster = 12
+        }
+        if(ChewCrunch){
+            ChewN++
+            soundPlay(5,1,"player/footsteps/ice"+ChewN:toString()+".wav")
+            soundPitch(5,120)
+            if(ChewN==2){
+                Blinking = 0
+            }elseif(ChewN==4){
+                Chewing = 0
+                Blinking = 1
+                timer("swallow",1000)
+            }
+        }
+        
+    }
+    local RotateEGP = WeaponAlpha>0
+    holoAng(112,holoEntity(2):angles()*ang(0,1,0) + RotateEGP*ang(0,180,0))
+     
+    #Love
+    
+    if(Loving){
+        LoveTheta1 += 30
+        if(LoveTheta1>360){
+            LoveTheta1 = 0
+        }
+        if((LoveTheta1==120) & (LoveQ==0)){
+            LoveQ = 1
+        }elseif((LoveTheta1==240) & (LoveQ==1)){
+            LoveQ = 2
+        }
+        holoPos(113,holoEntity(2):toWorld(vec(-(8 + LoveTheta1/30),0,LoveTheta1/12 + 6)*Scale))
+        holoAng(113,ang(0,LoveTheta1,0))
+        holoAlpha(113,127 - 127*cos(LoveTheta1))
+        holoScale(113,(1 + LoveTheta1/360)*vec(0.25)*Scale)
+        if(LoveQ>=1){
+            LoveTheta2 += 30
+            if(LoveTheta2>360){
+                LoveTheta2 = 0
+            }
+            holoPos(114,holoEntity(2):toWorld(vec((8+LoveTheta2/30)*cos(60),(8+LoveTheta2/30)*sin(60),LoveTheta2/12 + 6)*Scale))
+            holoAng(114,ang(0,LoveTheta2,0))
+            holoAlpha(114,127 - 127*cos(LoveTheta2))
+            holoScale(114,(1 + LoveTheta2/360)*vec(0.25)*Scale)
+        }
+        if(LoveQ>=2){
+            LoveTheta3 += 30
+            if(LoveTheta3>360){
+                LoveTheta3 = 0
+            }
+            holoPos(115,holoEntity(2):toWorld(vec((8+LoveTheta3/30)*cos(-60),(8+LoveTheta3/30)*sin(-60),LoveTheta3/12 + 6)*Scale))
+            holoAng(115,ang(0,LoveTheta3,0))
+            holoAlpha(115,127 - 127*cos(LoveTheta3))
+            holoScale(115,(1 + LoveTheta3/360)*vec(0.25)*Scale)
+        }
+    }elseif(Dancing){ #Dancing
+        NoteTheta1 += 15
+            if(NoteTheta1>360){
+                NoteTheta1 = 0
+            }
+            if((NoteTheta1==120) & (NoteQ==0)){
+                NoteQ = 1
+            }elseif((NoteTheta1==240) & (NoteQ==1)){
+                NoteQ = 2
+            }
+            holoPos(113,holoEntity(2):pos()+(vec((NoteTheta1/16)*cos(2*NoteTheta1),(NoteTheta1/16)*sin(2*NoteTheta1),NoteTheta1/8)*Scale))
+            holoAng(113,ang(0,2*NoteTheta1,0))
+            holoAlpha(113,127 - 127*cos(NoteTheta1))
+            holoScale(113,(1 + NoteTheta1/360)*vec(0.5)*Scale)
+            if(NoteQ>=1){
+                NoteTheta2 += 15
+                if(NoteTheta2>360){
+                    NoteTheta2 = 0
+                }
+                holoPos(114,holoEntity(2):pos()+(vec((NoteTheta2/16)*cos(2*NoteTheta2),(NoteTheta2/16)*sin(2*NoteTheta2),NoteTheta2/8)*Scale))
+                holoAng(114,ang(0,2*NoteTheta2,0))
+                holoAlpha(114,127 - 127*cos(NoteTheta2))
+                holoScale(114,(1 + NoteTheta2/360)*vec(0.5)*Scale)
+            }
+            if(NoteQ>=2){
+                NoteTheta3 += 15
+                if(NoteTheta3>360){
+                    NoteTheta3 = 0
+                }
+                holoPos(115,holoEntity(2):pos()+(vec((NoteTheta3/16)*cos(2*NoteTheta3),(NoteTheta3/16)*sin(2*NoteTheta3),NoteTheta3/8)*Scale))
+                holoAng(115,ang(0,2*NoteTheta3,0))
+                holoAlpha(115,127 - 127*cos(NoteTheta3))
+                holoScale(115,(1 + NoteTheta3/360)*vec(0.5)*Scale)
+            }
+    }
+    
+    #Stop Following if entity disappears
+    if(Following & !FollowTarget){
+        Following = 0
+        dprint(Name + " has stopped following because " + (Sex ? "her" : "his") + " target is gone!")
+    }
+    
+    timer("clk",100)
+}elseif(clk("blink_close")){
+    #E:poseEyes(vec2(),1,0)
+    Blinking = 1
+    timer("blink_open", IdleBlinkHoldtime)
+}elseif(clk("blink_open")){
+    #E:poseEyes(vec2(),0,0)
+    Blinking = 0
+    timer("blink_close",(random() > 0.75) ? IdleBlinkHoldtime : IdleBlinkInterval)    
+}elseif(clk("eject")){
+    Eject = 0
+    Eject2 = 0
+}elseif(clk("flametoloop")){
+    FlamePlate:entity():soundPlay(4,0,"weapons/flame_thrower_loop.wav")
+    soundPitch(4,75 + 10*Sex)
+}elseif(clk("roarend")){
+    JawAngleMaster = Flaming ? 30 : LanternOn ? 22 : 0
+    RoarQ = 0
+    timer("blink_open",100)
+}elseif(clk("resetIdleLookTarget")){
+    HasLookTarget = 0
+}elseif(clk("anglereset")){
+    holoAng(0,E:angles())
+    BPitch = 0
+    BodyAngle = E:angles()
+}elseif(clk("speechtimeout")){
+    #print("Print Fading")
+    SpeakFading = 1
+    SpeakAlpha = 255
+}elseif(clk("sleep_start")){
+    holoEntity(2):eyeExpression("normal",0,Sex,Scale,Baby,0,Wink)
+    holoEntity(2):poseEyes(vec2(),1,0,Sex,Scale,Baby,Wink)
+    for(N=113,115){
+        holoModel(N,"models/sprops/misc/alphanum/alphanum_z.mdl")
+        holoScale(N,vec(0.5)*Scale)
+        holoColor(N,vec(255))
+    }
+    soundPlay(5,0,"npc/antlion_guard/growl_idle.wav")
+    
+    soundPitch(5,(50+15*Sex)/VoScale)
+    Snoring = 1
+    ZQ = 0
+    ZTheta1 = ZTheta2 = ZTheta3 = 0
+}elseif(clk("endForceFire")){
+    ForceFire = 0
+    if(!Active1){
+        #print("dingas")
+        FlamePlate:entity():propNotSolid(0)
+        Igniter:entity():propNotSolid(0)
+        FireLight:entity():propNotSolid(0)
+        LanternLight:entity():propNotSolid(0)
+        EGP:entity():propNotSolid(0)
+    }
+}elseif(clk("SuperCharge")){
+    Supercharged = 1
+    JawAngleMaster = 15
+    soundPlay(5,1,select(randint(1,3),
+    "ambient/levels/canals/toxic_slime_gurgle2.wav",
+    "ambient/levels/canals/toxic_slime_gurgle4.wav",
+    "ambient/levels/canals/toxic_slime_gurgle7.wav"
+    ))
+}elseif(clk("endFireBallSpit")){
+    JawAngleMaster = Carrying ? 25 : LanternOn ? 22 : 0
+    holoEntity(2):eyeExpression(DefaultExpression,DefaultExpressionEyelids,Sex,Scale,Baby,DefaultSquint,Wink)
+}elseif(clk("fireballreset")){
+    holoEntity(118):removeTrails()
+    holoPos(118,holoEntity(2):pos())
+    holoParent(118,2)
+    holoScale(118,vec(2))
+    Explosive:entity():setPos(Crate:entity():pos())
+    Explosive["Detonate",number] = 0
+    Explosive:entity():setAlpha(255)
+    Explosive:entity():propNotSolid(0)
+    FireBallQ = 0
+    FireBallInit = 0
+    Explosion_M = Explosion_F = 0
+}elseif(clk("recover")){
+    Recovering = 1
+    soundPlay(5,2,"npc/antlion_guard/angry3.wav")
+    
+    soundPitch(5,(90+10*Sex)/VoScale)
+    holoEntity(2):eyeExpression("angry",0,Sex,Scale,Baby,1,Wink)
+    
+    
+    for(N=113,115){
+        holoAlpha(N,0)
+    }
+    timer("recover2",2000)
+}elseif(clk("recover2")){
+    
+    StandMode = 0
+    StandTransitionQ = 1
+    Dazed = 0
+    Recovering = 0
+    ShakeAng = 0
+    
+    holoEntity(2):eyeExpression(DefaultExpression,DefaultExpressionEyelids,Sex,Scale,Baby,DefaultSquint,Wink)
+    holoEntity(0):poseWings(30,0,75,22.5,0,0,Scale)
+    
+    
+}elseif(clk("bite")){
+    Bite = 1
+    EatIndex = 0
+    ChewN = 0  
+}elseif(clk("chew")){
+    Chewing = 1
+    stoptimer("blink_open")
+    stoptimer("blink_close")
+    Blinking = 1
+    
+}elseif(clk("swallow")){
+    soundPlay(5,1,select(randint(1,3),
+    "ambient/levels/canals/toxic_slime_gurgle2.wav",
+    "ambient/levels/canals/toxic_slime_gurgle4.wav",
+    "ambient/levels/canals/toxic_slime_gurgle7.wav"
+    ))
+    JawAngleMaster = 0
+    PropsEaten++
+    local Burp = 0
+    if(PropsEaten==3){
+        PropsEaten=0
+        Burp = 1
+    }
+    if(Burp){
+        timer("burp",1000)
+    }else{
+        Eating = 0
+    }
+    timer("blink_open",500)
+    
+}elseif(clk("burp")){
+    Belching = 1
+    
+    FlamePlate:entity():propNotSolid(1)
+    Igniter:entity():propNotSolid(1)
+    FireLight:entity():propNotSolid(1)
+    LanternLight:entity():propNotSolid(1)
+    EGP:entity():propNotSolid(1)
+    
+    soundPlay(5,1,select(randint(1,4),
+    "vo/burp03.mp3",
+    "vo/burp04.mp3",
+    "vo/burp06.mp3",
+    "vo/burp07.mp3"
+    ))
+    soundPitch(5,70+10*Sex)
+    JawAngleMaster = 25
+    if(Sex){
+        holoEntity(2):eyeExpression("sad",0,Sex,Scale,Baby,0,Wink)
+    }
+    ForceFire = 1
+    timer("endForceFire",400)
+    timer("burpend",800)
+}elseif(clk("burpend")){
+    Belching = 0
+    JawAngleMaster =Carrying ? 25 : LanternOn ? 22 : 0
+    Eating = 0
+    holoEntity(2):eyeExpression(DefaultExpression,DefaultExpressionEyelids,Sex,Scale,Baby,DefaultSquint,Wink)
+    
+}elseif(clk("endlove1")){
+    
+    JawAngleMaster = 0
+    holoEntity(2):eyeExpression(DefaultExpression,DefaultExpressionEyelids,Sex,Scale,Baby,DefaultSquint,Wink)
+    if(!Sleeping & (DefaultExpression=="normal")){
+        stoptimer("blink_open")
+        timer("blink_open",100)
+    }
+    timer("endlove2",3000)
+}elseif(clk("endlove2")){
+    Loving = 0
+    if(Dancing){
+        holoModel(113,"models/sprops/misc/alphanum/alphanum_note_8a.mdl")
+        holoModel(114,"models/sprops/misc/alphanum/alphanum_note_8a.mdl")
+        holoModel(115,"models/sprops/misc/alphanum/alphanum_note_8b.mdl")
+        
+        for(N=113,115){
+            holoScale(N,vec(0.5)*Scale)
+            holoColor(N,vec(36))
+        }
+    }else{
+        for(N=113,115){
+            holoAlpha(N,0)
+        }
+    }
+    
+}elseif(clk("teleport")){
+    E:setPos(GTpos)
+    E:setAng(GTang)
+    TeleLock = 0
+    if(StandMode==0){
+        timer("anglereset",50)
+    }
+    timer("tailphys",50)
+    
+}elseif(clk("tailphys")){
+    if(StandMode==1){ #Sitting
+        if(Sex){
+            E:poseTail(-5,randint(-20,20),1,1,Scale)
+        }else{
+            E:poseTail(-2.5,randint(-20,20),6,1,Scale)
+        }
+    }elseif(StandMode==2){ #Lying
+        if(Sex){
+            E:poseTail(-7.55,randint(-20,20),-4,2,Scale)
+        }else{
+            E:poseTail(-5,randint(-20,20),-4,2,Scale)
+        }
+        
+    }elseif(StandMode==3){ #Sleep
+        local CurlDirection = (random()>0.5) ? 1 : -1 #1 for Left, -1 for Right
+        E:poseTail(-5,CurlDirection*20,-4,2,Scale)
+    }elseif(StandMode==4){
+        E:poseTail(-5,randint(-5,5),-4,2,Scale)
+    }
+}elseif(clk("carryParent")){
+    CarryObject:parentTo(holoEntity(2))
+}elseif(clk("DropLaunch")){
+    local NewDragonPos = E:pos()
+    local DragonVel = NewDragonPos - DragonPos
+    
+    CarryObject:applyForce(CarryObject:mass()*DragonVel*10)
+}elseif(clk("ragdollassemble")){
+    ragdollGenerate(RagdollStep)
+    RagdollStep++
+    if(RagdollStep==8){
+        
+        timer("ragdollconstrain",1000)
+    }else{
+        timer("ragdollassemble",1200)
+    }
+
+    
+}elseif(clk("ragdollconstrain")){
+    dprint("Ragdoll Assembly done!")
+    ragdollConstrain()
+}elseif(chatClk(O)){
+    local LS = O:lastSaid()
+    local Sentence = LS:explode(" ")
+    local CMD_Prename = Sentence[1,string]
+    local CMD_S = CMD_Prename:explode(":")
+    local CMD = CMD_S[1,string]
+    local NameGiven = CMD_S[2,string]:lower()
+    local NameCHK = Name:lower()
+    if((NameCHK:find(NameGiven)) | (NameGiven=="")){
+        switch(CMD){
+            case ".come",
+                if(!Riding){
+                    GTpos = O:aimPos()+vec(0,0,18)
+                    GTang = O:eyeAngles()*ang(0,1,0) + ang(0,180,0)
+                    timer("teleport",100)
+                    dprint(Name + " has come to you.") 
+                }else{
+                    dprint(Name + " is riding something!")
+                }
+                hideChat(1)
+                break
+            case ".stand",
+                if(!Sleeping){
+                    if(StandMode!=0){
+                        StandMode = 0
+                        StandTransitionQ = 1
+                        dprint(Name + " is now standing.")
+                    }else{
+                        dprint(Name + " is already standing.")
+                    }
+                }else{
+                    dprint(Name + " is asleep!")
+                }
+                hideChat(1)
+                break
+            case ".sit",
+                if(!Sleeping){
+                    if(StandMode!=1){
+                        StandMode = 1
+                        StandTransitionQ = 1
+                        Following = 0
+                        dprint(Name + " is now sitting.")
+                    }else{
+                        dprint(Name + " is already sitting.")
+                    }
+                }else{
+                    dprint(Name + " is asleep!")
+                }
+                hideChat(1)
+                break
+            case ".lie",
+                if(!Sleeping){
+                    if(StandMode!=2){
+                        StandMode = 2
+                        StandTransitionQ = 1
+                        Following = 0
+                        dprint(Name + " is lying down.")
+                    }else{
+                        dprint(Name + " is already lying down.")
+                    }
+                }else{
+                    dprint(Name + " is already lying down... and asleep!")
+                }
+                hideChat(1)
+                break
+            case ".splat",
+                if(!Sleeping){
+                    if(StandMode!=4){
+                        StandMode = 4
+                        StandTransitionQ = 1
+                        Following = 0
+                        dprint(Name + " is now dazed for some reason.")
+                    }else{
+                        dprint("Give poor " + Name + " a few seconds before giving " + (Sex ? "her " : "him ") + "another concussion.")
+                    }
+                }else{
+                    dprint(Name + " is asleep!")
+                }
+                hideChat(1)
+                break
+            case ".sleep",
+                if(!Sleeping){
+                    if(StandMode!=3){
+                        StandMode = 3
+                        StandTransitionQ = 1
+                        Following = 0
+                        dprint(Name + " is falling asleep.")
+                    }
+                }else{
+                    dprint(Name + " is already asleep.")
+                }
+                hideChat(1)
+                break
+            case ".wake",
+                if(Sleeping){
+                    if(StandMode!=2){
+                        StandMode = 2
+                        StandTransitionQ = 1
+                        soundStop(5)
+                        dprint(Name + " is now awake.")
+                    }
+                    for(N=113,115){
+                        holoModel(N,"cube")
+                        holoAlpha(N,0)
+                    }
+                    Snoring = 0
+                    ZQ = 0
+                }else{
+                    dprint(Name + " is already awake.")
+                }
+                hideChat(1)
+                break
+            case ".roar",
+                if(!Sleeping){
+                    RoarQ = 1
+                    vocalizeRoar(DefaultExpression,Sex,1,VoScale)
+                    if(Carrying){
+                        CarryObject:propNotSolid(0)
+                        CarryObject:deparent()
+                        CarryObject:propFreeze(0)
+                        Carrying = 0
+                        #JawAngleMaster =Carrying ? 25 : LanternOn ? 22 : 0
+                        if(Driving==3){CarryObject:applyForce(CarryObject:mass()*FlyVelW)}
+                    }
+                }
+                hideChat(1)
+                break
+            case ".light",
+                LanternOn = !LanternOn
+                if(LanternOn){
+                    holoAlpha(117,255)
+                    LanternLight:entity():setAlpha(255)
+                    dprint(Name + " has lit " + (Sex ? "her " : "his ") + "lantern.")
+                }else{
+                    holoAlpha(117,0)
+                    LanternLight:entity():setAlpha(0)
+                    LanternColor = vec()
+                    dprint(Name + " has extinguished " + (Sex ? "her " : "his ") + "lantern.")
+                }
+                LanternColor = LanternOn ? DefaultLanternColor*0.5 : vec(0)
+                JawAngleMaster =Carrying ? 25 : LanternOn ? 22 : 0
+                
+                
+                hideChat(1)
+                break
+            case ".expr",
+                if(!Sleeping){
+                    local Expression = Sentence[2,string]
+                    local Eyelids = Sentence[3,string]:toNumber()
+                    local Squint = Sentence[4,string]:toNumber()
+                    if(Expression==""){Expression = "normal"}
+                    DefaultExpression = Expression
+                    DefaultExpressionEyelids = Eyelids
+                    DefaultSquint = Squint
+                    holoEntity(2):eyeExpression(Expression,Eyelids,Sex,Scale,Baby,Squint,Wink)
+                    switch(Expression){
+                        case "normal",
+                            dprint(Name + " is feeling normal.")
+                            break
+                        case "sad",
+                            dprint(Name + " is feeling sad.")
+                            break
+                        case "annoyed",
+                            dprint(Name + " is feeling annoyed.")
+                            break
+                        case "angry",
+                            dprint(Name + " is feeling angry.")
+                            break
+                        case "confused",
+                            dprint(Name + " is feeling confused.")
+                            break
+                        case "concerned",
+                            dprint(Name + " is feeling concerned.")
+                            break
+                        case "smug",
+                            dprint(Name + " is feeling smug.")
+                            break
+                        default,
+                            break
+                    }
+                }
+                hideChat(1)
+                break
+            case ".jaw",
+                JawAngleMaster = Sentence[2,string]:toNumber()
+                dprint(Name + " has opened  " + (Sex ? "her " : "his ") + "mouth to exactly " + JawAngleMaster + " degrees.")
+                hideChat(1)
+                break
+            case ".grab",
+                #ifdef weld(entity,entity)
+                    if(!Riding){
+                        local GrabRanger = rangerOffset(64*Scale,E:pos(),-E:up())
+                        
+                        if(GrabRanger:entity():isValidPhysics()){
+                            RidingEntity = GrabRanger:entity()
+                            if(RidingEntity:parent():isValidPhysics()){RidingEntity = RidingEntity:parent()}
+                            if(RidingEntity:parent():isValidPhysics()){RidingEntity = RidingEntity:parent()}
+                            if(RidingEntity:parent():isValidPhysics()){RidingEntity = RidingEntity:parent()}
+                            Riding = 1
+                            E:propFreeze(0)
+                            weld(E,RidingEntity)
+                            Following = 0
+                            dprint(Name + " is now riding " + RidingEntity:toString() + ".")
+                            #print(RidingEntity)
+                            
+                        }
+                    }else{
+                        dprint(Name + " is already riding " + RidingEntity:toString() + "!")
+                    }
+                    
+                #else
+                    dprint(Name + " cannot ride anything because Constraint Core isn't enabled!")
+                #endif
+
+                hideChat(1)
+                break
+            case ".release",
+                #ifdef entity:constraintBreak(entity)
+                    E:constraintBreak(RidingEntity)
+                    Riding = 0
+                    E:propFreeze(1)
+                    dprint(Name + " is no longer riding anything.")
+                #else
+                    dprint(Name + " cannot un-ride anything because Constraint Core isn't enabled!")
+                #endif
+                
+                hideChat(1)
+                break
+            case ".say",
+                if(!Sleeping){
+                    if(!Sentence[2,string]:find("\"")){
+                        local Expression = Sentence[2,string]
+                        local Eyelids = 0
+                        if(Expression==""){Expression = "normal"}
+                        DefaultExpression = Expression
+                        DefaultExpressionEyelids = Eyelids
+                        holoEntity(2):eyeExpression(Expression,Eyelids,Sex,Scale,Baby,DefaultSquint,Wink)
+                        
+                    }
+                    
+                    EGP:egpSetText(3,"")
+                    EGP:egpSize(1,vec2(32))
+                    
+                    for(N=1,3){
+                        EGP:egpAlpha(N,255)
+                    }
+                    
+                    local SpeakArray = LS:explode("\"")
+                    TargetText = SpeakArray[2,string]
+                    if(Carrying){
+                        TargetText = mumble(TargetText)
+                    }
+                    if(Baby){
+                        TargetText = owo(TargetText)
+                    }
+                    
+                    Speaking = 1
+                    SpeakIndex = 1
+                    SpeakFading = 0
+                    SpeakAlpha = 255
+                    
+                    vocalizeRoar(DefaultExpression,Sex,0,VoScale)
+                    
+                    stoptimer("speechtimeout")
+                }
+                
+                hideChat(1)
+                break
+            case ".fire",
+                
+                local FireDuration = Sentence[2,string]:toNumber()
+                if(FireDuration==0){FireDuration = 1}
+                
+                FlamePlate:entity():propNotSolid(1)
+                Igniter:entity():propNotSolid(1)
+                FireLight:entity():propNotSolid(1)
+                LanternLight:entity():propNotSolid(1)
+                EGP:entity():propNotSolid(1)
+                
+                ForceFire = 1
+                timer("endForceFire",FireDuration*1000)
+                
+                hideChat(1)
+                break
+            case ".lookat",
+                local PlayerName = Sentence[2,string]
+                if(PlayerName==""){
+                    local LATarget = O:aimEntity()
+                    if(LATarget){
+                        stoptimer("resetIdleLookTarget")
+                        HasLookTarget = 1
+                        IdleLookTarget = LATarget
+                        dprint(Name + " is now looking at " + LATarget:toString() + ".")
+                    }else{
+                        HasLookTarget = 0
+                        dprint(Name + " is now looking at the nearest Player or Dragon.")
+                        timer("resetIdleLookTarget",5000)
+                    }
+                }else{
+                    local LATarget = findPlayerByName(PlayerName)
+                    stoptimer("resetIdleLookTarget")
+                    HasLookTarget = 1
+                    IdleLookTarget = LATarget
+                    dprint(Name + " is now looking at " + LATarget:toString() + ".")
+                }
+                hideChat(1)
+                break
+            case ".eat",
+                if(!Sleeping){
+                    if(!Eating){
+                        if(Carrying){
+                            EATarget = CarryObject
+                            
+                        }else{
+                            EATarget = O:aimEntity()
+                            if(!EATarget:isValidPhysics()){
+                                EATarget = IdleLookTarget
+                            }else{
+                                stoptimer("resetIdleLookTarget")
+                                HasLookTarget = 1
+                                IdleLookTarget = EATarget
+                            }
+                        }
+                        local Wirelink = EATarget:wirelink()
+                        local EHAttempt = 0
+                        foreach(K,V:entity=CannotEat){
+                            if(EATarget==V){EHAttempt = 1}
+                        }
+                        if(LanternOn){
+                            dprint(Name + " cannot eat with a lantern in " + (Sex ? "her " : "his ") + "mouth!")
+                        }elseif(EHAttempt){
+                            dprint(Name + " cannot eat " + (Sex ? "herself!" : "himself!"))
+                        }elseif(EATarget:isPlayer()){
+                            dprint(Name + " refuses to eat humans!")
+                        }elseif(Wirelink["DragonHead",entity]){
+                            dprint(Name + " isn't a cannibal!")
+                        }elseif(EATarget:radius()>(144*Scale)){
+                            dprint("That's too large for " + Name + " to eat!")
+                        }else{
+                            if(EATarget:boxCenterW():distance(holoEntity(2):pos())<(144*Scale)){
+                                Eating = 1
+                                Carrying = 0
+                                JawAngleMaster = 30
+                                timer("bite",500)
+                                
+                            }else{
+                                dprint("That's too far away for " + Name + " to eat!")
+                            }
+                        }
+                    }
+                }
+                hideChat(1)
+                break
+            case ".burp",
+                if(!Sleeping & !Eating & !Chewing){
+                    timer("burp",100)
+                }
+                
+                hideChat(1)
+                break
+            case ".love",
+            
+                Loving = 1
+                
+                if(!Sleeping){
+                    
+                    local LoveExpr = Sentence[2,string]
+                    if(LoveExpr!=""){DefaultExpression = LoveExpr}
+                    
+                    JawAngleMaster = 25
+                    holoEntity(2):eyeExpression(DefaultExpression,1,Sex,Scale,Baby,0,Wink)
+                    
+                    if(DefaultExpression=="normal"){
+                        stoptimer("blink_open")
+                        stoptimer("blink_close")
+                        Blinking = 1
+                    }
+                    soundPlay(5,2,"npc/antlion_guard/angry3.wav")
+                    
+                    soundPitch(5,(100+10*Sex)/VoScale)
+                    
+                    
+                    
+                }else{
+                    
+                }
+                for(N=113,115){
+                    holoModel(N,"models/balloons/balloon_classicheart.mdl")
+                    holoScale(N,vec(0.5))
+                    holoColor(N,vec(255,191,191))
+                }
+                LoveTheta1 = LoveTheta2 = LoveTheta3 = 0
+                LoveQ = 0
+                timer("endlove1",2000)
+                
+                hideChat(1)
+                break
+            case ".dance",
+                
+                Dancing = !Dancing
+                if(Dancing){
+                    holoModel(113,"models/sprops/misc/alphanum/alphanum_note_8a.mdl")
+                    holoModel(114,"models/sprops/misc/alphanum/alphanum_note_8a.mdl")
+                    holoModel(115,"models/sprops/misc/alphanum/alphanum_note_8b.mdl")
+                    
+                    for(N=113,115){
+                        holoScale(N,vec(0.5)*Scale)
+                        holoColor(N,vec(36))
+                    }
+                }else{
+                    for(N=113,115){
+                        holoAlpha(N,0)
+                    }
+                }
+                
+                hideChat(1)
+                break
+            case ".cam",
+                #ifdef cameraCreate(number,vector,angle)
+                    CameraOn = Sentence[2,string]:toNumber()>0
+                    if(CameraOn){
+                        cameraToggle(1,1)
+                        dprint("Now spectating " + Name + ".")
+                        if(Sentence[2,string]:toNumber()==2){
+                            FirstPerson = 1
+                        }else{
+                            FirstPerson = 0
+                        }
+                    }else{
+                        cameraToggle(1,0)
+                        dprint("No longer spectating " + Name + ".")
+                        FirstPerson = 0
+                    }
+                    
+                #else
+                    dprint("Camera Core not Enabled!")
+                #endif
+                
+                
+                
+                
+                hideChat(1)
+                break
+            case ".eject",
+                Eject = 1
+                Eject2 = 1
+                timer("eject",100)
+                hideChat(1)
+                break
+            case ".goto",
+                
+                local GotoTarget = Sentence[2,string]
+                if(GotoTarget!=""){
+                    local Goto = findPlayerByName(GotoTarget)
+                    if(Goto:isPlayer()){
+                        GTang = Goto:eyeAngles()*ang(0,1,0)
+                        GTpos = Goto:pos() + vec(0,0,18) - 80*GTang:forward()*Scale
+                        
+                        TeleLock = 1
+                        
+                        dprint("Teleporting to " + Goto:name())
+                        timer("teleport",100)
+                    }else{
+                        dprint("Cannot find player!")
+                    }
+                }else{
+                    dprint("You must specify a player!")
+                }
+                
+                hideChat(1)
+                break
+            case ".pickup",
+                if(!Carrying){
+                    if(Following & FollowTarget:isValidPhysics()){
+                        CarryObject = FollowTarget
+                        Following = 0
+                    }else{
+                        CarryObject = O:aimEntity()
+                    }
+                    local Wirelink = CarryObject:wirelink()
+                    if(CarryObject:isValidPhysics() & !Wirelink["DragonHead",entity]){
+                        rangerFilter(CannotEat)
+                        local PickupRanger = rangerOffset(holoEntity(2):toWorld(vec(14.5,0,-7)*Scale),CarryObject:boxCenterW())
+                        local CarryPosW = PickupRanger:pos()
+                        if(CarryPosW:distance(holoEntity(2):pos())<(128*Scale)){
+                            if(CarryObject:radius()<(64*Scale)){
+                                if(!CarryObject:isConstrained() & !CarryObject:parent()){
+                                    Carrying = 1
+                                    
+                                    local MouthPosW = holoEntity(2):toWorld(vec(14.5,0,-7)*Scale)
+                                    local CarryDisp = MouthPosW - CarryPosW
+                                    
+                                    CarryObject:setPos(CarryObject:pos() + CarryDisp)
+                                    CarryObject:propFreeze(1)
+                                    CarryObject:propNotSolid(1)
+                                    
+                                    JawAngleMaster = 22
+                                    dprint(Name + " is now carrying " + CarryObject:toString() + ".")
+                                    timer("carryParent",50)
+                                }else{
+                                    dprint("Object is connected to something!")
+                                }
+                            }else{
+                                dprint("Object is too large for " + Name + " to carry!")
+                            }
+                        }else{
+                            dprint("Object is too far away for " + Name + " to carry!")
+                        }
+                    }
+                }else{
+                    dprint(Name + " is already carrying something!")
+                }
+                hideChat(1)
+                break
+            case ".drop",
+                if(Carrying){
+                    CarryObject:propNotSolid(0)
+                    CarryObject:deparent()
+                    CarryObject:propFreeze(0)
+                    Carrying = 0
+                    JawAngleMaster =Carrying ? 25 : LanternOn ? 22 : 0
+                    if(Driving==3){CarryObject:applyForce(CarryObject:mass()*FlyVelW)}
+                }
+                hideChat(1)
+                break
+            case ".follow",
+                local Arg = Sentence[2,string]
+                if(Arg==""){
+                    if(O:aimEntity():isValidPhysics()){
+                        FollowTarget = O:aimEntity()
+                        if(FollowTarget==E){FollowTarget = O}
+                    }else{
+                        FollowTarget = Following ? noentity() : O
+                    }
+                }else{
+                    FollowTarget = findPlayerByName(Arg)
+                }
+                if(FollowTarget:isPlayer()|FollowTarget:isValidPhysics()){
+                    if(!Sleeping){
+                        if(StandMode==0){
+                            Following = 1
+                            FollowDisp = FollowTarget:pos() - E:pos()
+                            FWL = FollowTarget:wirelink()
+                            dprint(Name + " is now following " + FollowTarget:toString() + ".")
+                        }
+                    }
+                }else{
+                    Following = 0
+                    dprint(Name + " has stopped following.")
+                }
+                
+                hideChat(1)
+                break
+            case ".gohere",
+                if(!Sleeping){
+                    GoHerePos = O:aimPos()
+                    GoHere = 1
+                    FollowTarget = E
+                    Following = 1
+                }
+                hideChat(1)
+                break
+            case ".cmere",
+            
+                local Arg = Sentence[2,string]
+                if(Arg==""){
+                    FollowTarget = O
+                }else{
+                    FollowTarget = findPlayerByName(Arg)
+                }
+                if(FollowTarget:isPlayer()){
+                    if(!Sleeping){
+                        if(StandMode==0){
+                            Following = 1
+                            Greet = 1
+                            FollowDisp = FollowTarget:pos() - E:pos()
+                            FWL = FollowTarget:wirelink()
+                            dprint(Name + " is now going to " + FollowTarget:toString() + ".")
+                        }
+                    }
+                }
+                hideChat(1)
+                break
+            case ".headlock",
+            
+                local HPitch = -Sentence[2,string]:toNumber()
+                local HYaw = Sentence[3,string]:toNumber()
+                local HRoll = -Sentence[4,string]:toNumber()
+                
+                if(Sentence[2,string]!=""){
+                    if(!HeadLock){
+                        HeadLock = 1
+                    }
+                    HeadLockAngle = clamp(ang(HPitch,HYaw,HRoll),ang(-90,-135,-45),ang(90,135,45))
+                }else{
+                    HeadLock = !HeadLock
+                    if(HeadLock){HeadLockAngle = ang()}
+                }
+                if(HeadLock){
+                    dprint(Name + " is now looking at Angle: " + (HeadLockAngle*ang(-1,1,-1)):toString() + ".")
+                }else{
+                    dprint(Name + " is now looking freely.")
+                }
+                hideChat(1)
+                break
+            case ".wink",
+                local Arg = Sentence[2,string]
+                if(Arg==""){ #Toggle
+                    if(Wink==0){
+                        Wink = 1
+                        dprint(Name + " is now winking.")
+                    }else{
+                        Wink = 0
+                        dprint(Name + " is no longer winking.")
+                    }
+                }else{
+                    Wink = round(clamp(Arg:toNumber(),0,2))
+                    if(Wink==0){
+                        dprint(Name + " is no longer winking.")
+                    }elseif(Wink==1){
+                        dprint(Name + " is now winking (Left Eye).")
+                    }elseif(Wink==2){
+                        dprint(Name + " is now winking (Right Eye).")
+                    }
+                }
+                
+                hideChat(1)
+                break
+            case ".printscales",
+                if(0){ #Disabled debug only
+                    for(N=0,119+CosmeticTable:count()){
+                        HoloEnts[N,entity] = holoEntity(N)
+                        HoloScales[N,vector] = holoScale(N)
+                    }
+                }
+                hideChat(1)
+                break
+            case ".commands",
+            case ".list",
+                
+                dprint("DRAGON COMMANDS (See Manual for Details):\n")
+                cprint("--Poses--")
+                cprint(".stand, .sit, .lie, .sleep, .wake\n")
+                cprint("--Mobility--")
+                cprint(".come, .goto (string PlayerName), .follow [string PlayerName], .cmere, .gohere, .grab, .release\n")
+                cprint("--Utility--")
+                cprint(".light, .cam [number CameraMode], .lookat [string PlayerName], .pickup, .drop, .eat, .eject, .fire [number Duration], .headlock [number Pitch] [number Yaw] [number Roll]\n")
+                cprint("--Personality--")
+                cprint(".roar, .love [string Expression], .expr [string Expression] [bool Eyelids] [bool Squint], .wink [number Eye], .dance, .say [string Expression] \"(string Speech)\", .burp\n")
+                
+                hideChat(1)
+                break
+            default,
+                if(CMD:index(1)=="."){
+                    local CMDL = CMD:lower()
+                    if("abcdefghijklmnopqrstuvwxyz":find(CMDL:index(2))){
+                        hideChat(1)
+                    }
+                }
+                break
+        }
+    }
+}elseif(last()){
+    Seat1:entity():deparent()
+    Seat2:entity():deparent()
+    FlamePlate:entity():deparent()
+    Igniter:entity():deparent()
+    FireLight:entity():deparent()
+    LanternLight:entity():deparent()
+    EGP:entity():deparent()
+}else{
+    #HTTP Version Checking
+    #ifdef httpClk()
+        if(httpClk()){
+            if(httpData()!=""){
+                #print(httpData())
+                
+                local Lines = httpData():explode("\n")
+                
+                local MasterVersion = Lines[1,string]:explode(":")[2,string]
+                local MVArray = MasterVersion:explode(".")
+                
+                local MasterName = Lines[2,string]:explode(":")[2,string]
+                local Changelog = Lines[3,string]:explode(":")[2,string]
+                
+                local MasterMajor = MVArray[2,string]:toNumber()
+                local MasterMinor = MVArray[3,string]:toNumber()
+                
+                local CurrentVersion = Version:explode(".")
+                local CurrentMajor = CurrentVersion[2,string]:toNumber()
+                local CurrentMinor = CurrentVersion[3,string]:toNumber()
+                
+                #print(MVArray)
+                #print(CurrentVersion)
+                
+                if(MasterMajor > CurrentMajor){
+                    dprint("There is a MAJOR update to the dragon script ("+MasterVersion+": "+MasterName+")! Changes:")
+                    cprint(Changelog)
+                    O:soundPlay(0,4,"misc/killstreak.wav")
+                    soundVolume(0,0.5)
+                }elseif(MasterMinor > CurrentMinor){
+                    dprint("There is a minor update to the dragon script ("+MasterVersion+": "+MasterName+"). Changes:")
+                    cprint(Changelog)
+                    O:soundPlay(0,2,"buttons/button17.wav")
+                }elseif((MasterMajor<CurrentMajor) | (MasterMinor<CurrentMinor)){
+                    dprint("You are running a dev version of the dragon (newer than master version)!")
+                }
+                
+            }else{
+                dprint("Could not find the version info online.")
+            }
+        }
+    #endif
+}
+CPU = cpuUsage()*1000000

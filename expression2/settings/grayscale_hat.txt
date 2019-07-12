@@ -1,0 +1,83 @@
+@name dragonscript/settings/grayscale_hat
+@persist Name:string Sex [ColorBody ColorWings]:vector Material:string #Metadata
+@persist CosmeticTable:table CurrentCosmetic SubMCosmeticTable:table BodyGCosmeticTable:table # Cosmetics function
+@persist Baby Scale #Scaling stuff
+function void addCosmetic(Bone:string,Model:string,Scale:vector,Pos:vector,Ang:angle,Mat:string,Skin:number,Color:vector,Alpha:number){ CosmeticTable:pushArray(array(Bone,Model,Scale,Pos,Ang,Mat,Skin,Color,Alpha)) 
+    CurrentCosmetic = CosmeticTable:count(), SubMCosmeticTable[CurrentCosmetic,array] = array(), BodyGCosmeticTable[CurrentCosmetic,array] = array() }
+function void cosmeticSubMaterial(Index:number,Material:string){ local Array = SubMCosmeticTable[CurrentCosmetic,array], Array:pushString(Index:toString()+":"+Material), SubMCosmeticTable[CurrentCosmetic,array] = Array }
+function void cosmeticBodyGroup(Group:number, Sel:number){ local Array = BodyGCosmeticTable[CurrentCosmetic,array], Array:pushVector2(vec2(Group,Sel)), BodyGCosmeticTable[CurrentCosmetic,array] = Array }
+
+SettingsVersion = "2.0.0" #Don't touch this
+
+Name = "Grayscale" #What is the name of your dragon?
+Sex = 0 #0 for Male, 1 for Female
+ColorBody = vec(255,255,255) #The color of the dragon's body
+ColorWings = vec(143,143,143) #The color of the dragon's wings
+Material = "sprops/textures/sprops_metal5" #The material used for the dragon's skin
+
+Scale = 1 #Scale factor: 1 for Adult.
+Baby = 0 #Forces scale to 0.5
+
+#[
+Adding Cosmetics
+
+To add cosmetics, use this function:
+addCosmetic(Bone String, Model String, Scale Vector, Position Vector, Angle Ang, Material String, Skin Number, Color Vector, Alpha Number)
+
+As an example:
+addCosmetic("Head","models/player/items/engineer/veteran_hat.mdl",vec(1.4),vec(-3,0,1.3),ang(-7,0,0),"",0,vec(255),255)
+
+Modifying Cosmetics
+
+To change the bodygroup of a cosmetic, put the cosmeticBodygroup function underneath the cosmetic you wish to change.
+CosmeticBodyGroup(Group Number, Selection Number)
+
+As an example:
+addCosmetic("Head","models/player/items/engineer/veteran_hat.mdl",vec(1.4),vec(-3,0,1.3),ang(-7,0,0),"",0,vec(255),255)
+CosmeticBodyGroup(1,3)
+CosmeticBodyGroup(2,1)
+
+To change the submaterial of a cosmetic, put the cosmeticSubMaterial function underneath the cosmetic you wish to change.
+CosmeticSubMaterial(SubmaterialIndex Number, Material String)
+
+As an example:
+addCosmetic("Head","models/player/items/engineer/veteran_hat.mdl",vec(1.4),vec(-3,0,1.3),ang(-7,0,0),"",0,vec(255),255)
+cosmeticSubMaterial(1,"phoenix_storms/explo_barrel")
+cosmeticSubMaterial(2,"phoenix_storms/explo_barrel")
+
+Attachment Points
+
+Here is the table of possible attachment points:
+
+    Body
+    Neck
+    Head
+    LeftShoulder
+    LeftElbow
+    LeftFrontFoot
+    RightShoulder
+    RightElbow
+    RightFrontFoot
+    LeftHip
+    LeftKnee
+    LeftRearFoot
+    RightHip
+    RightKnee
+    RightRearFoot
+    Tail  | Tail Bone
+    Tail1 | Tail Segment 1
+    Tail2 | Tail Segment 2
+    Tail3 | Tail Segment 3
+    Tail4 | Tail Segment 4
+    LeftWingJoint
+    LeftHand1
+    LeftHand2
+    LeftHand3
+    RightWingJoint
+    RightHand1
+    RightHand2
+    RightHand3
+    
+]#
+
+addCosmetic("Head","models/player/items/engineer/engineer_cowboy_hat.mdl",vec(1.75,2,1.75),vec(-3,0,0.5),ang(-7,0,0),"",0,vec(191),255) #Hat

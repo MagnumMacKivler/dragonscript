@@ -14,4 +14,7 @@ So read carefully.
 
 4. Extract the folders "expression2" and "advdupe2" into Garry's Mod/garrysmod/data/. You do NOT need version.txt or README.md!
 5. Spawn the dupe in-game and
-6. ## Read the @%$#ing manual!
+6. ## Read the @%$#ing manual God @%$#ing Damn it!
+7. Have fun!
+
+If you're wondering why I'm being so aggressive about this, it's because if I don't scream the proper instructions, [nobody will read them and will complain to me that it didn't work.](https://github.com/MagnumMacKivler/RLCPT2)

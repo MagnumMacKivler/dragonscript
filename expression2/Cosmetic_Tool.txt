@@ -27,8 +27,8 @@ if(->LookupTable){
         local Array = CosmeticTable[N,array]
         local Bone = LookupTable[Array[1,string],entity]
         
-        local Pos = Bone:toWorld(Array[4,vector])
-        local Scale = Array[3,vector]
+        local Pos = Bone:toWorld(Array[4,vector] * Scale)
+        local Scale = Array[3,vector] * Scale
         local Ang = Bone:toWorld(Array[5,angle])
         local Color = Array[8,vector]
         local Alpha = Array[9,number]

@@ -18,3 +18,8 @@ So read carefully.
 7. Have fun!
 
 If you're wondering why I'm being so aggressive about this, it's because if I don't scream the proper instructions, [nobody will read them and will complain to me that it didn't work.](https://github.com/MagnumMacKivler/RLCPT2)
+
+Things you need to be able to see/hear/run it correctly:
+1. TF2 should be mounted.
+2. You will need [Advanced Particle Controller](https://steamcommunity.com/sharedfiles/filedetails/?id=242776816) for the particle effects (Fire Breath).
+3. Prop Core and Constraint Core need to be enabled on the server. HTTP core is required for automatic update checking, but is optional. 

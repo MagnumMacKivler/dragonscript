@@ -18,7 +18,7 @@
 @persist RidingEntity:entity HeadLock HeadLockAngle:angle #Prop Surfing
 @persist CurlDirection ShutEyesQ Snoring ZTheta1 ZTheta2 ZTheta3 ZQ #Sleeping
 @persist LanternQ LanternOn DefaultLanternColor:vector #Lantern
-@persist SpeakBubbleTimeout SpeakAlpha SpeakFading Speaking SpeakIndex [TargetText]:string #Speaking
+@persist SpeakBubbleTimeout SpeakAlpha SpeakFading Speaking TalkingTo TalkPrintMode SpeakIndex TargetText:string #Speaking
 @persist Eating EatIndex Chewing ChewN Bite EATarget:entity CannotEat:array PropsEaten Belching EatQ #Eating
 @persist Dazed DazedTheta Recovering Crashing ShakeAng ShakeQ #Fender Bender
 @persist Loving LoveTheta1 LoveTheta2 LoveTheta3 LoveQ #Love and Affection
@@ -30,13 +30,15 @@
 @persist FollowTarget:entity GoHerePos:vector GoHere Cmere Greet FollowDisp:vector FollowSpeedTarget FWL:wirelink FollowQ #Follow Freeman!
 @persist Ragdoll RagdollStep NoCosmetics #Ragdoll stuff
 @persist Version:string AnimVersion:string HoloVersion:string SettingsVersion:string #Version Info
+@persist DTable:gtable LDTable:gtable DragonFindName:string DragonFindArray:array  # Global-Based Stuff
 @trigger NextWeapon PrevWeapon
 @model models/hunter/blocks/cube075x075x075.mdl
 
 #For draconic care instructions, please see dragonscript/How_To_Maintain_Your_Dragon.txt!
+#For updates for the Dragonscript E2, check out where you probably got it: https://github.com/MagnumMacKivler/dragonscript
 
 if(first()|duped()){
-    Version = "2.0.1"
+    Version = "2.0.2"
     
     #Config: Which Dragon Settings file do you want to load?
     
@@ -49,6 +51,7 @@ if(first()|duped()){
     
     #Launch Options
     
+    TalkPrintMode = 1 #Changes whether or not the dragon has its chatlog in the console, or the player chat. 1 is player chat, 0 is console.
     Ragdoll = 0 #Turn the dragon into a ragdoll? Results may vary.
     NoCosmetics = 0 #Prevent cosmetics from loading?
     ForceScale = 0 #If anything other than 0, force the dragon's scale to this (max 3):
@@ -123,6 +126,21 @@ if(first()|duped()){
 
     setName(Name + "\n" + (Sex ? "(Female)" : "(Male)")+"\nVersion "+Version)
     
+    signalSetGroup("magdragons")
+    runOnSignal("dragonspeak",2,1)
+    
+    DTable = gTable("dtable",1)
+    LDTable = gTable("ldtable")
+    local Ent_Ids = LDTable["ent_ids",array]
+    Ent_Ids:pushNumber(E:id()) # stupid returning number BS
+    LDTable["ent_ids",array] = Ent_Ids
+    
+    if(DTable:toTable():exists("dragons")){
+        DTable["dragons",table][E:id() + "_" + Name,array] = array(O,E,Name,Sex,ColorBody,Scale,Baby,Version)
+    }else{
+        DTable["dragons",table] = table()
+        DTable["dragons",table][E:id() + "_" + Name,array] = array(O,E,Name,Sex,ColorBody,Scale,Baby,Version)
+    }
     
     Crate:entity():setColor(ColorBody)
     
@@ -136,14 +154,95 @@ if(first()|duped()){
     }
     
     function dprint(Message:string){
-        printColor(ColorBody,"[Dragonscript] ",vec(191),Message)
+        printColor(ColorBody,"[Dragonscript] ",vec(255),Message)
     }
     function entity:dprintDriver(Message:string){
-        This:printColorDriver(ColorBody,"[Dragonscript] ",vec(191),Message)
+        This:printColorDriver(ColorBody,"[Dragonscript] ",vec(255),Message)
     }
     function cprint(Message:string){
-        printColor(vec(191),Message)
+        printColor(vec(255),Message)
     }
+    function clprint(Color:vector,Name:string,MSG:string,Emotion:string,Target:string,TargetColor:vector){
+        if(TalkPrintMode){
+            if(Emotion != ""){
+                switch(Emotion){
+                    default,
+                    case "normal",
+                        if(Target != ""){ printColor(Color,Name,vec(255)," says to ",TargetColor,Target,vec(255), ": " + "\""+MSG+"\"")
+                        }else{ printColor(Color,Name,vec(255)," says: " + "\""+MSG+"\"") }
+                    break
+                    case "happy",
+                        if(Target != ""){ printColor(Color,Name,vec(255)," cheerfully exclaims to ",TargetColor,Target,vec(255), ": " + "\""+MSG+"\"")
+                        }else{ printColor(Color,Name,vec(255)," cheerfully exclaims: " + "\""+MSG+"\"") }
+                    break
+                    case "sad",
+                        if(Target != ""){ printColor(Color,Name,vec(255),", in sadness, says to ",TargetColor,Target,vec(255), ": " + "\""+MSG+"\"")
+                        }else{ printColor(Color,Name,vec(255),", in sadness, says: " + "\""+MSG+"\"") }
+                    break
+                    case "annoyed",
+                        if(Target != ""){ printColor(Color,Name,vec(255),", rather annoyed at ",TargetColor,Target,vec(255), ", says: " + "\""+MSG+"\"")
+                        }else{ printColor(Color,Name,vec(255),", rather annoyed, says: " + "\""+MSG+"\"") }
+                    break
+                    case "angry",
+                        if(Target != ""){ printColor(Color,Name,vec(255)," angrily shouts at ",TargetColor,Target,vec(255), "! " + "\""+MSG+"\"")
+                        }else{ printColor(Color,Name,vec(255)," angrily shouts! " + "\""+MSG+"\"") }
+                    break
+                    case "confused",
+                        if(Target != ""){ printColor(Color,Name,vec(255),", in a cloud of confusion, says to ",TargetColor,Target,vec(255), ": " + "\""+MSG+"\"")
+                        }else{ printColor(Color,Name,vec(255), ", in a cloud of confusion, says: " + "\""+MSG+"\"") }
+                    break
+                    case "smug",
+                        if(Target != ""){ printColor(Color,Name,vec(255),", rather smugly, says to ",TargetColor,Target,vec(255), ": " + "\""+MSG+"\"")
+                        }else{ printColor(Color,Name,vec(255), ", rather smugly, says: " + "\""+MSG+"\"") }
+                    break
+                    case "concerned",
+                        if(Target != ""){ printColor(Color,Name,vec(255),", concerned for ",TargetColor,Target,vec(255), ", says: " + "\""+MSG+"\"")
+                        }else{ printColor(Color,Name,vec(255), ", in concern, says: " + "\""+MSG+"\"") }
+                    break
+                }
+            }else{
+                if(Target != ""){ printColor(Color,Name,vec(255)," says to ",TargetColor,Target,vec(255), ": " + "\""+MSG+"\"")
+                }else{ printColor(Color,Name,vec(255)," says: " + "\""+MSG+"\"") }
+            }
+        }else{
+            print(_HUD_PRINTCONSOLE,"[Dragonscript] "+Name+": \""+MSG+"\"")
+        }
+    }
+    
+    # normal
+    # happy
+    # sad
+    # annoyed
+    # angry
+    # confused
+    # smug
+    # concerned
+    
+    # Grayscale says: "Hello!" 
+    # Grayscale says to Custard: "Hello!"
+    
+    # Grayscale cheerfully exclaims: "AAAA"
+    # Grayscale cheerfully exclaims to Custard: "AAAAAAAAAAAAA"
+    
+    # Grayscale, in sadness, says "How could this happen?"
+    # Grayscale, in sadness, says to Custard "How could this happen?" 
+    
+    # Grayscale, rather annoyed, says "Stop that!"
+    # Grayscale, rather annoyed at Custard, says: "Stop that!"
+    
+    # Grayscale angrily shouts! "How dare you!"
+    # Grayscale angrily shouts at Custard! "How dare you!"
+    
+    # Grayscale, in a cloud of confusion, says "What are you doing..." 
+    # Grayscale, in a cloud of confusion, says to Custard: "What are you doing..."
+    
+    # Grayscale, rather smugly, says: "Proved you wrong."
+    # Grayscale, rather smugly, says to Custard: "Proved you wrong."
+    
+    # Grayscale, in concern, says "Are you okay?"
+    # Grayscale, concerned for Custard, says "Are you okay?"
+    
+    # [Dragonscript] Grayscale said: "Hello!" | console
     
     function number compatCheck(Need:string, Have:string){
         local NA = Need:explode(".")
@@ -157,9 +256,32 @@ if(first()|duped()){
         
     }
     
+    function entity findDragonByName(DragonName:string){
+        local Dragons = DTable["dragons",table]
+        foreach(K,V:array=Dragons){
+            if(V[3,string]:lower():find(DragonName:lower())){
+                DragonFindName = V[3,string]
+                DragonFindArray = V
+                return V[2,entity]
+            }
+        }
+        return noentity()
+    }
+    
+    function number entity:isDragon(){
+        if(This:type()=="gmod_wire_expression2"){
+            local Wirelink = This:wirelink()
+            local HeadHolo = Wirelink["DragonHead",entity]
+            if(HeadHolo){
+                return 1
+            }
+        }
+        return 0
+    }
+    
     #Compatibility Checking
     
-    local NeedAnim = "2.0.0"
+    local NeedAnim = "2.0.2"
     local NeedHolo = "2.0.0"
     local NeedSettings = "2.0.0"
     
@@ -3345,6 +3467,15 @@ if(first()|duped()){
     }
     
     timer("clk",100)
+}elseif(signalClk()){
+    local Signal = signalName()
+    local IsLowestEnt = LDTable["ent_ids",array]:min() == E:id()
+    
+    if(Signal == "dragonspeak"){
+        local Data = DTable["last_message",array]
+        #clprint(ColorBody,Name,TargetText,(ExprUsed ? Expression : ""),"",vec(0))
+        if(IsLowestEnt){ clprint(Data[1,vector],Data[2,string],Data[3,string],Data[4,string],Data[5,string],Data[6,vector]) }
+    }
 }elseif(clk("blink_close")){
     #E:poseEyes(vec2(),1,0)
     Blinking = 1
@@ -3373,6 +3504,12 @@ if(first()|duped()){
     #print("Print Fading")
     SpeakFading = 1
     SpeakAlpha = 255
+    # end looking at target, bit of a hidden check I know
+    if(TalkingTo){
+        TalkingTo = 0
+        HasLookTarget = 0
+        timer("resetIdleLookTarget",5000)
+    }
 }elseif(clk("sleep_start")){
     holoEntity(2):eyeExpression("normal",0,Sex,Scale,Baby,0,Wink)
     holoEntity(2):poseEyes(vec2(),1,0,Sex,Scale,Baby,Wink)
@@ -3738,6 +3875,9 @@ if(first()|duped()){
                         case "normal",
                             dprint(Name + " is feeling normal.")
                             break
+                        case "happy",
+                            dprint(Name + " is feeling happy.")
+                            break
                         case "sad",
                             dprint(Name + " is feeling sad.")
                             break
@@ -3809,16 +3949,72 @@ if(first()|duped()){
                 break
             case ".say",
                 if(!Sleeping){
-                    if(!Sentence[2,string]:find("\"")){
-                        local Expression = Sentence[2,string]
-                        local Eyelids = 0
-                        if(Expression==""){Expression = "normal"}
-                        DefaultExpression = Expression
-                        DefaultExpressionEyelids = Eyelids
-                        holoEntity(2):eyeExpression(Expression,Eyelids,Sex,Scale,Baby,DefaultSquint,Wink)
-                        
+                    
+                    local NumArguments = 0
+                    foreach(K,V:string=Sentence){
+                        if(V:find("\"")){ break }
+                        NumArguments++
                     }
                     
+                    local FoundTarget = 0
+                    local ExprUsed = 0
+                    local LATarget = noentity()
+                    if(NumArguments == 3){
+                        if(!Sentence[2,string]:find("\"")){
+                            local DragonTarget = findDragonByName(Sentence[2,string])
+                            local PlayerTarget = findPlayerByName(Sentence[2,string])
+                            LATarget = DragonTarget != noentity() ? DragonTarget : PlayerTarget
+                            if(DragonTarget == E){
+                                dprint(Name + " won't talk to " + (Sex ? "herself!" : "himself!")) 
+                            }elseif(LATarget:isValid()){
+                                FoundTarget = 1
+                                TalkingTo = LATarget == IdleLookTarget & HasLookTarget ? 0 : 1 # check previous target, if same, don't cancel lookat
+                                stoptimer("resetIdleLookTarget")
+                                HasLookTarget = 1
+                                IdleLookTarget = LATarget
+                            }
+                        }
+                    
+                        if(!Sentence[3,string]:find("\"")){
+                            ExprUsed = 1
+                            local Expression = Sentence[3,string]
+                            local Eyelids = 0
+                            if(Expression==""){Expression = "normal"}
+                            DefaultExpression = Expression
+                            DefaultExpressionEyelids = Eyelids
+                            holoEntity(2):eyeExpression(Expression,Eyelids,Sex,Scale,Baby,DefaultSquint,Wink)
+                            
+                        }
+                    }else{
+                        if(!Sentence[2,string]:find("\"")){
+                            switch(Sentence[2,string]){
+                                case "normal", case "happy", case "confused", case "sad", case "annoyed", case "smug", case "angry", case "concerned", case "",
+                                    ExprUsed = 1
+                                    local Expression = Sentence[2,string]
+                                    local Eyelids = 0
+                                    if(Expression==""){Expression = "normal"}
+                                    DefaultExpression = Expression
+                                    DefaultExpressionEyelids = Eyelids
+                                    holoEntity(2):eyeExpression(Expression,Eyelids,Sex,Scale,Baby,DefaultSquint,Wink)
+                                break
+                                default,
+                                    local DragonTarget = findDragonByName(Sentence[2,string])
+                                    local PlayerTarget = findPlayerByName(Sentence[2,string])
+                                    LATarget = DragonTarget != noentity() ? DragonTarget : PlayerTarget
+                                    if(DragonTarget == E){
+                                        dprint(Name + " won't talk to " + (Sex ? "herself!" : "himself!")) 
+                                    }elseif(LATarget:isValid()){
+                                        FoundTarget = 1
+                                        TalkingTo = LATarget == IdleLookTarget & HasLookTarget ? 0 : 1 # check previous target, if same, don't cancel lookat
+                                        stoptimer("resetIdleLookTarget")
+                                        HasLookTarget = 1
+                                        IdleLookTarget = LATarget
+                                    }
+                                break
+                            }
+                        }
+                    }
+
                     EGP:egpSetText(3,"")
                     EGP:egpSize(1,vec2(32))
                     
@@ -3840,11 +4036,106 @@ if(first()|duped()){
                     SpeakFading = 0
                     SpeakAlpha = 255
                     
+                    signalSend("dragonspeak",2) # for chat log
+                    
+                    if(!FoundTarget){
+                        DTable["last_message",array] = array(ColorBody,Name,TargetText,(ExprUsed ? DefaultExpression : ""),"",vec(0))
+                        clprint(ColorBody,Name,TargetText,(ExprUsed ? DefaultExpression : ""),"",vec(0))
+                    }else{
+                        print(LATarget)
+                        if(LATarget:isDragon()){
+                            DTable["last_message",array] = array(ColorBody,Name,TargetText,(ExprUsed ? DefaultExpression : ""),DragonFindArray[3,string],DragonFindArray[5,vector])
+                            clprint(ColorBody,Name,TargetText,(ExprUsed ? DefaultExpression : ""),(FoundTarget ? DragonFindArray[3,string] : ""),DragonFindArray[5,vector])
+                        }elseif(LATarget:isPlayer()){
+                            DTable["last_message",array] = array(ColorBody,Name,TargetText,(ExprUsed ? DefaultExpression : ""),LATarget:name(),teamColor(LATarget:team()))
+                            clprint(ColorBody,Name,TargetText,(ExprUsed ? DefaultExpression : ""),LATarget:name(),teamColor(LATarget:team()))
+                        }
+                    }
+                    
                     vocalizeRoar(DefaultExpression,Sex,0,VoScale)
                     
                     stoptimer("speechtimeout")
                 }
                 
+                hideChat(1)
+                break
+            case ".talkto",
+            case ".sayto",
+                if(!Sleeping){
+                    
+                    local FoundTarget = 0
+                    if(!Sentence[2,string]:find("\"")){
+                        local DragonTarget = findDragonByName(Sentence[2,string])
+                        local PlayerTarget = findPlayerByName(Sentence[2,string])
+                        local LATarget = DragonTarget != noentity() ? DragonTarget : PlayerTarget
+                        if(DragonTarget == E){
+                            dprint(Name + " won't talk to " + (Sex ? "herself!" : "himself!")) 
+                        }else{
+                            FoundTarget = 1
+                            TalkingTo = LATarget == IdleLookTarget & HasLookTarget ? 0 : 1 # check previous target, if same, don't cancel lookat
+                            stoptimer("resetIdleLookTarget")
+                            HasLookTarget = 1
+                            IdleLookTarget = LATarget
+                        }
+                    
+                        local ExprUsed = 0
+                        if(!Sentence[3,string]:find("\"")){
+                            ExprUsed = 1
+                            local Expression = Sentence[3,string]
+                            local Eyelids = 0
+                            if(Expression==""){Expression = "normal"}
+                            DefaultExpression = Expression
+                            DefaultExpressionEyelids = Eyelids
+                            holoEntity(2):eyeExpression(Expression,Eyelids,Sex,Scale,Baby,DefaultSquint,Wink)
+                            
+                        }
+    
+                        EGP:egpSetText(3,"")
+                        EGP:egpSize(1,vec2(32))
+                        
+                        for(N=1,3){
+                            EGP:egpAlpha(N,255)
+                        }
+                        
+                        local SpeakArray = LS:explode("\"")
+                        TargetText = SpeakArray[2,string]
+                        if(Carrying){
+                            TargetText = mumble(TargetText)
+                        }
+                        if(Baby){
+                            TargetText = owo(TargetText)
+                        }
+                        
+                        Speaking = 1
+                        SpeakIndex = 1
+                        SpeakFading = 0
+                        SpeakAlpha = 255
+                        
+                        signalSend("dragonspeak",2) # for chat log
+                        if(LATarget == DragonTarget){
+                            DTable["last_message",array] = array(ColorBody,Name,TargetText,(ExprUsed ? DefaultExpression : ""),DragonFindArray[3,string],DragonFindArray[5,vector])
+                            clprint(ColorBody,Name,TargetText,(ExprUsed ? DefaultExpression : ""),(FoundTarget ? DragonFindArray[3,string] : ""),DragonFindArray[5,vector])
+                        }elseif(LATarget == PlayerTarget){
+                            DTable["last_message",array] = array(ColorBody,Name,TargetText,(ExprUsed ? DefaultExpression : ""),LATarget:name(),teamColor(LATarget:team()))
+                            clprint(ColorBody,Name,TargetText,(ExprUsed ? DefaultExpression : ""),LATarget:name(),teamColor(LATarget:team()))
+                        }
+                        
+                        vocalizeRoar(DefaultExpression,Sex,0,VoScale)
+                        
+                        stoptimer("speechtimeout")
+                    }
+                }
+                
+                hideChat(1)
+                break
+            case ".talkprintmode",
+                if(TalkPrintMode == 1){
+                    TalkPrintMode = 0
+                    dprint("Chatlog will now appear only in console.")
+                }else{
+                    TalkPrintMode = 1 
+                    dprint("Chatlog will now appear in player chat.")
+                }
                 hideChat(1)
                 break
             case ".fire",
@@ -3864,25 +4155,33 @@ if(first()|duped()){
                 hideChat(1)
                 break
             case ".lookat",
-                local PlayerName = Sentence[2,string]
-                if(PlayerName==""){
+                local TargetName = Sentence[2,string]
+                if(TargetName==""){
+                    TalkingTo = 0
                     local LATarget = O:aimEntity()
                     if(LATarget){
                         stoptimer("resetIdleLookTarget")
                         HasLookTarget = 1
                         IdleLookTarget = LATarget
-                        dprint(Name + " is now looking at " + LATarget:toString() + ".")
+                        dprint(Name + " is now looking at " + "\""+LATarget:toString()+"\"" + ".")
                     }else{
                         HasLookTarget = 0
                         dprint(Name + " is now looking at the nearest Player or Dragon.")
                         timer("resetIdleLookTarget",5000)
                     }
                 }else{
-                    local LATarget = findPlayerByName(PlayerName)
-                    stoptimer("resetIdleLookTarget")
-                    HasLookTarget = 1
-                    IdleLookTarget = LATarget
-                    dprint(Name + " is now looking at " + LATarget:toString() + ".")
+                    TalkingTo = 0
+                    local DragonTarget = findDragonByName(TargetName)
+                    local PlayerTarget = findPlayerByName(TargetName)
+                    local LATarget = DragonTarget != noentity() ? DragonTarget : PlayerTarget
+                    if(DragonTarget == E){
+                        dprint(Name + " cannot look at " + (Sex ? "herself!" : "himself!")) 
+                    }else{
+                        stoptimer("resetIdleLookTarget")
+                        HasLookTarget = 1
+                        IdleLookTarget = LATarget
+                        dprint(Name + " is now looking at " + (LATarget == DragonTarget ? DragonFindName : LATarget:name()) + ".")
+                    }
                 }
                 hideChat(1)
                 break
@@ -4032,20 +4331,29 @@ if(first()|duped()){
                 
                 local GotoTarget = Sentence[2,string]
                 if(GotoTarget!=""){
-                    local Goto = findPlayerByName(GotoTarget)
-                    if(Goto:isPlayer()){
-                        GTang = Goto:eyeAngles()*ang(0,1,0)
-                        GTpos = Goto:pos() + vec(0,0,18) - 80*GTang:forward()*Scale
+                    local GotoPlayer = findPlayerByName(GotoTarget)
+                    local GotoDragon = findDragonByName(GotoTarget)
+                    local Goto = GotoDragon != noentity() ? GotoDragon : GotoPlayer
+                    if(Goto:isValid()){
+                        
+                        if(Goto == GotoPlayer){
+                            GTang = Goto:eyeAngles()*ang(0,1,0)
+                            GTpos = Goto:pos() + vec(0,0,18) - 80*GTang:forward()*Scale
+                        }else{
+                            local GotoScale = DragonFindArray[6,number]
+                            GTang = Goto:eyeAngles()*ang(0,1,0)
+                            GTpos = Goto:pos() + vec(0,0,0) - (180*GotoScale)*GTang:forward()*Scale
+                        }
                         
                         TeleLock = 1
                         
-                        dprint("Teleporting to " + Goto:name())
+                        dprint("Teleporting to " + (Goto == GotoDragon ? DragonFindName : Goto:name()) + ".")
                         timer("teleport",100)
                     }else{
-                        dprint("Cannot find player!")
+                        dprint("Cannot find target!")
                     }
                 }else{
-                    dprint("You must specify a player!")
+                    dprint("You must specify a player or dragon!")
                 }
                 
                 hideChat(1)
@@ -4114,7 +4422,9 @@ if(first()|duped()){
                         FollowTarget = Following ? noentity() : O
                     }
                 }else{
-                    FollowTarget = findPlayerByName(Arg)
+                    local FollowPlayerTarget = findPlayerByName(Arg)
+                    local FollowDragonTarget = findDragonByName(Arg)
+                    FollowTarget = FollowDragonTarget != noentity() ? FollowDragonTarget : FollowPlayerTarget
                 }
                 if(FollowTarget:isPlayer()|FollowTarget:isValidPhysics()){
                     if(!Sleeping){
@@ -4147,16 +4457,18 @@ if(first()|duped()){
                 if(Arg==""){
                     FollowTarget = O
                 }else{
-                    FollowTarget = findPlayerByName(Arg)
+                    local FollowPlayerTarget = findPlayerByName(Arg)
+                    local FollowDragonTarget = findDragonByName(Arg)
+                    FollowTarget = FollowDragonTarget != noentity() ? FollowDragonTarget : FollowPlayerTarget
                 }
-                if(FollowTarget:isPlayer()){
+                if(FollowTarget:isPlayer() | FollowTarget:isDragon()){
                     if(!Sleeping){
                         if(StandMode==0){
                             Following = 1
                             Greet = 1
                             FollowDisp = FollowTarget:pos() - E:pos()
                             FWL = FollowTarget:wirelink()
-                            dprint(Name + " is now going to " + FollowTarget:toString() + ".")
+                            dprint(Name + " is now going to " + (FollowTarget:isDragon() ? DragonFindName : FollowTarget:name()) + ".")
                         }
                     }
                 }
@@ -4223,11 +4535,13 @@ if(first()|duped()){
                 cprint("--Poses--")
                 cprint(".stand, .sit, .lie, .sleep, .wake\n")
                 cprint("--Mobility--")
-                cprint(".come, .goto (string PlayerName), .follow [string PlayerName], .cmere, .gohere, .grab, .release\n")
+                cprint(".come, .goto (string Name), .follow [string Name], .cmere\n.gohere, .grab, .release\n")
                 cprint("--Utility--")
-                cprint(".light, .cam [number CameraMode], .lookat [string PlayerName], .pickup, .drop, .eat, .eject, .fire [number Duration], .headlock [number Pitch] [number Yaw] [number Roll]\n")
+                cprint(".light, .cam [number CameraMode], .lookat [string Name], .pickup\n.drop, .eat, .eject, .fire [number Duration]\n.headlock [number Pitch] [number Yaw] [number Roll]\n.talkprintmode")
                 cprint("--Personality--")
-                cprint(".roar, .love [string Expression], .expr [string Expression] [bool Eyelids] [bool Squint], .wink [number Eye], .dance, .say [string Expression] \"(string Speech)\", .burp\n")
+                cprint(".roar, .love [string Expression]\n.expr [string Expression] [bool Eyelids] [bool Squint], .wink [number Eye]\n.dance, .burp\n")
+                cprint(".sayto (string Dragon/Player) [sting Expression] \"(string Speech)\"")
+                cprint(".say [string Expression | Dragon/Player] \"(string Speech)\"\n.say [string Dragon/Player] [string Expression] \"(string Speech)\"\n")
                 
                 hideChat(1)
                 break
@@ -4249,6 +4563,23 @@ if(first()|duped()){
     FireLight:entity():deparent()
     LanternLight:entity():deparent()
     EGP:entity():deparent()
+    
+    # global table management
+    local Ent_Ids = LDTable["ent_ids",array]
+    foreach(K,V:number=Ent_Ids){
+        if(V == E:id()){
+            Ent_Ids:remove(K)
+        }
+    }
+    local Dragons = DTable["dragons",table]
+    Dragons:remove(E:id() + "_" + Name)
+    foreach(K,V:array=Dragons){
+        if(!V[2,entity]:isValid()){
+            Dragons:remove(K) # cleaning up any dragons that did not delete properly
+        }
+    }
+    DTable["dragons",table] = Dragons
+    
 }else{
     #HTTP Version Checking
     #ifdef httpClk()

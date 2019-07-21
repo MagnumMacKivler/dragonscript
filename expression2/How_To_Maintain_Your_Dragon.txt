@@ -1,6 +1,6 @@
 @name dragonscript/How_To_Maintain_Your_Dragon
 @model models/props_lab/binderredlabel.mdl
-setName("How to Maintain your Dragon\nRelease 2.0.1")
+setName("How to Maintain your Dragon\nRelease 2.0.2")
 #[
     
     
@@ -12,7 +12,7 @@ setName("How to Maintain your Dragon\nRelease 2.0.1")
                                                                                |___/                                    |___/               
     
     ========================================================================================================================================
-                                                                Release Version 2.0.0-2.0.1
+                                                                Release Version 2.0.2
                                                       An Operation, Maintenance, and Survival Guide
                                                         Copyright 2018-19 Magnum Technologies Inc.
     ========================================================================================================================================
@@ -225,7 +225,7 @@ setName("How to Maintain your Dragon\nRelease 2.0.1")
     
     FOLLOW
     
-    Point at a prop or player and press [Mouse 1]. The dragon will follow that prop or player in a manner similar to the .follow chat command. Point at the world and press
+    Point at a prop or player and press [Mouse 1]. The dragon will follow that prop, player, or dragon in a manner similar to the .follow chat command. Point at the world and press
     [Mouse 1] to make the dragon stop following.
     
     CHAT COMMANDS
@@ -241,6 +241,16 @@ setName("How to Maintain your Dragon\nRelease 2.0.1")
     .sit:alice
     and
     .goto:bob n00b
+    
+    CHAT LOG
+    
+    The dragon has a chat log that, if left as default, will display in the player chat.
+    This chat log is only visible to other players with dragons out, and displays whenever a dragon says something.
+    
+    If you don't like this chat log (it can take your attention away form the dragon itself or be annoying) you can disable it with the .talkprintmode command.
+    If you want it always off, you can change the TalkPrintMode variable at the top of the Dragonscript E2.
+    
+    If you set the variable to 0, or toggle .talkprintmode, the chatlog will instead display in console.
     
     ---
     
@@ -275,18 +285,18 @@ setName("How to Maintain your Dragon\nRelease 2.0.1")
     The .come command makes the dragon teleport to wherever you are pointing. Great for if you get it stuck somewhere!
     Tip: if someone is driving the dragon around, the .come command may not work. Make it .sit first and then try!
     
-    .goto (string player name)
-    The .goto command makes the dragon teleport to the specified player. Right behind them. Perfect for spooking people!
+    .goto (string name)
+    The .goto command makes the dragon teleport to the specified player or dragon. Right behind them. Perfect for spooking people!
     Tip: see tip for .come command.
     
-    .follow [string player name]
-    The .follow command makes the dragon follow the given player name. The dragon will walk and run to try and catch up to the player, and teleport if they get stuck.
+    .follow [string name]
+    The .follow command makes the dragon follow the given target name. The dragon will walk and run to try and catch up to the target, and teleport if they get stuck.
     If no player name is given, the dragon will follow you.
     If no player name is given and the dragon is already following someone, the dragon will stop following.
     If no player name is given and you're pointing at a prop, the dragon will follow that prop instead.
     
-    .cmere [string player name]
-    The .cmere command is the same as .follow, except it only works for players, and the dragon stops and greets the target when it gets close enough.
+    .cmere [string name]
+    The .cmere command is the same as .follow, except it only works for players or dragons, and the dragon stops and greets the target when it gets close enough.
     
     .gohere
     The .gohere command makes the dragon walk to the coordinates you point at.
@@ -308,10 +318,10 @@ setName("How to Maintain your Dragon\nRelease 2.0.1")
     The .cam command controls spectating the dragon first-person. Passing a parameter of 1 lets you see through the dragon's eyes, while a parameter of 0 (or nothing)
     returns you to your own view. A parameter of 2 enables the firstperson camera and makes the dragon look around as you do.
     
-    .lookat [string player name]
-    The .lookat command makes the dragon look at a specific player, if specified.
-    If no player name is given, the dragon will revert to its normal looking-at behavior.
-    If no player name is given and you're pointing at a prop, the dragon will look at that prop.
+    .lookat [string name]
+    The .lookat command makes the dragon look at a specific target, if specified.
+    If no name is given, the dragon will revert to its normal looking-at behavior.
+    If no name is given and you're pointing at a prop, the dragon will look at that prop.
     
     .pickup
     The .pickup command makes the dragon pick up whatever it's looking at, subject to the same restrictions as the pickup/drop weapon mode. If you're pointing at a prop,
@@ -337,6 +347,9 @@ setName("How to Maintain your Dragon\nRelease 2.0.1")
     This command is useful for when the dragon is riding a prop, so that it doesn't spaz its head when looking at nearby players.
     Typing .headlock without any arguments while the dragon is head-locked will allow it to look around freely again.
     
+    .talkprintmode
+    Toggles between the chat log appearing in the player chat box or the console.
+    
     -----------
     PERSONALITY
     -----------
@@ -353,6 +366,7 @@ setName("How to Maintain your Dragon\nRelease 2.0.1")
     The .expr command changes the dragon's expression. The Expression paramter can be one of the following:
     
     normal
+    happy
     sad
     annoyed
     angry
@@ -364,7 +378,7 @@ setName("How to Maintain your Dragon\nRelease 2.0.1")
     Putting a 1 for the Eyelids parameter makes the dragon's eyelids more prominent. This can have a significant effect on what the expression shows.
     For example, eyelids can be the difference between "F*** you" and "F*** me."
     
-    Putting a 1 for the Squint parameter makes the dragon appear to be squinting. This can change an annoyed look into a suspicious one, or amplify confusion.
+    Putting a 1 for the Squint parameter makes the dragon appear to be squinting. This can change an annoyed look into a suspicious one, amplify confusion, or make an expression look happier.
     
     .wink [number Eye]
     The .wink command causes the dragon to wink. Passing a zero forces it to stop winking. Passing a 1 makes the left eye wink, and 2 makes the right eye wink. If no
@@ -373,9 +387,22 @@ setName("How to Maintain your Dragon\nRelease 2.0.1")
     .dance
     The .dance command toggles the dragon's dancing mode! While dancing, the dragon is unable to move (except by teleporting). Comes with music note effects.
     
-    .say [string expression] "(string speech)"
+    .say [string expression | name] "(string speech)"
+    .say [string name] [string expression] \"(string speech)\"
     The .say command can be used to make the dragon talk! Note that the speech must be encased in quotes.
+    
     Supplying an expression parameter will make the dragon's expression shift, incorporating the functionality of the .expr command.
+    If you supply a name instead (it's determined automatically), it will instead talk to that target. This will be noted in the chatlog, and your dragon will 
+    look at the target during the duration of the speech. You can also just put a name before the expression.
+    
+    If your chat log is displaying the player chat, supplying an expression will make the chat message flavored with an emotion.
+    Supplying a target will also flavor the chat log.
+    Examples:
+    Grayscale angrily shouts! "Grr, I'm angry!"
+    Grayscale says to Custard: "How are you doing?"
+    
+    .sayto (string name) [string expression] \"(string speech)\"
+    Also makes the dragon target, but at a specific target. Works like the previous .say supplied with a target, but is more rigid and requires a name.
     
     .burp
     The .burp command forces the dragon to belch. It does not say "Excuse me" unless told to.

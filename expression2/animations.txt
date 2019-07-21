@@ -7,7 +7,7 @@
 @persist LanternTheta
 @trigger 
 
-AnimVersion = "2.0.0"
+AnimVersion = "2.0.2"
 
 function number wsin(In){
     return max(sin(In),0)
@@ -665,15 +665,19 @@ function void entity:eyeExpression(Expr:string,Eyelids,Sex,Scale,Baby,Squint,Win
     local PLE = vec(5,3,6.5)*Scale
     local PRE = vec(5,-3,6.5)*Scale
     
-    if(Squint){
+    if((Squint & Expr != "happy") | (!Squint & Expr == "happy")){ # happy just has the squint in order to achieve the effect
         holoClip(28,2,vec(0,0,-0.625)*ScaleH,vec(0,-0.25,1),0)
         holoClip(29,2,vec(0,0,-0.625)*ScaleH,vec(0,0.25,1),0)
+    }elseif(Squint & Expr == "happy"){ # happy with squint desired is even more ludicrous
+        holoClip(28,2,vec(0,0,-0.55)*ScaleH,vec(0,-0.25,1),0)
+        holoClip(29,2,vec(0,0,-0.55)*ScaleH,vec(0,0.25,1),0)
     }else{
         holoClip(28,2,vec(0,0,-3)*ScaleH,vec(0,-0.25,1),0)
         holoClip(29,2,vec(0,0,-3)*ScaleH,vec(0,0.25,1),0)
     }
     
     switch(Expr){
+        case "happy", # i'm a filthy cheater
         case "normal",
             holoClip(28,vec(0,0,3)*ScaleH,vec(0,0,-1),0)
             holoClip(29,vec(0,0,3)*ScaleH,vec(0,0,-1),0)
@@ -697,7 +701,7 @@ function void entity:eyeExpression(Expr:string,Eyelids,Sex,Scale,Baby,Squint,Win
             
             holoPos(108,This:toWorld(PRE+vec(0,-1.75,1.25)*ScaleH))
             holoAng(108,This:toWorld(ang(0,0,60)))
-            break
+            break        
         case "confused",
             holoClip(28,vec(0,0,1)*ScaleH,vec(0,0,-1.5),0)
             holoClip(29,vec(0,0,3)*ScaleH,vec(0,0,-1),0)
@@ -1294,6 +1298,15 @@ function void vocalizeRoar(DefaultExpression:string,Sex,DoTimer,VoScale){
             stoptimer("blink_open")
             soundPitch(5,(90+10*Sex)/VoScale)
             JawAngleMaster = 30
+            if(DoTimer){timer("roarend",2500)}
+            break        
+        case "happy",
+            soundPlay(5,2,"npc/antlion_guard/angry1.wav")
+            Blinking = 1
+            stoptimer("blink_close")
+            stoptimer("blink_open")
+            soundPitch(5,(95+10*Sex)/VoScale)
+            JawAngleMaster = 35
             if(DoTimer){timer("roarend",2500)}
             break
         case "sad",

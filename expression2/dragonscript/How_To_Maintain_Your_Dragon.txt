@@ -1,6 +1,6 @@
 @name dragonscript/How_To_Maintain_Your_Dragon
 @model models/props_lab/binderredlabel.mdl
-setName("How to Maintain your Dragon\nRelease 2.0.2")
+setName("How to Maintain your Dragon\nRelease 2.0.3")
 #[
     
     
@@ -252,6 +252,9 @@ setName("How to Maintain your Dragon\nRelease 2.0.2")
     
     If you set the variable to 0, or toggle .talkprintmode, the chatlog will instead display in console.
     
+    Additionally you can set a chatroom. By default, your chatroom is "all". using the .chatroom command, you can set it to any other chatroom.
+    Setting it to another chatroom means only dragons in that chatroom can see eachothers chat log messages.
+    
     ---
     
     .list
@@ -403,6 +406,10 @@ setName("How to Maintain your Dragon\nRelease 2.0.2")
     
     .sayto (string name) [string expression] \"(string speech)\"
     Also makes the dragon target, but at a specific target. Works like the previous .say supplied with a target, but is more rigid and requires a name.
+    
+    .chatroom [string chatroom]
+    Sets the current chat log chatroom. By default, this is set to "all".
+    If you leave the command blank, it will default it back to "all".
     
     .burp
     The .burp command forces the dragon to belch. It does not say "Excuse me" unless told to.

@@ -1,3 +1,3 @@
-version:2.0.2
+version:2.0.3
 name:Here Be Dragons!
-changelog:Changelog can not be displayed on this older version, please get the new update at github.com/MagnumMacKivler/dragonscript/
+changelog:Added the ".chatroom" command. Get the new update at: "github.com/MagnumMacKivler/dragonscript/" Note: Old dragons and new dragons chat log display aren't compatible.

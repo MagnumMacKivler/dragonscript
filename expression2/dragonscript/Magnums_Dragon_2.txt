@@ -30,7 +30,7 @@
 @persist FollowTarget:entity GoHerePos:vector GoHere Cmere Greet FollowDisp:vector FollowSpeedTarget FWL:wirelink FollowQ #Follow Freeman!
 @persist Ragdoll RagdollStep NoCosmetics #Ragdoll stuff
 @persist Version:string AnimVersion:string HoloVersion:string SettingsVersion:string #Version Info
-@persist DTable:gtable LDTable:gtable DragonFindName:string DragonFindArray:array  # Global-Based Stuff
+@persist DTable:gtable LDTable:gtable DragonFindName:string DragonFindArray:array Chatroom:string  # Global-Based Stuff
 @trigger NextWeapon PrevWeapon
 @model models/hunter/blocks/cube075x075x075.mdl
 
@@ -38,7 +38,7 @@
 #For updates for the Dragonscript E2, check out where you probably got it: https://github.com/MagnumMacKivler/dragonscript
 
 if(first()|duped()){
-    Version = "2.0.2"
+    Version = "2.0.3"
     
     #Config: Which Dragon Settings file do you want to load?
     
@@ -126,8 +126,9 @@ if(first()|duped()){
 
     setName(Name + "\n" + (Sex ? "(Female)" : "(Male)")+"\nVersion "+Version)
     
+    Chatroom = "all"
     signalSetGroup("magdragons")
-    runOnSignal("dragonspeak",2,1)
+    runOnSignal(Chatroom,2,1)
     
     DTable = gTable("dtable",1)
     LDTable = gTable("ldtable")
@@ -3468,10 +3469,11 @@ if(first()|duped()){
     
     timer("clk",100)
 }elseif(signalClk()){
+    local Group = signalGroup()
     local Signal = signalName()
     local IsLowestEnt = LDTable["ent_ids",array]:min() == E:id()
     
-    if(Signal == "dragonspeak"){
+    if(Signal == Chatroom & Group == "magdragons"){
         local Data = DTable["last_message",array]
         #clprint(ColorBody,Name,TargetText,(ExprUsed ? Expression : ""),"",vec(0))
         if(IsLowestEnt){ clprint(Data[1,vector],Data[2,string],Data[3,string],Data[4,string],Data[5,string],Data[6,vector]) }
@@ -4036,7 +4038,7 @@ if(first()|duped()){
                     SpeakFading = 0
                     SpeakAlpha = 255
                     
-                    signalSend("dragonspeak",2) # for chat log
+                    signalSend(Chatroom,2) # for chat log
                     
                     if(!FoundTarget){
                         DTable["last_message",array] = array(ColorBody,Name,TargetText,(ExprUsed ? DefaultExpression : ""),"",vec(0))
@@ -4111,7 +4113,7 @@ if(first()|duped()){
                         SpeakFading = 0
                         SpeakAlpha = 255
                         
-                        signalSend("dragonspeak",2) # for chat log
+                        signalSend(Chatroom,2) # for chat log
                         if(LATarget == DragonTarget){
                             DTable["last_message",array] = array(ColorBody,Name,TargetText,(ExprUsed ? DefaultExpression : ""),DragonFindArray[3,string],DragonFindArray[5,vector])
                             clprint(ColorBody,Name,TargetText,(ExprUsed ? DefaultExpression : ""),(FoundTarget ? DragonFindArray[3,string] : ""),DragonFindArray[5,vector])
@@ -4273,6 +4275,21 @@ if(first()|duped()){
                 LoveQ = 0
                 timer("endlove1",2000)
                 
+                hideChat(1)
+                break
+            case ".chatroom",
+                local NewChatroom = Sentence[2,string]
+                if(NewChatroom != ""){
+                    runOnSignal(Chatroom,2,0)
+                    runOnSignal(NewChatroom,2,1)
+                    Chatroom = NewChatroom
+                    dprint("New chatroom set to: " + NewChatroom)
+                }else{
+                    runOnSignal(Chatroom,2,0)
+                    runOnSignal("all",2,1)
+                    Chatroom = "all"
+                    dprint("Chatroom set to default.")
+                }
                 hideChat(1)
                 break
             case ".dance",
@@ -4542,6 +4559,7 @@ if(first()|duped()){
                 cprint(".roar, .love [string Expression]\n.expr [string Expression] [bool Eyelids] [bool Squint], .wink [number Eye]\n.dance, .burp\n")
                 cprint(".sayto (string Dragon/Player) [sting Expression] \"(string Speech)\"")
                 cprint(".say [string Expression | Dragon/Player] \"(string Speech)\"\n.say [string Dragon/Player] [string Expression] \"(string Speech)\"\n")
+                cprint(".chatroom [string chatroom]")
                 
                 hideChat(1)
                 break

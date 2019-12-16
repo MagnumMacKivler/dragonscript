@@ -1,0 +1,474 @@
+@name dragonscript/cosmeticlib
+@inputs 
+@outputs 
+@persist Scale CurCos LastValidCosmetic CosmeticStart CosmeticTable:table [BoneLookup BodyLookup]:table
+@persist UsePupilAngles PupilCos:array # flags
+@trigger 
+
+#[
+add functions return the holoid, returns 0 if it failed
+function number cosmeticAdd(Bone:string,Model:string,Scale:vector,Pos:vector,Ang:angle,Mat:string,Skin:number,Color:vector,Alpha:number)
+function number cosmeticAdd(Bone:string) # starts with a generic cube holo like holoCreate()
+function number cosmeticAdd(HoloID:number) # dangerous function, but allowed
+
+# all functions return 0 if failed, except bone functions which return -1 (due to 0 being body)
+function number cosmeticGet() # returns the current cosmetic 
+function number cosmeticGet(Bodypart:string) # returns the holo based on a seperate lookup table (not based on the skeleton)
+function number cosmeticGetBone(Bone:string) # returns the bone holo - can do very bad things
+function number cosmeticSet(Bodypart:string) # set the holo based on a seperate lookup table (not based on the skeleton)
+function number cosmeticSetBone(Bone:string) # sets the current cosmetic to the bone holo - can do very bad things
+function number cosmeticSet(HoloID:number) # very scary
+
+function void cosmeticParent(Bone:string | Bodypart:string) # can be parented to either
+function void cosmeticParent(HoloID:number) # for hilarity
+
+function void cosmeticManipulate(Model:string,Scale:vector,Pos:vector,Ang:angle,Mat:string,Skin:number,Color:vector,Alpha:number)
+
+todo - figure out method to automatically determine parent of non cosmetic holos
+function void cosmeticPos(Pos:vector)
+function void cosmeticAng(Ang:angle)
+function void cosmeticScale(Scale:vector)
+
+function void cosmeticMaterial(Material:string)
+function void cosmeticColor(Color:vector)
+function void cosmeticColor(Color:vector4) # splits alpha off into own key in table
+function void cosmeticAlpha(Alpha:number)
+function void cosmeticModel(Model:string)
+function void cosmeticSkin(Skin:number)
+
+function void cosmeticDelete()
+
+the visclip indexs run backwards from the maximum number of clips - that way I don't replace base clips (such as the eyes)
+function void cosmeticClip(Pos:vector,Axis:vector) # automatically enables, automatically local
+function void cosmeticSubMaterial(Index:number,Material:string)
+function void cosmeticBodyGroup(Group:number, Sel:number)
+
+CosmeticTable(
+  key HoloID:number
+    table(
+      TYPE = Type:string = "cosmetic" | "body" # required
+      PARENT = HoloID:number # required if cosmetic
+      MODEL = Model:string
+      SCALE = Scale:vector
+      POS = Pos:vector # local to parent
+      ANG = Ang:vector # local to parent
+      MAT = Material:string
+      SKIN = Skin:number
+      COL = Col:vector
+      ALPHA = Alpha:number
+      CLIP_POS = Pos:array
+      CLIP_AXIS = Axis:array
+      SUBS = Subs:array = array("index:mat",etc)
+      BODYGROUPS = Bodygroups:array = array(vec2(Group,Body),etc)
+      DELETE = Delete:number # handled a tad differently
+    )
+}
+]#
+
+CosmeticStart = 119
+CurCos = CosmeticStart-1 # -1 because creating a cosmetic indexes this value by 1 at start
+LastValidCosmetic = CurCos
+
+# cosmetic delay handler for starting the dragon
+
+function cosmeticHandleDelay(CosDelay1,CosDelay2,CosDelay3){
+    local Delay = CosDelay1 + CosDelay2 + CosDelay3
+    if(!Delay){ timer("start",1000), return }
+    
+    local Index = 1
+    if(CosDelay1){ timer("cosdelay1",1000 * Index), Index++ }
+    if(CosDelay2){ timer("cosdelay2",1000 * Index), Index++ }
+    if(CosDelay3){ timer("cosdelay3",1000 * Index), Index++ }
+    timer("start",1000*Index)
+}
+
+# basic add functions, along with precursor stuff
+
+function table cosmeticAddifInvalid(Cos:number){
+    if(!CosmeticTable:exists(Cos)){
+        local Cosmetic = table()
+        CosmeticTable[CurCos,table] = Cosmetic
+        
+        local Type =  Cos<CosmeticStart ? "body" : "cosmetic"
+        Cosmetic["TYPE",string] = Type
+        if(Type == "cosmetic"){
+            print(_HUD_PRINTCONSOLE,"[Dragonscript] Cosmetic created without using cosmeticAdd function! Please check your cosmetics!")
+            Cosmetic["PARENT",number] = BodyLookup["Body",number]
+        }
+    }
+    return CosmeticTable[Cos,table]
+}
+
+function number cosmeticAdd(Bone:string){
+    local Parent = -1
+    if(BodyLookup:exists(Bone)){ Parent = BodyLookup[Bone,number] }
+    if(BoneLookup:exists(Bone)){ Parent = BoneLookup[Bone,number] } # bones have priority 
+    if(Parent == -1){
+        return 0
+    }
+    LastValidCosmetic++
+    CurCos = LastValidCosmetic
+    
+    local Cosmetic = table()
+    CosmeticTable[CurCos,table] = Cosmetic
+    
+    Cosmetic["TYPE",string] = "cosmetic"
+    Cosmetic["PARENT",number] = Parent
+    
+    # flag handling
+    
+    if(Bone:find("Pupil")){
+        UsePupilAngles = 1
+        PupilCos:pushNumber(CurCos)
+    }
+    
+    return CurCos
+}
+
+function number cosmeticAdd(Bone:string,Model:string,Scale:vector,Pos:vector,Ang:angle,Mat:string,Skin:number,Color:vector,Alpha:number){
+    # invalid cosmetic parent
+    local Cos = cosmeticAdd(Bone)
+    if(Cos){
+        local Cosmetic = CosmeticTable[Cos,table]
+        Cosmetic["MODEL",string] = Model
+        Cosmetic["SCALE",vector] = Scale
+        Cosmetic["POS",vector] = Pos
+        Cosmetic["ANG",angle] = Ang
+        Cosmetic["MAT",string] = Mat
+        Cosmetic["SKIN",number] = Skin
+        Cosmetic["COL",vector] = Color
+        Cosmetic["ALPHA",number] = Alpha
+    }
+    return Cos
+}
+
+# get and set functions
+function number cosmeticGet(){ return CurCos } # seems pointless but whatever, people will use it
+function number cosmeticGet(Bodypart:string){
+    if(!BodyLookup:exists(Bodypart)){
+        return 0
+    }
+    return BodyLookup[Bodypart,number]
+}
+function number cosmeticGetBone(Bone:string){
+    if(!BoneLookup:exists(Bone)){
+        return -1
+    }
+    return BoneLookup[Bone,number]
+}
+function number cosmeticSet(HoloID:number){
+    if(HoloID >= CosmeticStart){
+        LastValidCosmetic = CurCos
+    }
+    CurCos = HoloID 
+    return CurCos 
+}
+function number cosmeticSet(Bodypart:string){ local Cos = cosmeticGet(Bodypart), cosmeticSet(Cos == 0 ? CurCos : Cos), return Cos }
+function number cosmeticSetBone(Bone:string){ local Cos = cosmeticGetBone(Bone), cosmeticSet(Cos ==-1 ? CurCos : Cos), return Cos }
+
+# modifier functions
+
+function cosmeticManipulate(Model:string,Scale:vector,Pos:vector,Ang:angle,Mat:string,Skin:number,Color:vector,Alpha:number){
+    local Cosmetic = cosmeticAddifInvalid(CurCos)
+    Cosmetic["MODEL",string] = Model
+    Cosmetic["SCALE",vector] = Scale
+    Cosmetic["POS",vector] = Pos
+    Cosmetic["ANG",angle] = Ang
+    Cosmetic["MAT",string] = Mat
+    Cosmetic["SKIN",number] = Skin
+    Cosmetic["COL",vector] = Color
+    Cosmetic["ALPHA",number] = Alpha
+}
+
+function cosmeticParent(Bone:string){
+    local Parent = -1
+    if(BodyLookup:exists(Bone)){ Parent = cosmeticGet(Bone) }
+    if(BoneLookup:exists(Bone)){ Parent = cosmeticGetBone(Bone) } # bones have priority 
+    if(Parent != -1){
+        local Cosmetic = cosmeticAddifInvalid(CurCos)
+        Cosmetic["PARENT",number] = Parent
+    }
+}
+function cosmeticParent(HoloID:number){
+    local Cosmetic = cosmeticAddifInvalid(CurCos)
+    Cosmetic["PARENT",number] = HoloID
+}
+function cosmeticPos(Pos:vector){
+    local Cosmetic = cosmeticAddifInvalid(CurCos)
+    Cosmetic["POS",vector] = Pos
+}
+function cosmeticAng(Ang:angle){
+    local Cosmetic = cosmeticAddifInvalid(CurCos)
+    Cosmetic["ANG",angle] = Ang
+}
+function cosmeticScale(Scale:vector){
+    local Cosmetic = cosmeticAddifInvalid(CurCos)
+    Cosmetic["SCALE",vector] = Scale
+}
+function cosmeticMaterial(Mat:string){
+    local Cosmetic = cosmeticAddifInvalid(CurCos)
+    Cosmetic["MAT",string] = Mat
+}
+function cosmeticColor(Col:vector){
+    local Cosmetic = cosmeticAddifInvalid(CurCos)
+    Cosmetic["COL",vector] = Col
+}
+function cosmeticAlpha(Alpha:number){
+    local Cosmetic = cosmeticAddifInvalid(CurCos)
+    Cosmetic["ALPHA",number] = Alpha
+}
+function cosmeticColor(Col:vector4){
+    local Cosmetic = cosmeticAddifInvalid(CurCos)
+    local ColV = vec(Col)
+    local Alpha = Col:w()
+    Cosmetic["COL",vector] = ColV
+    Cosmetic["ALPHA",number] = Alpha
+}
+function cosmeticModel(Model:string){
+    local Cosmetic = cosmeticAddifInvalid(CurCos)
+    Cosmetic["MODEL",string] = Model
+}
+function cosmeticSkin(Skin:number){
+    local Cosmetic = cosmeticAddifInvalid(CurCos)
+    Cosmetic["SKIN",number] = Skin
+}
+function cosmeticClip(Pos:vector,Axis:vector){
+    local Cosmetic = cosmeticAddifInvalid(CurCos)
+    if(!Cosmetic:exists("CLIP_POS")){
+        Cosmetic["CLIP_POS",array] = array() 
+        Cosmetic["CLIP_AXIS",array] = array()
+    }
+    Cosmetic["CLIP_POS",array]:pushVector(Pos)
+    Cosmetic["CLIP_AXIS",array]:pushVector(Axis)
+}
+function cosmeticSubMaterial(Index,Mat:string){
+    local Cosmetic = cosmeticAddifInvalid(CurCos)
+    if(!Cosmetic:exists("SUBS")){
+        Cosmetic["SUBS",array] = array()
+    }
+    Cosmetic["SUBS",array]:pushString(Index + ":" + Mat)
+}
+function cosmeticBodyGroup(Group,Sel){
+    local Cosmetic = cosmeticAddifInvalid(CurCos)
+    if(!Cosmetic:exists("BODYGROUPS")){
+        Cosmetic["BODYGROUPS",array] = array()
+    }
+    Cosmetic["BODYGROUPS",array]:pushVector2(vec2(Group,Sel))
+}
+function cosmeticDelete(){
+    local Cosmetic = cosmeticAddifInvalid(CurCos)
+    Cosmetic["DELETE",number] = 1
+}
+
+# render functions
+function cosmeticRender(Cos){
+    local Cosmetic = CosmeticTable[Cos,table]
+    # deletion
+    if(Cosmetic["DELETE",number] == 1){ 
+        if(Cosmetic["TYPE",string] == "body"){
+            holoDelete(Cos)
+        }
+        return 
+    }
+    local Parent = Cosmetic["TYPE",string] == "cosmetic" ? holoEntity(Cosmetic["PARENT",number]) : holoEntity(Cos):parent()
+    
+    if(Cos>=CosmeticStart){ # new cosmetic
+        holoCreate(Cos)
+        holoPos(Cos,Parent:pos())
+        holoAng(Cos,Parent:angles())
+        holoParent(Cos,Parent)
+    }
+    
+    local Keys = Cosmetic:keys()
+    # have to set model fiRST AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+    if(Cosmetic:exists("MODEL")){ holoModel(Cos,Cosmetic["MODEL",string]) }
+    foreach(K,V:string=Keys){
+        switch(V){
+            case "PARENT", holoParent(Cos,Parent), break
+            case "SCALE", holoScale(Cos,Cosmetic["SCALE",vector] * Scale), break
+            case "POS", holoPos(Cos,Parent:toWorld(Cosmetic["POS",vector] * Scale)), break
+            case "ANG", holoAng(Cos,Parent:toWorld(Cosmetic["ANG",angle])), break
+            case "MAT", holoMaterial(Cos,Cosmetic["MAT",string]), break
+            case "SKIN", holoSkin(Cos,Cosmetic["SKIN",number]), break
+            case "COL", holoColor(Cos,Cosmetic["COL",vector]), break
+            case "ALPHA", holoAlpha(Cos,Cosmetic["ALPHA",number]), break
+            case "CLIP_POS", # handle clips here
+                local PosR = Cosmetic["CLIP_POS",array]
+                local AxisR = Cosmetic["CLIP_AXIS",array]
+                local Index = holoClipsAvailable()
+                for(N=1,PosR:count()){
+                    local Pos = PosR[N,vector] * Scale
+                    local Axis = AxisR[N,vector]
+                    holoClip(Cos,Index,Pos,Axis,0)
+                    holoClipEnabled(Cos,Index,1)
+                    Index = Index-1
+                }
+            break
+            case "SUBS",
+                local Subs = Cosmetic["SUBS",array]
+                foreach(K2,V2:string=Subs){
+                    local Split = V2:explode(":")
+                    holoEntity(Cos):setSubMaterial(Split[1,string]:toNumber(),Split[2,string])
+                }
+            break
+            case "BODYGROUPS",
+                local Bodygroups = Cosmetic["BODYGROUPS",array]
+                foreach(K2,V2:vector2=Bodygroups){
+                    holoBodygroup(Cos,V2:x(),V2:y())
+                }
+            break
+            default,
+                # nothing goes here yet
+            break
+        }
+    }
+    
+}
+
+# lookup
+BoneLookup = table()
+BoneLookup["Body",number] = 0
+BoneLookup["Neck",number] = 1
+BoneLookup["Head",number] = 2
+BoneLookup["LeftPupil",number] = 30
+BoneLookup["RightPupil",number] = 31
+BoneLookup["LeftShoulder",number] = 3
+BoneLookup["LeftElbow",number] = 92
+BoneLookup["LeftFrontFoot",number] = 4
+BoneLookup["RightShoulder",number] = 5
+BoneLookup["RightElbow",number] = 93
+BoneLookup["RightFrontFoot",number] = 6
+BoneLookup["LeftHip",number] = 7
+BoneLookup["LeftKnee",number] = 94
+BoneLookup["LeftRearFoot",number] = 8
+BoneLookup["RightHip",number] = 9
+BoneLookup["RightKnee",number] = 95
+BoneLookup["RightRearFoot",number] = 10
+BoneLookup["Tail",number] = 11
+BoneLookup["Tail1",number] = 63
+BoneLookup["Tail2",number] = 64
+BoneLookup["Tail3",number] = 65
+BoneLookup["Tail4",number] = 66
+BoneLookup["LeftWingJoint",number] = 12
+BoneLookup["LeftHand1",number] = 70
+BoneLookup["LeftHand2",number] = 71
+BoneLookup["LeftHand3",number] = 72
+BoneLookup["RightWingJoint",number] = 14
+BoneLookup["RightHand1",number] = 80
+BoneLookup["RightHand2",number] = 81
+BoneLookup["RightHand3",number] = 82
+BoneLookup["Lantern",number] = 116
+
+BodyLookup = table()
+
+#Main Body
+BodyLookup["Body",number] = 16
+BodyLookup["Neck",number] = 17
+BodyLookup["NeckCone",number] = 18
+
+#Head (Static)
+BodyLookup["HeadMain",number] = 19
+BodyLookup["Cheeks",number] = BodyLookup["Cheek",number] = 20
+BodyLookup["Snout",number] = BodyLookup["Nose",number] = 21
+BodyLookup["LeftTooth",number] = 22 #Twenty tooth
+BodyLookup["RightTooth",number] = 23
+BodyLookup["LeftBrow",number] = 24
+BodyLookup["RightBrow",number] = 25
+BodyLookup["LeftNostril",number] = 26
+BodyLookup["RightNostril",number] = 27
+BodyLookup["LeftHorn",number] = 32
+BodyLookup["RightHorn",number] = 33
+
+#Eyes
+BodyLookup["LeftEye",number] = 28
+BodyLookup["LeftEyeLid",number] = 109
+BodyLookup["LeftPupil",number] = 30
+BodyLookup["LeftEyelashL",number] = 105
+BodyLookup["LeftEyelashM",number] = 104
+BodyLookup["LeftEyelashR",number] = 103
+
+BodyLookup["RightEye",number] = 29
+BodyLookup["RightEyeLid",number] = 110
+BodyLookup["RightPupil",number] = 31
+BodyLookup["RightEyelashL",number] = 106
+BodyLookup["RightEyelashM",number] = 107
+BodyLookup["RightEyelashR",number] = 108
+
+#Jaw
+BodyLookup["Jaw",number] = BodyLookup["Lip",number] = 35
+BodyLookup["Tongue",number] = 36
+BodyLookup["LeftLowerTooth",number] = 37
+BodyLookup["RightLowerTooth",number] = 38
+
+#Legs
+BodyLookup["LeftShoulder",number] = 39
+BodyLookup["RightShoulder",number] = 45
+
+BodyLookup["LeftHumerus",number] = 40
+BodyLookup["RightHumerus",number] = 46
+BodyLookup["LeftThigh",number] = BodyLookup["LeftHaunch",number] = 51
+BodyLookup["RightThigh",number] = BodyLookup["RightHaunch",number] = 57
+
+BodyLookup["LeftElbow",number] = 96
+BodyLookup["RightElbow",number] = 98
+BodyLookup["LeftKnee",number] = 100
+BodyLookup["RightKnee",number] = 101
+
+BodyLookup["LeftForearm",number] = 97
+BodyLookup["RightForearm",number] = 99
+BodyLookup["LeftShin",number] = 52
+BodyLookup["RightShin",number] = 58
+
+BodyLookup["FrontLeftFoot",number] = BodyLookup["FrontLeftPaw",number] = 41
+BodyLookup["FrontLeftClawL",number] = 43
+BodyLookup["FrontLeftClawM",number] = 42
+BodyLookup["FrontLeftClawR",number] = 44
+
+BodyLookup["FrontRightFoot",number] = BodyLookup["FrontRightPaw",number] = 47
+BodyLookup["FrontRightClawL",number] = 50
+BodyLookup["FrontRightClawM",number] = 48
+BodyLookup["FrontRightClawR",number] = 49
+
+BodyLookup["RearLeftFoot",number] = BodyLookup["RearLeftPaw",number] = 53
+BodyLookup["RearLeftClawL",number] = 55
+BodyLookup["RearLeftClawM",number] = 54
+BodyLookup["RearLeftClawR",number] = 56
+
+BodyLookup["RearRightFoot",number] = BodyLookup["RearRightPaw",number] = 59
+BodyLookup["RearRightClawL",number] = 62
+BodyLookup["RearRightClawM",number] = 60
+BodyLookup["RearRightClawR",number] = 61
+
+#Tail
+BodyLookup["Tail1",number] = 63
+BodyLookup["Tail2",number] = 64
+BodyLookup["Tail3",number] = 65
+BodyLookup["Tail4",number] = 66
+
+#Left Wing
+BodyLookup["LeftWingJoint",number] = 67
+BodyLookup["LeftWingCorner",number] = 69
+BodyLookup["LeftWingRib1",number] = 68
+BodyLookup["LeftWingRib2",number] = 73
+BodyLookup["LeftWingRib3",number] = 74
+BodyLookup["LeftWingRib4",number] = 75
+
+BodyLookup["LeftWingPlane1",number] = 76
+BodyLookup["LeftWingPlane2",number] = 77
+BodyLookup["LeftWingPlane3",number] = 78
+
+#Right Wing
+BodyLookup["RightWingJoint",number] = 83
+BodyLookup["RightWingCorner",number] = 85
+BodyLookup["RightWingRib1",number] = 84
+BodyLookup["RightWingRib2",number] = 86
+BodyLookup["RightWingRib3",number] = 87
+BodyLookup["RightWingRib4",number] = 88
+
+BodyLookup["RightWingPlane1",number] = 89
+BodyLookup["RightWingPlane2",number] = 90
+BodyLookup["RightWingPlane3",number] = 91
+
+#Misc
+BodyLookup["Lantern",number] = 117
+BodyLookup["FireBall",number] = 118

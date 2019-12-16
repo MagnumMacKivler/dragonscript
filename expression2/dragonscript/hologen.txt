@@ -4,7 +4,7 @@
 @persist RagdollBits:table
 @trigger 
 
-HoloVersion = "2.0.0"
+HoloVersion = "2.1.0"
 
 function void holoSkeleton(P0:vector,PH:vector,PLWJ:vector,PLWH:vector,PRWJ:vector,PRWH:vector,Scale){
     local Ang0 = ang()
@@ -107,6 +107,31 @@ function void holoSkeleton(P0:vector,PH:vector,PLWJ:vector,PLWH:vector,PRWJ:vect
     holoAlpha(81,SkeletonAlpha)
     holoAlpha(82,SkeletonAlpha)
     holoAlpha(15,SkeletonAlpha)
+    holoShadow(0,0)
+    holoShadow(1,0)
+    holoShadow(2,0)
+    holoShadow(3,0)
+    holoShadow(92,0)
+    holoShadow(4,0)
+    holoShadow(5,0)
+    holoShadow(93,0)
+    holoShadow(6,0)
+    holoShadow(7,0)
+    holoShadow(94,0)
+    holoShadow(8,0)
+    holoShadow(9,0)
+    holoShadow(95,0)
+    holoShadow(10,0)
+    holoShadow(11,0)
+    holoShadow(12,0)
+    holoShadow(70,0)
+    holoShadow(71,0)
+    holoShadow(72,0)
+    holoShadow(14,0)
+    holoShadow(80,0)
+    holoShadow(81,0)
+    holoShadow(82,0)
+    holoShadow(15,0)
     #holoAlpha(102,SkeletonAlpha)
     
     return void
@@ -316,7 +341,7 @@ function void ragdollConstrain(){
     }
 }
 
-function void holos1(P0:vector, PH:vector, ColorBody:vector, Material:string, Scale, Baby){
+function void holos1(P0:vector, PH:vector, ColorBody:vector, ColorEye:vector, Material:string, Scale, Baby){
     local Ang0 = ang()
     local PLS = P0 + vec(24,7,0)*Scale
     local PRS = P0 + vec(24,-7,0)*Scale
@@ -367,9 +392,9 @@ function void holos1(P0:vector, PH:vector, ColorBody:vector, Material:string, Sc
     holoClipEnabled(29,1,1)
     holoClipEnabled(29,2,1)
     
-    holoCreate(30,PH+vec(5.5,3,6.5)*Scale,vec(0.125)*ScaleH,ang(0,0,-15),vec(),"sphere") #Pupils
+    holoCreate(30,PH+vec(5.5,3,6.5)*Scale,vec(0.125)*ScaleH,ang(0,0,-15),ColorEye,"sphere") #Pupils
     holoMaterial(30,"debug/debugdrawflat")
-    holoCreate(31,PH+vec(5.5,-3,6.5)*Scale,vec(0.125)*ScaleH,ang(0,0,15),vec(),"sphere")
+    holoCreate(31,PH+vec(5.5,-3,6.5)*Scale,vec(0.125)*ScaleH,ang(0,0,15),ColorEye,"sphere")
     holoMaterial(31,"debug/debugdrawflat")
 
     holoCreate(32,PH+vec(-4,7.5,11)*Scale,vec(0.375,0.375,1)*Scale,ang(-30,0,-30),vec(255),"hq_cone") #Horns

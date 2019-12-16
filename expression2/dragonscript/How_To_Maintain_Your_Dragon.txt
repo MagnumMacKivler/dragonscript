@@ -1,6 +1,6 @@
 @name dragonscript/How_To_Maintain_Your_Dragon
 @model models/props_lab/binderredlabel.mdl
-setName("How to Maintain your Dragon\nRelease 2.0.3")
+setName("How to Maintain your Dragon\nRelease 2.1.0")
 #[
     
     
@@ -12,7 +12,7 @@ setName("How to Maintain your Dragon\nRelease 2.0.3")
                                                                                |___/                                    |___/               
     
     ========================================================================================================================================
-                                                                Release Version 2.0.2
+                                                                Release Version 2.1.0
                                                       An Operation, Maintenance, and Survival Guide
                                                         Copyright 2018-19 Magnum Technologies Inc.
     ========================================================================================================================================
@@ -65,6 +65,7 @@ setName("How to Maintain your Dragon\nRelease 2.0.3")
     Sex: Stifle your giggle. This parameter determines whether a dragon is Male or Female. 0 for Male, 1 for Female.
     ColorBody: The color of the dragon's body, formatted as a vector.
     ColorWings: The color of the dragon's wings, also formatted as a vector.
+    ColorEye: Sets the color of the dragon's eyes. You should probably leave this as black.
     Material: The dragon's skin texture. It's fine to leave this as "sprops/textures/sprops_metal5", but you can change it as desired.
     
     Cosmetics:
@@ -87,10 +88,13 @@ setName("How to Maintain your Dragon\nRelease 2.0.3")
     
     Your dragon should now be standing in front of you, ready to take on the world!
     
+    Custom Code per Config (for advanced users only):
+    In the "customCodeConfig" function, you can have any code you like in here. It will run for every single execution of the chip.
+    
     Adjusting the config:
     Say you want to make a minor edit, like you're trying to get the color just right or position a hat on the dragon's head.
     Simply make the changes to the config file, SAVE, then manually reupload the Main E2 into the dragon's body.
-    If adjusting the cosmetics, check out the cosmetic tool! "dragonscript/cosmetic_tool.txt"
+    If adjusting the cosmetics, check out the cosmetic tool! "dragonscript/cosmetic_tool_2.txt"
     
        ________  _   ____                    __  _         
       /  _/  _/ (_) / __ \___  ___ _______ _/ /_(_)__  ___ 
@@ -125,7 +129,7 @@ setName("How to Maintain your Dragon\nRelease 2.0.3")
     
     Pressing [Shift] while the dragon is walking forward will cause it to break into a run.
     
-    You can walk around on moving props as well, though beware: if the prop rotates and the dragon isn't standing near the center, it may fall off.
+    You can walk around on moving props as well.
     
     RUNNING
     
@@ -255,6 +259,10 @@ setName("How to Maintain your Dragon\nRelease 2.0.3")
     Additionally you can set a chatroom. By default, your chatroom is "all". using the .chatroom command, you can set it to any other chatroom.
     Setting it to another chatroom means only dragons in that chatroom can see eachothers chat log messages.
     
+    Finally, there is a form of the chat log that is proximity based. If you have proximity mode, only dragons nearby will receive your messages.
+    This goes for everyone else too, so if they're in proximity mode and you're not, you'll only see their messages if you're in their proximity.
+    You can enable or disable this with the TalkProximityMode variable or with the .talkproximitymode command.
+    
     ---
     
     .list
@@ -353,6 +361,9 @@ setName("How to Maintain your Dragon\nRelease 2.0.3")
     .talkprintmode
     Toggles between the chat log appearing in the player chat box or the console.
     
+    .talkproximitymode
+    Toggles between the chat log being proximity based or global.
+    
     -----------
     PERSONALITY
     -----------
@@ -404,6 +415,13 @@ setName("How to Maintain your Dragon\nRelease 2.0.3")
     Grayscale angrily shouts! "Grr, I'm angry!"
     Grayscale says to Custard: "How are you doing?"
     
+    You can also use a dragon autocomplete (it works on players too, actually).
+    Putting the expression "d:[dragon/player]" will autocomplete that portion of their name, and also will color their name in the chat.
+    This system works in .me and .event as well.
+    Examples with a dragon named "Zenith Leadwing":
+    Command: .say "Hello, d:zen" | Output: Grayscale says: "Hello, Zenith" (The "Zenith" portion will be colored)
+    Command: .say "Hello, d:lead" | Output: Grayscale says "Hello, Leadwing" (Still colored)
+    
     .sayto (string name) [string expression] \"(string speech)\"
     Also makes the dragon target, but at a specific target. Works like the previous .say supplied with a target, but is more rigid and requires a name.
     
@@ -411,8 +429,25 @@ setName("How to Maintain your Dragon\nRelease 2.0.3")
     Sets the current chat log chatroom. By default, this is set to "all".
     If you leave the command blank, it will default it back to "all".
     
+    .me
+    Makes your dragon "say" they performed an action. It will show up in chat, and in a square speech bubble.
+    Supports dragon autocomplete (d:)
+    Examples:
+    .me waves to you | Grayscale waves to you
+    .me is very happy | Grayscale is very happy
+    
+    .event
+    Only works with the chat log visible. Performs an "event" visible to everyone in the chatlog.
+    Supports dragon autocomplete (d:)
+    Examples:
+    .event A huge explosion sounds in the distance!
+    .event The earth shakes, making d:grayscale fall over!
+    
     .burp
     The .burp command forces the dragon to belch. It does not say "Excuse me" unless told to.
+    
+    .closeeyes
+    The .closeeyes command opens or closes the dragon's eyes.
     
     DEBUG COMMANDS
     A couple of commands that aren't really useful, but made for testing and left in.
@@ -460,5 +495,8 @@ setName("How to Maintain your Dragon\nRelease 2.0.3")
     
     Q: Do dragons like music?
     A: Many of them do. Their tastes are usually for the classics, but dragons will dance to just about anything!
+    
+    Q: How do dragons just stick to stuff like that?
+    A: Magnets.
 
 ]#

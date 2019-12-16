@@ -1,0 +1,430 @@
+@name dragonscript/Cosmetic_Tool_2
+@inputs 
+@outputs 
+@persist [P0 PH PLWJ PRWJ PLWH PRWH]:vector Ang0:angle [LH1 LH2 LH3 RH1 RH2 RH3]:entity CIndex #Holo/Skeleon Shit
+@persist [FLPO FRPO RLPO RRPO]:vector FLPQ FRPQ RLPQ RRPQ
+@persist E:entity PopPitch Version:string
+@trigger
+@model models/hunter/blocks/cube075x075x075.mdl
+
+if(first()|duped()){
+    
+    #Put your config file in here
+    #include "dragonscript/settings/grayscale"
+    
+    cosmeticHandleDelay(CosDelay1,CosDelay2,CosDelay3) #Don't touch this
+    entity():setName("[Dragonscript Cosmetic Tool 2]\n"+Name+"\nLoading cosmetics..."+"\nVersion "+Version) #Don't touch this either
+    
+}elseif(clk("cosdelay1")){cosmeticDelay1()}elseif(clk("cosdelay2")){cosmeticDelay2()}elseif(clk("cosdelay3")){cosmeticDelay3()}elseif(clk("start")){
+
+    #Don't touch past this!
+    
+    Version = "2.1.0"
+    #include "dragonscript/hologen"
+
+    # ported animation functions
+    
+    function void entity:iklegs(FLP:vector, FRP:vector, RLP:vector, RRP:vector, Scale){ #Inputs local to E2
+        local E = This
+        rangerFilter(entity())
+        rangerDefaultZero(0)
+        
+        local Thigh = 18*Scale
+        local Shin = 18*Scale
+        local Hip = holoEntity(3)
+        local Knee = holoEntity(92)
+        local Foot = holoEntity(4)
+        local R = rangerOffset(Hip:pos(),E:toWorld(vec(24,7,-36)*Scale+FLP))
+        local TreadPos = (E:toLocal(R:pos())+vec(0,-7,0)*Scale)*vec(1,-1,1) + vec(0,7,0)*Scale
+        if((TreadPos==FLPO) & (FLPQ<10)){
+            FLPQ++
+        }elseif(TreadPos!=FLPO){
+            FLPQ = 0
+        }
+        FLPO = TreadPos
+        if(FLPQ<10){
+            local Distance = clamp(R:distance(),12*Scale,Shin+Thigh-1)
+            local Theta_a = acos((Shin^2 + Thigh^2 - Distance^2)/(2*Thigh*Shin)) #Knee
+            local Theta_b = asin((Shin/Distance)*sin(Theta_a)) #Hip
+            local Theta_c = 180 - Theta_a - Theta_b #Foot
+            local Axis = TreadPos - vec(24,7,0)*Scale
+            local Ang_h_f = -heading(vec(),ang(-90,0,0),-Axis) + ang(-90,0,0)
+        
+            local HipAngle = Ang_h_f:rotateAroundAxis(vec(0,1,0),Theta_b+90)#:rotateAroundAxis(Axis,Ang_h_f:yaw())
+            local KneeAngle = Ang_h_f:rotateAroundAxis(vec(0,1,0),-Theta_c+90)#:rotateAroundAxis(Axis,Ang_h_f:yaw())
+            
+            local FootAngle = ang(15,0,0)
+            if(R:hit()){
+                local RelevantVector = E:toLocalAxis(R:hitNormal())*vec(1,0,1)
+                local Phi = elevation(vec(),ang(90,0,0),RelevantVector)
+                FootAngle = ang(Phi,0,0)
+            }
+            
+            holoAng(3,E:toWorld(HipAngle))
+            holoAng(92,E:toWorld(KneeAngle))
+            holoAng(4,E:toWorld(FootAngle))
+        }
+        
+        local Thigh = 18*Scale
+        local Shin = 18*Scale
+        local Hip = holoEntity(5)
+        local Knee = holoEntity(93)
+        local Foot = holoEntity(6)
+        local R = rangerOffset(Hip:pos(),E:toWorld(vec(24,-7,-36)*Scale+FRP))
+        local TreadPos = (E:toLocal(R:pos())+vec(0,7,0)*Scale)*vec(1,-1,1) + vec(0,-7,0)*Scale
+        if((TreadPos==FRPO) & (FRPQ<10)){
+            FRPQ++
+        }elseif(TreadPos!=FRPO){
+            FRPQ = 0
+        }
+        FRPO = TreadPos
+        if(FRPQ<10){
+            local Distance = clamp(R:distance(),12*Scale,Shin+Thigh-1)
+            local Theta_a = acos((Shin^2 + Thigh^2 - Distance^2)/(2*Thigh*Shin)) #Knee
+            local Theta_b = asin((Shin/Distance)*sin(Theta_a)) #Hip
+            local Theta_c = 180 - Theta_a - Theta_b #Foot
+            local Axis = TreadPos - vec(24,-7,0)*Scale
+            local Ang_h_f = -heading(vec(),ang(-90,0,0),-Axis) + ang(-90,0,0)
+        
+            local HipAngle = Ang_h_f:rotateAroundAxis(vec(0,1,0),Theta_b+90)#:rotateAroundAxis(Axis,Ang_h_f:yaw())
+            local KneeAngle = Ang_h_f:rotateAroundAxis(vec(0,1,0),-Theta_c+90)#:rotateAroundAxis(Axis,Ang_h_f:yaw())
+            
+            local FootAngle = ang(15,0,0)
+            if(R:hit()){
+                local RelevantVector = E:toLocalAxis(R:hitNormal())*vec(1,0,1)
+                local Phi = elevation(vec(),ang(90,0,0),RelevantVector)
+                FootAngle = ang(Phi,0,0)
+            }
+            
+            holoAng(5,E:toWorld(HipAngle))
+            holoAng(93,E:toWorld(KneeAngle))
+            holoAng(6,E:toWorld(FootAngle))
+        }
+        
+        local Thigh = 12*Scale
+        local Shin = 24*Scale
+        local Hip = holoEntity(7)
+        local Knee = holoEntity(94)
+        local Foot = holoEntity(8)
+        local R = rangerOffset(Hip:pos(),E:toWorld(vec(-20,7,-36)*Scale+RLP))
+        local TreadPos = (E:toLocal(R:pos())+vec(0,-7,0)*Scale)*vec(1,-1,1) + vec(0,7,0)*Scale
+        #print(E:toLocal(Hip:pos()))
+        #print(round(TreadPos))
+        if((TreadPos==RLPO) & (RLPQ<10)){
+            RLPQ++
+        }elseif(TreadPos!=RLPO){
+            RLPQ = 0
+        }
+        RLPO = TreadPos
+        if(RLPQ<10){
+            
+            local Distance = clamp(R:distance(),20*Scale,Shin+Thigh-1)
+            local Theta_a = acos((Shin^2 + Thigh^2 - Distance^2)/(2*Thigh*Shin)) #Knee
+            local Theta_b = asin((Shin/Distance)*sin(Theta_a)) #Hip
+            local Theta_c = 180 - Theta_a - Theta_b #Foot
+            local Axis = TreadPos - vec(-20,7,0)*Scale
+            local Ang_h_f = -heading(vec(),ang(-90,0,0),-Axis) + ang(-90,0,0)
+        
+            local HipAngle = Ang_h_f:rotateAroundAxis(vec(0,1,0),-Theta_b+90)#:rotateAroundAxis(Axis,Ang_h_f:yaw())
+            local KneeAngle = Ang_h_f:rotateAroundAxis(vec(0,1,0),Theta_c+90)#:rotateAroundAxis(Axis,Ang_h_f:yaw())
+            
+            local FootAngle = ang(15,0,0)
+            if(R:hit()){
+                local RelevantVector = E:toLocalAxis(R:hitNormal())*vec(1,0,1)
+                local Phi = elevation(vec(),ang(90,0,0),RelevantVector)
+                FootAngle = ang(Phi,0,0)
+            }
+            
+            holoAng(7,E:toWorld(HipAngle))
+            holoAng(94,E:toWorld(KneeAngle))
+            holoAng(8,E:toWorld(FootAngle))
+        }
+        
+        local Thigh = 12*Scale
+        local Shin = 24*Scale
+        local Hip = holoEntity(9)
+        local Knee = holoEntity(95)
+        local Foot = holoEntity(10)
+        local R = rangerOffset(Hip:pos(),E:toWorld(vec(-20,-7,-36)*Scale+RRP))
+        local TreadPos = (E:toLocal(R:pos())+vec(0,7,0)*Scale)*vec(1,-1,1) + vec(0,-7,0)*Scale
+        if((TreadPos==RRPO) & (RRPQ<10)){
+            RRPQ++
+        }elseif(TreadPos!=RRPO){
+            RRPQ = 0
+        }
+        RRPO = TreadPos
+        if(1){
+            local Distance = clamp(R:distance(),20*Scale,Shin+Thigh-1)
+            local Theta_a = acos((Shin^2 + Thigh^2 - Distance^2)/(2*Thigh*Shin)) #Knee
+            local Theta_b = asin((Shin/Distance)*sin(Theta_a)) #Hip
+            local Theta_c = 180 - Theta_a - Theta_b #Foot
+            local Axis = TreadPos - vec(-20,-7,0)*Scale
+            local Ang_h_f = -heading(vec(),ang(-90,0,0),-Axis) + ang(-90,0,0)
+            #print(Theta_a, Theta_b, Theta_c)
+            local HipAngle = Ang_h_f:rotateAroundAxis(vec(0,1,0),-Theta_b+90)#:rotateAroundAxis(Axis,Ang_h_f:yaw())
+            local KneeAngle = Ang_h_f:rotateAroundAxis(vec(0,1,0),Theta_c+90)#:rotateAroundAxis(Axis,Ang_h_f:yaw())
+            
+            local FootAngle = ang(15,0,0)
+            if(R:hit()){
+                local RelevantVector = E:toLocalAxis(R:hitNormal())*vec(1,0,1)
+                local Phi = elevation(vec(),ang(90,0,0),RelevantVector)
+                FootAngle = ang(Phi,0,0)
+            }
+            
+            holoAng(9,E:toWorld(HipAngle))
+            holoAng(95,E:toWorld(KneeAngle))
+            holoAng(10,E:toWorld(FootAngle))
+        }
+        return void
+    }
+        
+    function void entity:poseTail(Pitch,Yaw,Voffset,PoseType,Scale){
+        local HitSolid = 1
+        if((PoseType>0)){
+            local E = entity()
+            local TailRanger = rangerOffset(32,E:toWorld(vec(-36,0,-18)*Scale),-E:up())
+            HitSolid = TailRanger:hit()
+            #print(HitSolid)
+        }
+        if(HitSolid){
+            Yaw = clamp(Yaw,-20,20)
+            
+            holoPos(64,holoEntity(11):toWorld(vec(-16,-Yaw/9,0)*Scale))
+            holoPos(65,holoEntity(64):toWorld(vec(-16,-Yaw/9,0)*Scale))
+            holoPos(66,holoEntity(65):toWorld(vec(-16,-Yaw/9,0)*Scale))
+            
+            holoAng(11,This:toWorld(ang(Pitch,Yaw,0)))
+            holoAng(64,This:toWorld(ang(Pitch,Yaw*2,0)))
+            holoAng(65,This:toWorld(ang(Pitch,Yaw*3,0)))
+            holoAng(66,This:toWorld(ang(Pitch,Yaw*4,0)))
+            
+            holoPos(11,holoEntity(0):toWorld(vec(-28,0,0)*Scale) + Voffset*This:up()*Scale)
+        }elseif(PoseType==1){ #Sitting
+            local PitchDown = 10
+            local H0 = holoEntity(0)
+            holoPos(64,holoEntity(11):toWorld(vec(-16,0,-PitchDown/9)*Scale))
+            holoPos(65,holoEntity(64):toWorld(vec(-16,0,-PitchDown/9)*Scale))
+            holoPos(66,holoEntity(65):toWorld(vec(-16,0,-PitchDown/9)*Scale))
+            
+            holoAng(11,H0:toWorld(ang(-PitchDown*1,0,0)))
+            holoAng(64,H0:toWorld(ang(-PitchDown*2,0,0)))
+            holoAng(65,H0:toWorld(ang(-PitchDown*3,0,0)))
+            holoAng(66,H0:toWorld(ang(-PitchDown*4,0,0)))
+            holoPos(11,holoEntity(0):toWorld(vec(-28,0,0)*Scale) + Voffset*This:up()*Scale)
+        }elseif(PoseType==2){ #Lying etc
+            local PitchDown = 10
+            local H0 = holoEntity(0)
+            holoPos(64,holoEntity(11):toWorld(vec(-16,0,-PitchDown/9)*Scale))
+            holoPos(65,holoEntity(64):toWorld(vec(-16,0,-PitchDown/9)*Scale))
+            holoPos(66,holoEntity(65):toWorld(vec(-16,0,-PitchDown/9)*Scale))
+            
+            holoAng(11,H0:toWorld(ang(-PitchDown*3,0,0)))
+            holoAng(64,H0:toWorld(ang(-PitchDown*4,0,0)))
+            holoAng(65,H0:toWorld(ang(-PitchDown*5,0,0)))
+            holoAng(66,H0:toWorld(ang(-PitchDown*6,0,0)))
+            holoPos(11,holoEntity(0):toWorld(vec(-28,0,0)*Scale) + Voffset*This:up()*Scale)
+        } 
+        
+        return void
+    }
+    
+    function void entity:poseJaw(Angle,Scale){
+        local HA = holoEntity(2)
+        Angle = clamp(Angle,0,30)
+        
+        holoAng(35,HA:toWorld(ang(Angle,0,0)))
+        holoPos(35,HA:toWorld(vec(6,0,-4 - Angle*4/30)*Scale))
+
+        return void
+    }
+
+    function void dytri(HoloIndex,Pos1:vector,Pos2:vector,Pos3:vector){
+        local H = holoEntity(HoloIndex)
+        local Center = (Pos1+Pos2+Pos3)/3
+    
+        local L12 = (Pos2-Pos1)
+        local L23 = (Pos3-Pos2)
+        local L13 = (Pos3-Pos1)
+        
+        local Normal = L12:cross(L23):normalized()
+        local NA = Normal:toAngle()
+        local NR = NA:rotateAroundAxis(NA:right(),-90)
+        local Bearing = -bearing(Center,NR,Pos1)
+        
+        local Angle = NA:rotateAroundAxis(Normal,Bearing):rotateAroundAxis((Center-Pos1):cross(Normal),90)
+        
+        local FWD = Center-Pos1
+        local Theta12 = acos((FWD:dot(L12))/(FWD:length()*L12:length()))
+        local Adj12 = L12:length()*cos(Theta12)
+        local Theta13 = acos((FWD:dot(L13))/(FWD:length()*L13:length()))
+        local Adj13 = L13:length()*cos(Theta13)
+        
+        local SQS = max(Adj12,Adj13)
+        local SQP = Pos1 + FWD:normalized()*SQS/2
+        
+        local CA12 = -L12:cross(Normal)
+        local CA23 = -L23:cross(Normal)
+        local CA13 = L13:cross(Normal)
+        
+        holoPos(HoloIndex,SQP)
+        holoAng(HoloIndex,Angle)
+        holoScale(HoloIndex,vec((SQS+6)/12,(SQS+6)/12,0.003125))
+        
+        holoClip(HoloIndex,1,H:toLocal(Pos1),H:toLocalAxis(CA12),0)
+        holoClip(HoloIndex,2,H:toLocal(Pos2),H:toLocalAxis(CA23),0)
+        holoClip(HoloIndex,3,H:toLocal(Pos1),H:toLocalAxis(CA13),0)
+        return void
+    }
+    
+    function void entity:poseWings(ShoulderYaw, ShoulderPitchUp, ShoulderRollUp, Splay, Flap, Offset, Scale){
+        
+        local JL = holoEntity(12)
+        local JR = holoEntity(14)
+        
+        local ShoulderAngle1 = ang():rotateAroundAxis(vec(0,0,1),-ShoulderYaw):rotateAroundAxis(vec(0,1,0),-ShoulderPitchUp)
+        
+        local ALS = ShoulderAngle1:rotateAroundAxis(vec(1,0,0),ShoulderRollUp + Offset)
+        local ARS = (ShoulderAngle1:rotateAroundAxis(vec(1,0,0),ShoulderRollUp) - Offset)*ang(1,-1,-1)
+        
+        local LH1 = ALS:rotateAroundAxis(ALS:up(),-Splay*3 + 180) + ang(0,0,Flap*60)
+        local LH2 = ALS:rotateAroundAxis(ALS:up(),-Splay*2 + 180) + ang(0,0,Flap*40)
+        local LH3 = ALS:rotateAroundAxis(ALS:up(),-Splay + 180) + ang(0,0,Flap*20)
+        
+        local RH1 = LH1*ang(1,-1,-1)
+        local RH2 = LH2*ang(1,-1,-1)
+        local RH3 = LH3*ang(1,-1,-1)
+        
+        holoAng(12,This:toWorld(ALS))
+        holoAng(70,This:toWorld(LH1))
+        holoAng(71,This:toWorld(LH2))
+        holoAng(72,This:toWorld(LH3))
+        
+        holoAng(14,This:toWorld(ARS))
+        holoAng(80,This:toWorld(RH1))
+        holoAng(81,This:toWorld(RH2))
+        holoAng(82,This:toWorld(RH3))
+        
+        local PLWH = JL:toWorld(vec(0,36,0)*Scale)
+        local PLWJ = JL:pos()
+        local PRWH = JR:toWorld(vec(0,-36,0)*Scale)
+        local PRWJ = JR:pos()
+        
+        dytri(76,PLWH,PLWH-48*This:toWorld(LH1):right()*Scale,PLWH-48*This:toWorld(LH2):right()*Scale)
+        dytri(77,PLWH,PLWH-48*This:toWorld(LH2):right()*Scale,PLWH-48*This:toWorld(LH3):right()*Scale)
+        dytri(78,PLWH,PLWH-48*This:toWorld(LH3):right()*Scale,PLWJ)
+        
+        dytri(89,PRWH,PRWH+48*This:toWorld(RH1):right()*Scale,PRWH+48*This:toWorld(RH2):right()*Scale)
+        dytri(90,PRWH,PRWH+48*This:toWorld(RH2):right()*Scale,PRWH+48*This:toWorld(RH3):right()*Scale)
+        dytri(91,PRWH,PRWH+48*This:toWorld(RH3):right()*Scale,PRWJ)
+
+        return void
+    }
+    
+    E = entity()
+    E:setName("[Dragonscript Cosmetic Tool 2]\n"+Name+"\nRendering..."+"\nVersion "+Version)
+    E:propShadow(0)
+    E:setAlpha(0)
+    timer("holos1",10)
+    PopPitch = 100
+    
+}
+elseif(clk("holos1")){
+Ang0 = ang()
+    local V1 = vec(1)
+    
+    P0 = E:pos()
+    PH = P0+vec(48,0,22)*Scale
+    PLWJ = P0 + vec(12,13,0)*Scale
+    PLWH = PLWJ + vec(0,36,0)*Scale
+    PRWJ = P0 + vec(12,-13,0)*Scale
+    PRWH = PRWJ + vec(0,-36,0)*Scale
+    holoSkeleton(P0,PH,PLWJ,PLWH,PRWJ,PRWH,Scale)
+    holos1(P0, PH, ColorBody, ColorEye, Material, Scale, Baby)
+    DragonHead = holoEntity(2)
+    E:poseJaw(0,Scale)
+    
+    soundPlay(0,1,"garrysmod/balloon_pop_cute.wav")
+    soundPitch(0,PopPitch)
+    PopPitch += 10
+    timer("holos2",1000)
+}elseif(clk("holos2")){
+    holos2(PLWJ, PLWH, PRWJ, PRWH, ColorBody, ColorWings, Material, Scale)
+    soundPlay(0,1,"garrysmod/balloon_pop_cute.wav")
+    soundPitch(0,PopPitch)
+    PopPitch += 10
+    timer("holos3",1000)
+}elseif(clk("holos3")){
+    
+    holos3(PLWJ, PLWH, PRWJ, PRWH, ColorBody, ColorWings, Material, Scale)
+    
+    dytri(76,PLWH,PLWH-48*LH1:right()*Scale,PLWH-48*LH2:right()*Scale)
+    dytri(77,PLWH,PLWH-48*LH2:right()*Scale,PLWH-48*LH3:right()*Scale)
+    dytri(78,PLWH,PLWH-48*LH3:right()*Scale,PLWJ)
+    
+    dytri(89,PRWH,PRWH+48*RH1:right()*Scale,PRWH+48*RH2:right()*Scale)
+    dytri(90,PRWH,PRWH+48*RH2:right()*Scale,PRWH+48*RH3:right()*Scale)
+    dytri(91,PRWH,PRWH+48*RH3:right()*Scale,PRWJ)
+    
+    soundPlay(0,1,"garrysmod/balloon_pop_cute.wav")
+    soundPitch(0,PopPitch)
+    PopPitch += 10
+    timer("holos4",100)
+    
+}elseif(clk("holos4")){
+
+    if(Sex){
+        holosEyelashes(P0, PH, ColorBody, Material, Scale)
+    }
+    holoEyeClips(P0, PH, ColorBody, Material, Scale, Baby)
+    holosMisc(P0, PH, ColorBody, Material, Scale)
+    holoColor(118,Sex ? vec(127,255,0) : vec(255))
+    holosFX()
+    soundPlay(0,1,"garrysmod/balloon_pop_cute.wav")
+    soundPitch(0,PopPitch)
+    PopPitch += 10
+    timer("holos5",100)
+}elseif(clk("holos5")){
+    
+    holoPos(0,E:toWorld(vec(0,0,-18 + 36*Scale)))
+    holoAng(0,E:angles())
+    E:poseTail(-15,0,0,0,Scale)
+    
+    soundPlay(0,1,"garrysmod/balloon_pop_cute.wav")
+    soundPitch(0,PopPitch)
+    PopPitch += 10
+    
+    if(CosmeticTable:count() != 0){ #load faster if we have no cosmetics
+        CIndex = 0
+        timer("holos6",1000)
+    }else{
+        timer("parentseats",100)
+    }
+}elseif(clk("holos6")){
+    local NumCosmetics = CosmeticTable:count()
+    
+    local DidCreate = 0
+    local Keys = CosmeticTable:keys()
+    while(holoCanCreate() & CIndex < NumCosmetics & perf()){
+        DidCreate = 1
+        CIndex++
+        cosmeticRender(Keys[CIndex,number])
+    }
+    if(DidCreate){
+        soundPlay(0,1,"garrysmod/balloon_pop_cute.wav")
+        soundPitch(0,PopPitch)
+        PopPitch += 10
+    }
+    
+    if(CIndex < NumCosmetics){
+        timer("holos6",100)
+    }else{
+        timer("parentseats",500)
+    }
+}elseif(clk("parentseats")){
+    
+    holoEntity(0):poseWings(30,0,75,22.5,0,0,Scale)
+    holoEntity(0):iklegs(vec(0),vec(0),vec(0),vec(0),Scale)
+    soundPlay(0,1,"npc/roller/remote_yes.wav")
+    E:setName("[Dragonscript Cosmetic Tool 2]\n"+Name+"\nVersion "+Version)
+  
+}

@@ -1,4 +1,4 @@
-# Dragonscript (Magnum's Dragon V2.0.3)
+# Dragonscript (Magnum's Dragon V2.1.0)
 The New and Improved Dragon Script (E2) for Garry's Mod.
 ## Installation Instructions
 Note, if you do not **follow these instructions _exactly,_**

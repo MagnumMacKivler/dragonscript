@@ -1,3 +1,3 @@
-version:2.0.3
-name:Here Be Dragons!
-changelog:Added the ".chatroom" command. Get the new update at - "github.com/MagnumMacKivler/dragonscript/" Note - Old dragons and new dragons chat log display aren't compatible.
+version:2.1.0
+name:Time To Socialize!
+changelog:Massive update. Completely new cosmetic system. New chat related commands and features, localized physics changes, and a lot more. Check out the Github.

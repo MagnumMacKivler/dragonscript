@@ -7,54 +7,6 @@
 #For draconic care instructions, please see dragonscript/How_To_Maintain_Your_Dragon.txt!
 #For updates for the Dragonscript E2, check out where you probably got it: https://github.com/MagnumMacKivler/dragonscript
 
-# To-Do (Monk)
-# semi-localize running
-# localize sliding
-# kerning for text - per font?
-# sleeping poses
-# pose wing command
-# global chat print (requires an extension)
-# follow flying (paper mario pathfinding)
-# general pathfinding algo
-# experiment with making CrashRanger (flying) follow FlyVelW
-# wing clipping use local ents
-# add cosmeticScaleMul, cosmeticPosOffset, cosmeticAngOffset
-# make cosmetics load in order
-# when dragons talk, make other dragons look at talking source - maybe
-# possible sortMSG tick quota
-# add in cam controller
-#   add alternate movement mode - mouse for movement, acts like a third person game
-# use clamping for the rest of speed modulation
-
-#To-Do (Mag)
-# expose a lot of things to the config as variables and functions... big item. may want to include a variable init include before config to allow overriding variables.
-# Alert (!) and Question (?) commands
-
-# Changelog (Monk)
-# Fixed .me and .event not working with prenames correctly.
-# Fixed speech bubble fading with .me text.
-# Dragon now resets when spawned by dupe to fix dupe persist issues.
-# Turning on the spot now has a small radius to make things more natural.
-# Simplified some walk modulation code.
-# Fixed tick quotas or various other acts of divine intervention futzing up the local dragon table, which bricked the owners chat until server restart.
-# Fixed a start timer being in the first block.
-# Added .reset.
-# Fixed an unending while loop if you forgot to put a quote in a .say command.
-
-# Changelog (Mag)
-# Added dragonscript/init to store @persists and set initial variable states... configs now only change what's set in there instead of defining new variables.
-# Changed ColorEye to affect the sclera instead of the pupil, added ColorPupil, ColorEyeLid, MatEye, MatPupil, MatEyeLid
-# Added tears config variables and .cry command
-# Added tongue and .blep command
-# Added speech bubble Font config variable and .font command
-# Changed setting Baby=2 in config doesn't force body scale to 0.5
-# Added three new expressions: flustered, scared, and worried.
-# Added prefix and suffix variables to keep all the extra darg info from cluttering up the chat name
-# Added .crouch command, fixed pose changes to/from crouch retaining height offset
-# Fixed dragon not running in follow mode, added .allowrun
-# Fixed dragon tail not behaving correctly at large/small scales
-# Added .mlem command
-
 if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init", setName("Magnums Dragon 2")
     Version = "2.2.0"
     

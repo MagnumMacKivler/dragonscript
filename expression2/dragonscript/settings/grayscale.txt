@@ -1,7 +1,5 @@
 @name dragonscript/settings/grayscale
-@persist Name:string Sex [ColorBody ColorWings ColorEye]:vector Material:string #Metadata
-@persist Baby #Scaling stuff
-@persist #Whatever you like!
+@persist #Whatever you need for custom cosmetic code to work!
 function cosmeticAdd(){} 
 function cosmeticSet(){}
 function number cosmeticGet(){}
@@ -21,20 +19,29 @@ function cosmeticClip(){}
 function cosmeticSubMaterial(){}
 function cosmeticBodyGroup(){}
 function cosmeticDelete(){}
+function number cosmeticFudge(){}
 #include "dragonscript/cosmeticlib"
-SettingsVersion = "2.1.0" #Don't touch this
-
+SettingsVersion = "2.2.0" #Don't touch this
+    
 #--Config Start!--
+Prefix = "" #Additional name text that comes before the actual name, ignored by chat/search. Add spaces or newlines (\n) here.
+Name = "Grayscale Sikseff" #What is the name of your dragon? This is used for chat and search functions.
+Suffix = "\nThe Default Dragon" #Additional name text that comes after the actual name, ignored by chat/search. Add spaces or newlines (\n) here.
 
-Name = "Grayscale" #What is the name of your dragon?
 Sex = 0 #0 for Male, 1 for Female
+Scale = 1 #Scale factor: 1 for Adult.
+Baby = 0 #Adjusts eye and body scale. 0 = Adult, 1 = Baby Eyes + Baby Scale (0.5), 2 = Baby Eyes (Set Scale Normally).
+
 ColorBody = vec(255,255,255) #The color of the dragon's body
 ColorWings = vec(143,143,143) #The color of the dragon's wings
-ColorEye = vec(0) #The color of the eyes, best with black, works with some other colors
 Material = "sprops/textures/sprops_metal5" #The material used for the dragon's skin
 
-Scale = 1 #Scale factor: 1 for Adult.
-Baby = 0 #Forces scale to 0.5
+ColorEye = vec(255) #The color of the "whites" of the eyes (the sclera)
+ColorEyeLid = ColorBody*0.75 #The color for the dragon's eyelids. Normally a slightly darkened copy of the body color.
+ColorPupil = vec(0,0,0) #The color of the pupils, best with black, works with some other colors
+MatEye = "debug/debugdrawflat" #The material for the dragon's eyes (sclera).
+MatEyeLid = Material #The material for the dragon's eyelids. Normally a copy of the skin material.
+MatPupil = MatEye #The material for the dragon's pupils.
 
 #You can put any custom code you like into this function. It runs every time the chip executes for any reason.
 function void customConfigCode(){
@@ -53,6 +60,8 @@ function void cosmeticDelay2(){
 CosDelay3 = 0
 function void cosmeticDelay3(){
 }
+
+
 
 #[
 
@@ -284,4 +293,3 @@ Body List:
     Lantern
     FireBall
 ]#
-

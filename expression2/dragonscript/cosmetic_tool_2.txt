@@ -1,16 +1,18 @@
 @name dragonscript/Cosmetic_Tool_2
 @inputs 
 @outputs 
-@persist [P0 PH PLWJ PRWJ PLWH PRWH]:vector Ang0:angle [LH1 LH2 LH3 RH1 RH2 RH3]:entity CIndex #Holo/Skeleon Shit
+#@persist [P0 PH PLWJ PRWJ PLWH PRWH]:vector Ang0:angle [LH1 LH2 LH3 RH1 RH2 RH3]:entity CIndex #Holo/Skeleon Shit
 @persist [FLPO FRPO RLPO RRPO]:vector FLPQ FRPQ RLPQ RRPQ
-@persist E:entity PopPitch Version:string
+#@persist E:entity PopPitch Version:string
 @trigger
 @model models/hunter/blocks/cube075x075x075.mdl
 
 if(first()|duped()){
+    #include "dragonscript/init"
+    
     
     #Put your config file in here
-    #include "dragonscript/settings/grayscale"
+    #include "dragonscript/settings/random_ba2"
     
     cosmeticHandleDelay(CosDelay1,CosDelay2,CosDelay3) #Don't touch this
     entity():setName("[Dragonscript Cosmetic Tool 2]\n"+Name+"\nLoading cosmetics..."+"\nVersion "+Version) #Don't touch this either
@@ -19,7 +21,7 @@ if(first()|duped()){
 
     #Don't touch past this!
     
-    Version = "2.1.0"
+    Version = "2.2.0"
     #include "dragonscript/hologen"
 
     # ported animation functions
@@ -339,7 +341,7 @@ Ang0 = ang()
     PRWJ = P0 + vec(12,-13,0)*Scale
     PRWH = PRWJ + vec(0,-36,0)*Scale
     holoSkeleton(P0,PH,PLWJ,PLWH,PRWJ,PRWH,Scale)
-    holos1(P0, PH, ColorBody, ColorEye, Material, Scale, Baby)
+    holos1(P0, PH, ColorBody, ColorEye, ColorPupil, MatEye, MatPupil, Material, Scale, Baby)
     DragonHead = holoEntity(2)
     E:poseJaw(0,Scale)
     

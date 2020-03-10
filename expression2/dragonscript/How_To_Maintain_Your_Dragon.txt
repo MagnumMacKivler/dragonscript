@@ -1,6 +1,6 @@
 @name dragonscript/How_To_Maintain_Your_Dragon
 @model models/props_lab/binderredlabel.mdl
-setName("How to Maintain your Dragon\nRelease 2.1.0")
+setName("How to Maintain your Dragon\nRelease 2.2.0")
 #[
     
     
@@ -12,9 +12,9 @@ setName("How to Maintain your Dragon\nRelease 2.1.0")
                                                                                |___/                                    |___/               
     
     ========================================================================================================================================
-                                                                Release Version 2.1.0
+                                                                Release Version 2.2.0
                                                       An Operation, Maintenance, and Survival Guide
-                                                        Copyright 2018-19 Magnum Technologies Inc.
+                                                        Copyright 2018-20 Magnum Technologies Inc.
     ========================================================================================================================================
     
     Thank you for purchasing this manual from Magnum Technologies Inc. We at MTI understand that dragonkeeping can be a confusing, difficult,
@@ -318,6 +318,9 @@ setName("How to Maintain your Dragon\nRelease 2.1.0")
     .release
     The .release command makes the dragon release from whichever prop it's riding.
     
+    .crouch
+    Toggles the dragon's crouching/climbing state.
+    
     -------
     UTILITY
     -------
@@ -364,6 +367,13 @@ setName("How to Maintain your Dragon\nRelease 2.1.0")
     .talkproximitymode
     Toggles between the chat log being proximity based or global.
     
+    .font [string fontname]
+    Changes the font used by the speech bubble. The default is WireGPU_ConsoleFont. Acceptable fonts are: "WireGPU_ConsoleFont", "Coolvetica", "Arial", "Lucida Console", "Trebuchet",
+    "Courier New", "Times New Roman", "ChatFont", "Marlett", and "Roboto". Not every font fits in the speech bubble, so be careful.
+    
+    .reset
+    Reloads the E2.
+    
     -----------
     PERSONALITY
     -----------
@@ -387,6 +397,9 @@ setName("How to Maintain your Dragon\nRelease 2.1.0")
     confused
     smug
     concerned
+    flustered
+    scared
+    worried
     
     A blank string reverts the dragon to normal (happy) expression.
     Putting a 1 for the Eyelids parameter makes the dragon's eyelids more prominent. This can have a significant effect on what the expression shows.
@@ -397,6 +410,9 @@ setName("How to Maintain your Dragon\nRelease 2.1.0")
     .wink [number Eye]
     The .wink command causes the dragon to wink. Passing a zero forces it to stop winking. Passing a 1 makes the left eye wink, and 2 makes the right eye wink. If no
     parameter is given, it wil toggle between winking the left eye and not winking at all.
+    
+    .cry [bool Enable]
+    Toggles tears at the corners of the dragon's eyes. Not emotion-dependent.
     
     .dance
     The .dance command toggles the dragon's dancing mode! While dancing, the dragon is unable to move (except by teleporting). Comes with music note effects.
@@ -423,6 +439,7 @@ setName("How to Maintain your Dragon\nRelease 2.1.0")
     Command: .say "Hello, d:lead" | Output: Grayscale says "Hello, Leadwing" (Still colored)
     
     .sayto (string name) [string expression] \"(string speech)\"
+    .talkto (string name) [string expression] \"(string speech)\"
     Also makes the dragon target, but at a specific target. Works like the previous .say supplied with a target, but is more rigid and requires a name.
     
     .chatroom [string chatroom]
@@ -442,6 +459,14 @@ setName("How to Maintain your Dragon\nRelease 2.1.0")
     Examples:
     .event A huge explosion sounds in the distance!
     .event The earth shakes, making d:grayscale fall over!
+    
+    .blep [number Angle]
+    Causes the dragon to stick their tongue out at the specified angle, or toggle on/off if no number is given.
+    
+    .mlem [bool Loop]
+    .kiss [bool Loop]
+    .lick [bool Loop]
+    Causes the dragon to doggie-kiss whatever it is looking at. If a 1 is given, the dragon will repeatedly lick until told to stop.
     
     .burp
     The .burp command forces the dragon to belch. It does not say "Excuse me" unless told to.

@@ -1,51 +1,67 @@
 @name dragonscript/Magnums Dragon 2
 @inputs [Seat1 Seat2 PodController1 PodController2 FlamePlate Igniter EGP FireLight LanternLight Crate Explosive User]:wirelink NextWeapon PrevWeapon
 @outputs Eject Eject2 CPU Flame_M Flame_F Ignite Explosion_M Explosion_F [FireColor LanternColor]:vector DragonHead:entity Following Cmere GoHere FollowTarget:entity LanternPos LanternEnergy LanternForce HoloEnts:array HoloScales:array
-@persist [P0 PH PLWJ PRWJ PLWH PRWH]:vector Ang0:angle [LH1 LH2 LH3 RH1 RH2 RH3]:entity CIndex #Holo/Skeleon Shit
-@persist Loading Driveable Driving Riding Sleeping Following #States
-@persist IdleLookTarget:entity HasLookTarget TailTheta StandMode StandTransitionQ #Idling Data
-@persist WalkSpeed WalkSpeedMax WalkAccel WalkTurnSpeed WalkTurnSpeedMax WalkTurnAccel LastPos:vector Pm1 Pm2 BodyAngle:angle NeedsReset BPitch WalkBobTheta WalkBobTheta2 Moving EjectQ #Walking Data
-@persist StandOn StandOnEntity:entity Climbing VkeyQ PhysPos:vector PhysAng:angle CollisionAvoidTick #Walking 2
-@persist RunSpeed RunSpeedMax RunAccel RunTheta1 JumpQ JumpPower RunRoll #Running Data
-@persist FallVelF FallVelZ #Freefall Data
-@persist FlyVelW:vector FlapQ FlapTheta FlapResetQ FlyTerminalVelocity FlyTurnMul FlyPitchVel FlyYawVel FlyRollVel FlyBobTheta #Flying Data
-@persist SlideSpeed SlideAccel #Sliding Data
-@persist SwimSpeed SwimSpeedMax SwimAccel SwimTurnSpeed SwimTurnSpeedMax SwimTurnAccel SwimTheta SwimTheta2 SwishQ TreadWater #Swimming Data
-@persist FireQ Flaming FireExpression:string FireColorFactor ForceFire #Fire Breath
-@persist FireBallPos:vector FireBallVelW:vector FireBallQ FireBallLaunchVel FireBallGravity FireBallRoll Supercharged FireChargeQ #Fireball
-@persist UserStep Pressing PressParm PressTarget:vector FootPos:vector #User
-@persist RoarQ VoScale #Rawr Colon Three
-@persist RidingEntity:entity HeadLock HeadLockAngle:angle #Prop Surfing
-@persist CurlDirection ShutEyesQ Snoring ZTheta1 ZTheta2 ZTheta3 ZQ #Sleeping
-@persist LanternQ LanternOn DefaultLanternColor:vector #Lantern
-@persist SpeakBubbleTimeout SpeakAlpha SpeakFading Speaking SpeakType TalkingTo TalkPrintMode TalkProximityMode SpeakIndex TargetText:string MSGSortString:string #Speaking
-@persist Eating EatIndex Chewing ChewN Bite EATarget:entity CannotEat:array PropsEaten Belching EatQ #Eating
-@persist Dazed DazedTheta Recovering Crashing ShakeAng ShakeQ #Fender Bender
-@persist Loving LoveTheta1 LoveTheta2 LoveTheta3 LoveQ #Love and Affection
-@persist Dancing DanceTheta1 NoteTheta1 NoteTheta2 NoteTheta3 NoteQ DanceStyle #Get down and Boogey
-@persist [E O]:entity IdleBlinkInterval IdleBlinkHoldtime Blinking GetInQ1 GetInQ2 DefaultExpression:string DefaultExpressionEyelids DefaultSquint Wink ClosedEyes JawAngleMaster SitAngleCorrect Active1 Weapon WeaponQ WeaponAlpha Freeze MinScale MaxScale PopPitch #Misc
-@persist CameraOn FirstPerson #Camera
-@persist GTpos:vector GTang:angle TeleLock #Needateleportahere
-@persist Carrying CarryObject:entity PickupQ DragonPos:vector #Object Carrying
-@persist FollowTarget:entity GoHerePos:vector GoHere Cmere Greet FollowDisp:vector FollowSpeedTarget FWL:wirelink FollowQ #Follow Freeman!
-@persist Ragdoll RagdollStep NoCosmetics #Ragdoll stuff
-@persist Version:string AnimVersion:string HoloVersion:string SettingsVersion:string #Version Info
-@persist DTable:gtable LDTable:gtable DragonFindName:string DragonFindArray:array Chatroom:string # Global-Based Stuff
-@persist JayMode # henlo
 @trigger NextWeapon PrevWeapon
 @model models/hunter/blocks/cube075x075x075.mdl
 
 #For draconic care instructions, please see dragonscript/How_To_Maintain_Your_Dragon.txt!
 #For updates for the Dragonscript E2, check out where you probably got it: https://github.com/MagnumMacKivler/dragonscript
 
-if(first()|duped()){
-    timer("start",1000)
-    Version = "2.1.0"
+# To-Do (Monk)
+# semi-localize running
+# localize sliding
+# kerning for text - per font?
+# sleeping poses
+# pose wing command
+# global chat print (requires an extension)
+# follow flying (paper mario pathfinding)
+# general pathfinding algo
+# experiment with making CrashRanger (flying) follow FlyVelW
+# wing clipping use local ents
+# add cosmeticScaleMul, cosmeticPosOffset, cosmeticAngOffset
+# make cosmetics load in order
+# when dragons talk, make other dragons look at talking source - maybe
+# possible sortMSG tick quota
+# add in cam controller
+#   add alternate movement mode - mouse for movement, acts like a third person game
+# use clamping for the rest of speed modulation
+
+#To-Do (Mag)
+# expose a lot of things to the config as variables and functions... big item. may want to include a variable init include before config to allow overriding variables.
+# Alert (!) and Question (?) commands
+
+# Changelog (Monk)
+# Fixed .me and .event not working with prenames correctly.
+# Fixed speech bubble fading with .me text.
+# Dragon now resets when spawned by dupe to fix dupe persist issues.
+# Turning on the spot now has a small radius to make things more natural.
+# Simplified some walk modulation code.
+# Fixed tick quotas or various other acts of divine intervention futzing up the local dragon table, which bricked the owners chat until server restart.
+# Fixed a start timer being in the first block.
+# Added .reset.
+# Fixed an unending while loop if you forgot to put a quote in a .say command.
+
+# Changelog (Mag)
+# Added dragonscript/init to store @persists and set initial variable states... configs now only change what's set in there instead of defining new variables.
+# Changed ColorEye to affect the sclera instead of the pupil, added ColorPupil, ColorEyeLid, MatEye, MatPupil, MatEyeLid
+# Added tears config variables and .cry command
+# Added tongue and .blep command
+# Added speech bubble Font config variable and .font command
+# Changed setting Baby=2 in config doesn't force body scale to 0.5
+# Added three new expressions: flustered, scared, and worried.
+# Added prefix and suffix variables to keep all the extra darg info from cluttering up the chat name
+# Added .crouch command, fixed pose changes to/from crouch retaining height offset
+# Fixed dragon not running in follow mode, added .allowrun
+# Fixed dragon tail not behaving correctly at large/small scales
+# Added .mlem command
+
+if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init", setName("Magnums Dragon 2")
+    Version = "2.2.0"
     
     #Config: Which Dragon Settings file do you want to load?
     #include "dragonscript/settings/grayscale"
     
-    cosmeticHandleDelay(CosDelay1,CosDelay2,CosDelay3) #Don't touch this
+    cosmeticHandleDelay(CosDelay1,CosDelay2,CosDelay3) 
     
 }elseif(clk("cosdelay1")){cosmeticDelay1()}elseif(clk("cosdelay2")){cosmeticDelay2()}elseif(clk("cosdelay3")){cosmeticDelay3()}elseif(clk("start")){
     
@@ -59,96 +75,92 @@ if(first()|duped()){
     ForceBaby = 0 #Force your dragon to be a baby? Overrides everything.
     Freeze = 0 #Disable Blinking and Idle Animations.
     
-    #The following three variables can be set in the settings config:
-    #DefaultExpression [normal/happy/annoyed/sad/angry/concerned/confused/smug]
-    #DefaultExpressionEyelids [1/0]
-    #DefaultSquint [1/0]
-    
     #Don't touch anything past this point.
     
     #include "dragonscript/animations"
     #include "dragonscript/hologen"
     
+    #Non-Optional Init: stuff the config shouldn't normally be allowed to change.
+    
     E = entity()
     O = owner()
-        
-    WalkSpeedMax = 16
-    WalkAccel = 2
-    WalkTurnSpeedMax = 10
-    WalkTurnAccel = 2
-    
-    RunSpeedMax = 128
-    RunAccel = 4
-    
-    JumpPower = 72
-    
-    FlyTerminalVelocity = 192
-    FlyTurnMul = 0.5
-    
-    SlideAccel = 8
-    
-    SwimSpeedMax = 12
-    SwimAccel = 1
-    SwimTurnSpeedMax = 3
-    SwimTurnAccel = 1
-    
-    IdleBlinkInterval = 3000
-    IdleBlinkHoldtime = 500
-    
     Loading = 1
+    CosDelay1 = CosDelay2 = CosDelay3 = 0
     
-    StandMode = 0 #Testing only
+    MinScale = 0.65 #Minimum Rideable scale, anything lower will cause splat if anyone tries to get on
+    
+    JawAngleMaster = 0
+    MinJawAngle = 0
+    
     StandTransitionQ = 1
     
-    if(DefaultExpression==""){
-        DefaultExpression = "normal"
-    }
-    #DefaultExpressionEyelids = 0
-    
-    FireExpression = "angry"
-    
-    SpeakBubbleTimeout = 10
-    
-    DefaultLanternColor = vec(255,255,200)
-    
-    FireBallLaunchVel = 256
-    FireBallGravity = 2
-    
-    if(Baby|ForceBaby){
+    if((Baby==1)|ForceBaby){
         Scale = 0.5
         Baby = 1
     }elseif(ForceScale!=0){
         Scale = min(ForceScale,3)
     }
     
-    MinScale = 0.65
-    
     VoScale = 1 + (Scale-1)/3  
     runOnChat(1)
     runOnLast(1)
     PodController1["Crosshairs",number] = 1
 
-    setName(Name + "\n" + (Sex ? "(Female)" : "(Male)")+"\nVersion "+Version)
+    setName(Prefix + Name + Suffix + "\n" + (Sex ? "(Female)" : "(Male)")+"\nVersion "+Version)
     
-    Chatroom = "all"
     signalSetGroup("magdragons")
     runOnSignal(Chatroom,2,1)
     runOnSignal("forcedmessage",0,1)
     
-    DTable = gTable("dtable",1)
+    # need to set up here, to check on the global tables
+    function number entity:isDragon(){
+        if(This:type()=="gmod_wire_expression2"){
+            local Wirelink = This:wirelink()
+            local HeadHolo = Wirelink["DragonHead",entity]
+            if(HeadHolo){
+                return 1
+            }
+        }
+        return 0
+    }
     
+    DTable = gTable("dtable",1)
     LDTable = gTable("ldtable")
+    
+    # local dragons
     local Ent_Ids = LDTable["ent_ids",array]
     local LDragons = LDTable["dragons",array]
     if(LDragons:count() == 0){ LDragons = array(O) } # array is just used for proximity chat - so we need to include the player too
+    
+    # checking for invalids
+    foreach(K,V:number=Ent_Ids){
+        if(!(entity(V):isDragon())){
+            Ent_Ids:remove(K)
+        }
+    }
+    foreach(K,V:entity=LDragons){
+        if(!V:isDragon() & !V:isPlayer()){
+            LDragons:remove(K)
+        }
+    }
 
+    local EntIdCleared = 1 # checking if our entity is already in the table
+    foreach(K,V:number=Ent_Ids){
+        if(V == E:id()){ EntIdCleared = 0 }
+    }
+    if(EntIdCleared){ Ent_Ids:pushNumber(E:id()) } # stupid returning number BS
     
-    Ent_Ids:pushNumber(E:id()) # stupid returning number BS
+    local EntCleared = 1
+    foreach(K,V:entity=LDragons){
+        if(V == E){ EntCleared = 0 }
+    }
+    if(EntCleared){ LDragons:pushEntity(E) }
+    
+    # not required, probably
     LDTable["ent_ids",array] = Ent_Ids
-    
-    LDragons:pushEntity(E)
     LDTable["dragons",array] = LDragons
     
+    # global dragons
     if(DTable:toTable():exists("dragons")){
         DTable["dragons",table][E:id() + "_" + Name,array] = array(O,E,Name,Sex,ColorBody,Scale,Baby,Version)
     }else{
@@ -234,17 +246,6 @@ if(first()|duped()){
             }
         }
         return noentity()
-    }
-    
-    function number entity:isDragon(){
-        if(This:type()=="gmod_wire_expression2"){
-            local Wirelink = This:wirelink()
-            local HeadHolo = Wirelink["DragonHead",entity]
-            if(HeadHolo){
-                return 1
-            }
-        }
-        return 0
     }
     
     # finding dragons with d:
@@ -347,6 +348,10 @@ if(first()|duped()){
                     if(Target != ""){ PrintArray = array(Color,Name,vec(255),", in a cloud of confusion, says to ",TargetColor,Target,vec(255), ": \""):add(MSG)
                     }else{ PrintArray = array(Color,Name,vec(255), ", in a cloud of confusion, says: \""):add(MSG) }
                 break
+                case "flustered",
+                    if(Target != ""){ PrintArray = array(Color,Name,vec(255),", somewhat flustered at ",TargetColor,Target,vec(255), ", says: \""):add(MSG)
+                    }else{ PrintArray = array(Color,Name,vec(255), ", somewhat flustered, says: \""):add(MSG) }
+                break
                 case "smug",
                     if(Target != ""){ PrintArray = array(Color,Name,vec(255),", rather smugly, says to ",TargetColor,Target,vec(255), ": \""):add(MSG)
                     }else{ PrintArray = array(Color,Name,vec(255), ", rather smugly, says: \""):add(MSG) }
@@ -355,6 +360,15 @@ if(first()|duped()){
                     if(Target != ""){ PrintArray = array(Color,Name,vec(255),", concerned for ",TargetColor,Target,vec(255), ", says: \""):add(MSG)
                     }else{ PrintArray = array(Color,Name,vec(255), ", in concern, says: \""):add(MSG) }
                 break
+                case "scared",
+                    if(Target != ""){ PrintArray = array(Color,Name,vec(255),", says fearfully to ",TargetColor,Target,vec(255), ",: \""):add(MSG)
+                    }else{ PrintArray = array(Color,Name,vec(255), ", in terror, says: \""):add(MSG) }
+                break
+                case "worried",
+                    if(Target != ""){ PrintArray = array(Color,Name,vec(255),", says worriedly to ",TargetColor,Target,vec(255), ",: \""):add(MSG)
+                    }else{ PrintArray = array(Color,Name,vec(255), ", rather worried, says: \""):add(MSG) }
+                break
+                    
             }
         }else{
             if(Target != ""){ PrintArray = array(Color,Name,vec(255)," says to ",TargetColor,Target,vec(255), ": \""):add(MSG)
@@ -412,22 +426,25 @@ if(first()|duped()){
     
     #Compatibility Checking
     
-    local NeedAnim = "2.1.0"
-    local NeedHolo = "2.1.0"
-    local NeedSettings = "2.1.0"
+    local NeedAnim = "2.2.0"
+    local NeedHolo = "2.2.0"
+    local NeedSettings = "2.2.0"
+    local NeedInit = "2.2.0"
     
     
     local AnimCompat = compatCheck(NeedAnim,AnimVersion)
     local HoloCompat = compatCheck(NeedHolo,HoloVersion)
     local SettingsCompat = compatCheck(NeedSettings,SettingsVersion)
+    local InitCompat = compatCheck(NeedInit,InitVersion)
     
-    if(!(AnimCompat & HoloCompat & SettingsCompat)){
+    if(!(AnimCompat & HoloCompat & SettingsCompat & InitCompat)){
         
         soundPlay(0,2,"buttons/combine_button_locked.wav")
         dprint("Compatibility Error!")
         cprint("Animations: "+AnimVersion+" ("+(AnimCompat ? "OK" : "NEED "+NeedAnim)+")")
         cprint("Hologen: "+HoloVersion+" ("+(HoloCompat ? "OK" : "NEED "+NeedHolo)+")")
         cprint("Settings: "+SettingsVersion+" ("+(SettingsCompat ? "OK" : "NEED "+NeedSettings)+")")
+        cprint("Settings: "+InitVersion+" ("+(InitCompat ? "OK" : "NEED "+NeedInit)+")")
         E:propShadow(1)
         E:setAlpha(255)
     }else{
@@ -448,7 +465,6 @@ if(first()|duped()){
         timer("holos1",1000)
     }
 }elseif(clk("holos1")){
-    
     Ang0 = ang()
     local V1 = vec(1)
     
@@ -459,9 +475,9 @@ if(first()|duped()){
     PRWJ = P0 + vec(12,-13,0)*Scale
     PRWH = PRWJ + vec(0,-36,0)*Scale
     holoSkeleton(P0,PH,PLWJ,PLWH,PRWJ,PRWH,Scale)
-    holos1(P0, PH, ColorBody, ColorEye, Material, Scale, Baby)
+    holos1(P0, PH, ColorBody, ColorEye, ColorPupil, MatEye, MatPupil, Material, Scale, Baby)
     DragonHead = holoEntity(2)
-    E:poseJaw(0,Scale)
+    E:poseJaw(0,0,Scale)
     
     #ifdef cameraCreate(number,vector,angle)
         cameraCreate(1,holoEntity(2):toWorld(vec(6,0,8)),holoEntity(2):angles())
@@ -480,7 +496,6 @@ if(first()|duped()){
     PopPitch += 10
     timer("holos3",1000)
 }elseif(clk("holos3")){
-    
     holos3(PLWJ, PLWH, PRWJ, PRWH, ColorBody, ColorWings, Material, Scale)
     
     dytri(76,PLWH,PLWH-48*LH1:right()*Scale,PLWH-48*LH2:right()*Scale)
@@ -496,7 +511,6 @@ if(first()|duped()){
     timer("holos4",1000)
     
 }elseif(clk("holos4")){
-
     if(Sex){
         holosEyelashes(P0, PH, ColorBody, Material, Scale)
     }
@@ -507,9 +521,16 @@ if(first()|duped()){
     soundPlay(0,1,"garrysmod/balloon_pop_cute.wav")
     soundPitch(0,PopPitch)
     PopPitch += 10
+    timer("holos4.5",1000)
+}elseif(clk("holos4.5")){
+    holosTongue(PH,Material,Scale)
+    holosTears(PH,TearColor,TearMat,Scale)
+    
+    soundPlay(0,1,"garrysmod/balloon_pop_cute.wav")
+    soundPitch(0,PopPitch)
+    PopPitch += 10
     timer("holos5",1000)
 }elseif(clk("holos5")){
-    
     holoPos(0,E:toWorld(vec(0,0,-18 + 36*Scale)))
     holoAng(0,E:angles())
     E:poseTail(-15,0,0,0,Scale)
@@ -575,6 +596,7 @@ if(first()|duped()){
         EGP:egpColor(2,vec(192))
         
         EGP:egpText(3,Text,vec2(256,Ylevel)+Offset1)
+        EGP:egpFont(3,SpeechFont)
         EGP:egpSize(3,24)
         EGP:egpAlign(3,1,1)
         EGP:egpColor(3,ColorBody/3)
@@ -777,7 +799,7 @@ if(first()|duped()){
         
     }
 }elseif(clk("clk")){
-    
+    #print("clk",ColorEye)
     Active1 = PodController1["Active",number]
     Active2 = PodController2["Active",number]
     
@@ -799,6 +821,7 @@ if(first()|duped()){
         Eject = Eject2 = 0
     }
     
+    local IdleBaseSpeed = (DefaultExpression=="scared" ? 20 : 5) #Used for tail/wing sway
     
     if(Driveable & (Active1 | Following)){ #Riding & Mobile
         if(!Driving){
@@ -880,7 +903,7 @@ if(first()|duped()){
                 rangerHitEntities(0)
             }
             local ForceCheck = (Following) & (FollowDisp:length() > 1024)
-            if(W | (WalkSpeed>0) | (FollowSpeedTarget>0) | ForceCheck){
+            if(W | A | D | (WalkSpeed>0) | (FollowSpeedTarget>0) | ForceCheck){ # add A|D here so that we can check for nicer looking turning on the spot behavior
                 local PosC = E:toWorld(scp(vec(0,0,8),Scale))
                 local BlockRanger = rangerOffsetHull(42*Scale,PosC,BodyAngle:forward()+0.5*BodyAngle:up(),vec(32,32,16)*Scale)
                 CanMove = !BlockRanger:hit()
@@ -917,8 +940,9 @@ if(first()|duped()){
                         #print("Door Stuck!")
                         
                         timer("teleport",100)
-                    }elseif(FollowDisp:length()>(384)){
+                    }elseif((FollowDisp:length()>(384)) & AllowRun){
                         Shift = 1
+                        #print("NYOOM?")
                     }
                     if(abs(FollowBearing)>45){
                         FollowSpeedTarget=0
@@ -934,7 +958,6 @@ if(first()|duped()){
                 
                 local WalkSpeedMaxMod = Climbing ? WalkSpeedMax/2 : WalkSpeedMax
                 
-                
                 if(Following){
                     if(FollowSpeedTarget > WalkSpeed){
                         if(WalkSpeed < WalkSpeedMaxMod){
@@ -949,43 +972,26 @@ if(first()|duped()){
                         }
                         if(WalkSpeed < FollowSpeedTarget){WalkSpeed = FollowSpeedTarget}
                     }
+                    
+                    if((WalkSpeed>=WalkSpeedMax) & Shift){
+                        RunSpeed = WalkSpeedMax
+                        Driving = 2
+                        RunTheta1 = 0
+                        RunRoll = 0
+                    }
                 }else{
                 
-                    if(W & !S){
-                        if(WalkSpeed < WalkSpeedMaxMod){
-                            if(WalkSpeed <= 0){
-                                WalkSpeed += WalkAccel*2*(1+Shift)
-                            }elseif(WalkSpeed > 0){
-                                WalkSpeed += WalkAccel
-                            }elseif(WalkSpeed > WalkSpeedMaxMod){
-                                WalkSpeed = WalkSpeedMaxMod
-                            }
-                        }
-                    }elseif(S & !W){
-                        if(WalkSpeed > -WalkSpeedMaxMod){
-                            if(WalkSpeed >= 0){
-                                WalkSpeed += -WalkAccel*2
-                            }elseif(WalkSpeed < 0){
-                                WalkSpeed += -WalkAccel
-                            }elseif(WalkSpeed < -WalkSpeedMaxMod){
-                                WalkSpeed = -WalkSpeedMaxMod
-                            }
-                        }
-                    }elseif(!W & !S & (WalkSpeed!=0)){
-                        if(WalkSpeed > 0){
-                            WalkSpeed += -WalkAccel*2
-                            if(WalkSpeed <= 0){WalkSpeed = 0}
-                        }elseif(WalkSpeed < 0){
-                            WalkSpeed += WalkAccel*2
-                            if(WalkSpeed >= 0){WalkSpeed = 0}
-                        }
+                    local TurnDiv = 3
+                    local TurningOnly = !W & !S & (A|D) ? 1 : 0
+                    local DesiredSpeed = W|S|A|D ? ((WalkSpeedMaxMod/(TurningOnly ? TurnDiv : 1) * (S & !W ? -1 : 1)) * (1+Shift)) : 0
+                    local WalkAccelMod = sign(WalkSpeed) != sign(DesiredSpeed) ? WalkAccel*2 : WalkAccel
+                    WalkSpeed = clamp(DesiredSpeed,WalkSpeed-WalkAccelMod,WalkSpeed+WalkAccelMod)
+                    if((WalkSpeed>=WalkSpeedMax) & Shift){
+                        RunSpeed = WalkSpeedMax
+                        Driving = 2
+                        RunTheta1 = 0
+                        RunRoll = 0
                     }
-                }
-                if((WalkSpeed>=WalkSpeedMax) & Shift){
-                    RunSpeed = WalkSpeedMax
-                    Driving = 2
-                    RunTheta1 = 0
-                    RunRoll = 0
                 }
             }else{
                 WalkSpeed = 0
@@ -1074,10 +1080,11 @@ if(first()|duped()){
                 }
             }
             local TargetAngle = -heading(holoEntity(0):toWorld(vec(48,0,22)*Scale),E:angles(),AimPos)
+            if(Mlemming){TargetAngle += ang(-MlemAngle,0,0)}
             
             (Following ? E : holoEntity(0)):poseHead(Flaming ? TargetAngle : TargetAngle*0.75,Climbing ? -15 : 0)
             EyeVec = holoEntity(2):aimEyes(AimPos)
-            holoEntity(2):poseEyes(EyeVec,Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,ColorEye,CosmeticTable,UsePupilAngles,PupilCos)
+            holoEntity(2):poseEyes(EyeVec,Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
             
             #Cmere/GoHere Reset
             if((GoHere|Greet) & (FollowSpeedTarget==0) & (abs(FollowBearing)<5)){
@@ -1221,7 +1228,7 @@ if(first()|duped()){
             holoEntity(0):iklegs(FLP,FRP,RLP,RRP,Scale)
             
             #Tail/Wing Waggle
-            TailTheta += (Moving ? WalkSpeedEffective*4 : 5)/Scale
+            TailTheta += (Moving ? WalkSpeedEffective*4 : IdleBaseSpeed)/Scale
             if(TailTheta>360){TailTheta-=360}
             holoEntity(0):poseTail(-15 + 5*sin(WalkBobTheta2),5*sin(TailTheta) - WalkTurnSpeed,0,0,Scale)
             holoEntity(0):poseWingsCheap(30,(Climbing ? 60 : 75) + 2.5*sin(TailTheta))
@@ -1371,10 +1378,9 @@ if(first()|duped()){
                     }
                 }
                 local TargetAngle = -heading(holoEntity(0):toWorld(vec(48,0,22)*Scale),E:angles(),AimPos)
-                #local AimPos = PodController1["AimPos",vector] - vec(0,0,6.5)
-                #local TargetAngle = -heading(holoEntity(2):pos(),E:angles(),AimPos)
+                
                 (Following ? E : holoEntity(0)):poseHead(TargetAngle,0)
-                holoEntity(2):poseEyes(vec2(),Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,ColorEye,CosmeticTable,UsePupilAngles,PupilCos)
+                holoEntity(2):poseEyes(vec2(),Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
                 
                 #Angles and Stuff
             
@@ -1611,10 +1617,9 @@ if(first()|duped()){
                     }
                 }
                 local TargetAngle = -heading(holoEntity(0):toWorld(vec(48,0,22)*Scale),E:angles(),AimPos)
-                #local AimPos = PodController1["AimPos",vector] - vec(0,0,6.5)
-                #local TargetAngle = -heading(holoEntity(2):pos(),E:angles(),AimPos)
+                
                 E:poseHead(TargetAngle,0)
-                holoEntity(2):poseEyes(vec2(),Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,ColorEye,CosmeticTable,UsePupilAngles,PupilCos)
+                holoEntity(2):poseEyes(vec2(),Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
                 
                 #Legs
                 
@@ -1702,7 +1707,7 @@ if(first()|duped()){
                     E:applyForce(E:mass()*FlyVelW*5)
                     
                     holoEntity(2):eyeExpression("angry",0,Sex,Scale,Baby,1,Wink)
-                    holoEntity(2):poseEyes(vec2(),1,0,Sex,Scale,Baby,Wink,ColorEye,CosmeticTable,UsePupilAngles,PupilCos)
+                    holoEntity(2):poseEyes(vec2(),1,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
                     
                     stoptimer("blink_open")
                     stoptimer("blink_close")
@@ -1772,7 +1777,7 @@ if(first()|duped()){
                         E:applyForce(E:mass()*FlyVelW*5)
                         
                         holoEntity(2):eyeExpression("angry",0,Sex,Scale,Baby,1,Wink)
-                        holoEntity(2):poseEyes(vec2(),1,0,Sex,Scale,Baby,Wink,ColorEye,CosmeticTable,UsePupilAngles,PupilCos)
+                        holoEntity(2):poseEyes(vec2(),1,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
                         
                         stoptimer("blink_open")
                         stoptimer("blink_close")
@@ -1947,10 +1952,10 @@ if(first()|duped()){
                         AimPos = PodController1["AimPos",vector] - vec(0,0,6.5)*Scale
                     }
                     local TargetAngle = -heading(holoEntity(0):toWorld(vec(48,0,22)*Scale),E:angles(),AimPos)
-                    #local AimPos = PodController1["AimPos",vector] - vec(0,0,6.5)
-                    #local TargetAngle = -heading(holoEntity(0):pos(),E:angles(),AimPos)
+                    if(Mlemming){TargetAngle += ang(-MlemAngle,0,0)}
+                    
                     holoEntity(0):poseHead(TargetAngle,0)
-                    holoEntity(2):poseEyes(vec2(),Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,ColorEye,CosmeticTable,UsePupilAngles,PupilCos)
+                    holoEntity(2):poseEyes(vec2(),Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
                     
                     #Legs
                     
@@ -2116,7 +2121,7 @@ if(first()|duped()){
                 #local AimPos = PodController1["AimPos",vector] - vec(0,0,6.5)
                 #local TargetAngle = -heading(holoEntity(2):pos(),E:angles(),AimPos)
                 holoEntity(0):poseHead(TargetAngle,0)
-                holoEntity(2):poseEyes(vec2(),Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,ColorEye,CosmeticTable,UsePupilAngles,PupilCos)
+                holoEntity(2):poseEyes(vec2(),Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
                 
                 #Angles and Stuff
             
@@ -2401,11 +2406,11 @@ if(first()|duped()){
                     }
                 }
                 local TargetAngle = -heading(holoEntity(0):toWorld(vec(48,0,22)*Scale),E:angles(),AimPos)
-                #local AimPos = PodController1["AimPos",vector] - vec(0,0,6.5)
-                #local TargetAngle = -heading(holoEntity(2):pos(),E:angles(),AimPos)
+                if(Mlemming){TargetAngle += ang(-MlemAngle,0,0)}
+                
                 (Following ? E : holoEntity(0)):poseHead(Flaming ? TargetAngle : TargetAngle*0.75,0)
                 EyeVec = holoEntity(2):aimEyes(AimPos)
-                holoEntity(2):poseEyes(EyeVec,Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,ColorEye,CosmeticTable,UsePupilAngles,PupilCos)
+                holoEntity(2):poseEyes(EyeVec,Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
                 
                 #Cmere/GoHere Reset
                 if((GoHere|Greet) & (FollowSpeedTarget==0)){
@@ -2614,7 +2619,7 @@ if(first()|duped()){
                 local SD1M = sin(DanceTheta1*3)
                 local SD1S = sin(DanceTheta1)
                 E:poseHeadInstant(ang(10*SD1F,10*SD1S,-5*SD1S),SitAngleCorrect)
-                holoEntity(2):poseEyes(vec2(),1,0,Sex,Scale,Baby,Wink,ColorEye,CosmeticTable,UsePupilAngles,PupilCos)
+                holoEntity(2):poseEyes(vec2(),1,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
                 holoEntity(0):poseWingsDance(30,75,7.5*SD1M)
             }elseif(!Active1){
                 #Look @ Players
@@ -2636,7 +2641,7 @@ if(first()|duped()){
                     local LATarget = !JayMode? ValidTargets[randint(1,min(randint(1,3),ValidTargets:count())),entity] : ValidTargets[1,entity] # find a random target based on the three closest targets
                     IdleLookTarget = LATarget # no need to search - we already sorted the list
                     
-                    timer("resetIdleLookTarget",5000)
+                    timer("resetIdleLookTarget",DefaultExpression=="scared" ? 1000 : 5000)
                 }
                 
                 #Head Tracking
@@ -2645,9 +2650,10 @@ if(first()|duped()){
                     AimPos = holoEntity(2):pos() + LookDir - vec(0,0,6.5)*Scale
                     
                     local TargetAngle = -heading(holoEntity(0):toWorld(vec(48,0,22)*Scale),E:angles(),AimPos)
+                    if(Mlemming){TargetAngle += ang(-MlemAngle,0,0)}
                     E:poseHead(HeadLock ? HeadLockAngle : Flaming ? TargetAngle : TargetAngle*0.75,SitAngleCorrect)
                     EyeVec = holoEntity(2):aimEyes(AimPos)
-                    holoEntity(2):poseEyes(EyeVec,Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,ColorEye,CosmeticTable,UsePupilAngles,PupilCos)
+                    holoEntity(2):poseEyes(EyeVec,Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
                 }elseif(IdleLookTarget){
                     local AimPos = vec()
                     if(IdleLookTarget:isPlayer()){
@@ -2666,14 +2672,14 @@ if(first()|duped()){
                     }
                     local TargetAngle = -heading(holoEntity(0):toWorld(vec(48,0,22)*Scale),E:angles(),AimPos)
                     
-                    
+                    if(Mlemming){TargetAngle += ang(-MlemAngle,0,0)}
                     E:poseHead(HeadLock ? HeadLockAngle : Flaming ? TargetAngle : TargetAngle*0.75,SitAngleCorrect)
                     EyeVec = holoEntity(2):aimEyes(AimPos)
                     if(Freeze){EyeVec=vec2()}
-                    holoEntity(2):poseEyes(EyeVec,Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,ColorEye,CosmeticTable,UsePupilAngles,PupilCos)
+                    holoEntity(2):poseEyes(EyeVec,Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
                 }else{
                     E:poseHead(HeadLock ? HeadLockAngle : ang(),SitAngleCorrect)
-                    holoEntity(2):poseEyes(vec2(),Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,ColorEye,CosmeticTable,UsePupilAngles,PupilCos)
+                    holoEntity(2):poseEyes(vec2(),Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
                     if(HasLookTarget){
                         HasLookTarget = 0
                     }
@@ -2690,12 +2696,11 @@ if(first()|duped()){
                     AimPos = PodController1["AimPos",vector] - vec(0,0,6.5)*Scale
                 }
                 local TargetAngle = -heading(holoEntity(0):toWorld(vec(48,0,22)*Scale),E:angles(),AimPos)
-                #local AimPos = PodController1["AimPos",vector] - vec(0,0,6.5)
-                #local TargetAngle = -heading(holoEntity(0):toWorld(vec(48,0,22)),E:angles(),AimPos)
+                if(Mlemming){TargetAngle += ang(-MlemAngle,0,0)}
                 
                 E:poseHead(HeadLock ? HeadLockAngle : Flaming ? TargetAngle : TargetAngle*0.75,SitAngleCorrect)
                 EyeVec = holoEntity(2):aimEyes(AimPos)
-                holoEntity(2):poseEyes(EyeVec,Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,ColorEye,CosmeticTable,UsePupilAngles,PupilCos)
+                holoEntity(2):poseEyes(EyeVec,Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
             }
         }
         if(StandMode==0){ #Standing
@@ -2779,11 +2784,12 @@ if(first()|duped()){
                 
                 #Tail/Wing Wag
                 if(!Dancing){
-                    TailTheta += 5/Scale
+                    TailTheta += IdleBaseSpeed/Scale
                     if(TailTheta>360){TailTheta-=360}
                     if(Freeze){TailTheta=0}
                     holoEntity(0):poseTail(-15,5*sin(TailTheta),0,0,Scale)
-                    holoEntity(0):poseWingsCheap(30,75 + 2.5*sin(TailTheta))
+                    #holoEntity(0):poseWingsCheap(30,75 + 2.5*sin(TailTheta))
+                    holoEntity(0):poseWingsCheap(30,(Climbing ? 60 : 75) + 2.5*sin(TailTheta))
                 }else{
                     holoEntity(0):poseTail(-15,5*sin(DanceTheta1*3),0,0,Scale)
                 }
@@ -2801,7 +2807,7 @@ if(first()|duped()){
             }
             
             if(!Dancing){
-                TailTheta += 5
+                TailTheta += IdleBaseSpeed/Scale
                 if(TailTheta>360){TailTheta-=360}
                 if(Freeze){TailTheta=0}
                 holoEntity(0):poseWingsCheap(30,75 + 2.5*sin(TailTheta))
@@ -2827,7 +2833,7 @@ if(first()|duped()){
             }
             
             if(!Dancing){
-                TailTheta += 5
+                TailTheta += IdleBaseSpeed/Scale
                 if(TailTheta>360){TailTheta-=360}
                 if(Freeze){TailTheta=0}
                 holoEntity(0):poseWingsCheap(30,45 + 2.5*sin(TailTheta))
@@ -2853,7 +2859,7 @@ if(first()|duped()){
                 timer("sleep_start",1000)
             }
             
-            TailTheta += 5/Scale
+            TailTheta += IdleBaseSpeed/Scale
             if(TailTheta>360){TailTheta-=360}
             if(Freeze){TailTheta=0}
             holoEntity(0):poseWingsCheap(30,45 + 2.5*sin(TailTheta))
@@ -2928,7 +2934,7 @@ if(first()|duped()){
                 
                 ShakeAng = 45*(sin(DazedTheta))
                 
-                holoEntity(2):poseEyes(vec2(),1,0,Sex,Scale,Baby,Wink,ColorEye,CosmeticTable,UsePupilAngles,PupilCos)
+                holoEntity(2):poseEyes(vec2(),1,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
                 
             }else{
                 local EyeVecDazed = vec2(cos(DazedTheta),sin(DazedTheta))
@@ -2947,7 +2953,7 @@ if(first()|duped()){
                     holoAlpha(N,255*(0.5 + 0.25*sin(2*DazedTheta)))
                 }
                 
-                holoEntity(2):poseEyes(EyeVecDazed,Blinking|ClosedEyes,1,Sex,Scale,Baby,Wink,ColorEye,CosmeticTable,UsePupilAngles,PupilCos)
+                holoEntity(2):poseEyes(EyeVecDazed,Blinking|ClosedEyes,1,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
             }
             
         }
@@ -3373,7 +3379,7 @@ if(first()|duped()){
     }
     
     
-    holoEntity(2):poseJaw(JawAngleMaster,Scale)
+    holoEntity(2):poseJaw(JawAngleMaster,MinJawAngle,Scale)
     
     #Speak Bubble
     
@@ -3409,7 +3415,7 @@ if(first()|duped()){
             SpeakAlpha = 0
             SpeakFading = 0
         }
-        if(SpeakType){
+        if(!SpeakType){
             EGP:egpAlpha(1,SpeakAlpha)
             EGP:egpAlpha(2,SpeakAlpha)
             EGP:egpAlpha(3,SpeakAlpha)
@@ -3611,7 +3617,7 @@ if(first()|duped()){
     }
 }elseif(clk("sleep_start")){
     holoEntity(2):eyeExpression("normal",0,Sex,Scale,Baby,0,Wink)
-    holoEntity(2):poseEyes(vec2(),1,0,Sex,Scale,Baby,Wink,ColorEye,CosmeticTable,UsePupilAngles,PupilCos)
+    holoEntity(2):poseEyes(vec2(),1,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
     for(N=113,115){
         holoModel(N,"models/sprops/misc/alphanum/alphanum_z.mdl")
         holoScale(N,vec(0.5)*Scale)
@@ -3816,6 +3822,21 @@ if(first()|duped()){
 }elseif(clk("ragdollconstrain")){
     dprint("Ragdoll Assembly done!")
     ragdollConstrain()
+}elseif(clk("startmlem")){
+    soundPlay(5,1,MlemSound)
+    soundPitch(5,linterpsat(Scale,vec2(0.5,100),vec2(2,60)))
+    holoEntity(35):blep(1,0)
+    if(DefaultExpression=="happy"|DefaultExpression=="normal"){
+        Blinking = 1
+        stoptimer("blink_close")
+        stoptimer("blink_open")
+    }
+    Mlemming = 1
+}elseif(clk("loopmlem")){
+    soundPlay(5,1,MlemSound)
+    soundPitch(5,linterpsat(Scale,vec2(0.5,100),vec2(2,60)))
+    holoEntity(35):blep(1,0)
+    Mlemming = 1
 }elseif(chatClk(O)){
     local LS = O:lastSaid()
     local Sentence = LS:explode(" ")
@@ -3928,6 +3949,37 @@ if(first()|duped()){
                 }
                 hideChat(1)
                 break
+            case ".crouch",
+                local Arg = Sentence[2,string]
+                local Cr = 0
+                if(Arg==""){
+                    Cr = !Climbing
+                }else{
+                    Cr = Arg:toNumber()
+                }
+                
+                if(!Driving & (StandMode==0)){ #Standing, not driving
+                    Climbing = Cr
+                    E:posReset(holoEntity(0):up(),Climbing,Scale)
+                    
+                    if(Climbing){
+                        dprint(Name + " is now crouching.")
+                    }else{
+                        dprint(Name + " is no longer crouching.")
+                    }
+                }elseif(Driving==1){ #Standing, driving
+                    Climbing = Cr
+                    if(Climbing){
+                        dprint(Name + " is now crouching.")
+                    }else{
+                        dprint(Name + " is no longer crouching.")
+                    }
+                }else{
+                    dprint(Name + " cannot crouch in "+(Sex ? "her" : "his")+" current position or movement mode.")
+                }
+                
+                hideChat(1)
+                break
             case ".roar",
                 if(!Sleeping){
                     RoarQ = 1
@@ -3990,11 +4042,20 @@ if(first()|duped()){
                         case "confused",
                             dprint(Name + " is feeling confused.")
                             break
+                        case "flustered",
+                            dprint(Name + " is feeling flustered.")
+                            break
                         case "concerned",
                             dprint(Name + " is feeling concerned.")
                             break
+                        case "scared",
+                            dprint(Name + " is feeling scared.")
+                            break
                         case "smug",
                             dprint(Name + " is feeling smug.")
+                            break
+                        case "worried",
+                            dprint(Name + " is feeling worried.")
                             break
                         default,
                             break
@@ -4005,6 +4066,40 @@ if(first()|duped()){
             case ".jaw",
                 JawAngleMaster = Sentence[2,string]:toNumber()
                 dprint(Name + " has opened  " + (Sex ? "her " : "his ") + "mouth to exactly " + JawAngleMaster + " degrees.")
+                hideChat(1)
+                break
+            case ".blep",
+                
+                local BlepS = Sentence[2,string]
+                if(BlepS==""){
+                    holoEntity(35):blep(!Blepping,0)
+                }else{
+                    local BlepAngle = BlepS:toNumber()
+                    holoEntity(35):blep(1,BlepAngle)
+                }
+                if(Blepping){
+                    dprint(Name + " is now sticking their tongue out.")
+                }else{
+                    dprint(Name + " is no longer sticking their tongue out.")
+                }
+                hideChat(1)
+                break
+            case ".mlem",
+            case ".lick",
+            case ".kiss",
+                local Arg = Sentence[2,string]
+                local Single = 0
+                if(Arg==""){
+                    Single = 1
+                }else{
+                    MlemLoop = Arg:toNumber()
+                }
+                if(Single & MlemLoop){
+                    MlemLoop = 0
+                }elseif(Single | MlemLoop){
+                    startMlem()
+                }
+                
                 hideChat(1)
                 break
             case ".grab",
@@ -4048,6 +4143,8 @@ if(first()|duped()){
             case ".say",
                 if(!Sleeping){
                     
+                    if(!LS:find("\"")){ hideChat(1), break } # safety for no quote (which is incorrect), otherwise its an endless while loop
+                    
                     local NumArguments = 0
                     foreach(K,V:string=Sentence){
                         if(V:find("\"")){ break }
@@ -4086,7 +4183,10 @@ if(first()|duped()){
                     }else{
                         if(!Sentence[2,string]:find("\"")){
                             switch(Sentence[2,string]){
-                                case "normal", case "happy", case "confused", case "sad", case "annoyed", case "smug", case "angry", case "concerned", case "",
+                                case "normal", case "happy", case "confused", case "flustered",
+                                case "sad", case "annoyed", case "smug", case "angry",
+                                case "concerned", case "scared", case "happy", case "worried",
+                                case "",
                                     ExprUsed = 1
                                     local Expression = Sentence[2,string]
                                     local Eyelids = 0
@@ -4137,7 +4237,10 @@ if(first()|duped()){
                     if(Carrying){
                         TargetText = mumble(TargetText)
                     }
-                    if(Baby){
+                    
+                    if(Blepping){
+                        TargetText = olo(TargetText)
+                    }elseif(Baby==1){
                         TargetText = owo(TargetText)
                     }
                     
@@ -4178,6 +4281,8 @@ if(first()|duped()){
             case ".talkto",
             case ".sayto",
                 if(!Sleeping){
+                    
+                    if(!LS:find("\"")){ hideChat(1), break } # safety for no quote (which is incorrect), otherwise its an endless while loop
                     
                     local FoundTarget = 0
                     if(!Sentence[2,string]:find("\"")){
@@ -4283,7 +4388,7 @@ if(first()|duped()){
                 break
             case ".me",
                 if(LS:trim():find(" ")){
-                    local Text = LS:replace(".me ","") # tad more efficient
+                    local Text = LS:replace(CMD_Prename + " ","") # tad more efficient
                     # quote clearing, so we don't mind if we have it or don't have it
                     if(Text[1] == "\""){
                         if(Text[Text:length()] == "\""){ Text = Text:sub(2,Text:length()-1) }
@@ -4319,7 +4424,7 @@ if(first()|duped()){
                 break
             case ".event",
                 if(LS:trim():find(" ")){
-                    local Text = LS:replace(".event ","")
+                    local Text = LS:replace(CMD_Prename + " ","")
                     # quote clearing, so we don't mind if we have it or don't have it
                     if(Text[1] == "\""){
                         if(Text[Text:length()] == "\""){ Text = Text:sub(2,Text:length()-1) }
@@ -4684,6 +4789,22 @@ if(first()|duped()){
                 }
                 hideChat(1)
                 break
+            case ".allowrun",
+                
+                local Arg = Sentence[2,string]
+                if(Arg==""){
+                    AllowRun = !AllowRun
+                }else{
+                    AllowRun = Arg:toNumber()
+                }
+                if(AllowRun){
+                    dprint(Name + " will now run towards follow/gohere targets.")
+                }else{
+                    dprint(Name + " will now walk towards follow/gohere targets.")
+                }
+                
+                hideChat(1)
+                break
             case ".headlock",
             
                 local HPitch = -Sentence[2,string]:toNumber()
@@ -4729,6 +4850,21 @@ if(first()|duped()){
                 
                 hideChat(1)
                 break
+            case ".cry",
+                local Arg = Sentence[2,string]
+                if(Arg==""){
+                    Crying = !Crying
+                }else{
+                    Crying = Arg:toNumber()   
+                }
+                cry(Crying)
+                if(Crying){
+                    dprint(Name + " is starting to tear up.")
+                }else{
+                    dprint(Name + " has stopped crying.")
+                }
+                hideChat(1)
+                break
             case ".closeeyes",
                 if(ClosedEyes==0){
                     ClosedEyes = 1
@@ -4748,24 +4884,42 @@ if(first()|duped()){
                 }
                 hideChat(1)
                 break
+            case ".font",
+                local StartText = LS:find(" ")
+                local Arg = ""
+                if(StartText){
+                    Arg = LS:sub(StartText+1)
+                }
+                
+                if(Arg==""){Arg = "WireGPU_ConsoleFont"}
+                EGP:egpFont(3,Arg)
+                dprint("Set speech bubble font to \""+Arg+"\"")
+                
+                hideChat(1)
+                break
             case ".commands",
             case ".list",
                 
-                dprint("DRAGON COMMANDS (See Manual for Details):\n")
-                cprint("--Poses--")
-                cprint(".stand, .sit, .lie, .sleep, .wake\n")
-                cprint("--Mobility--")
-                cprint(".come, .goto (string Name), .follow [string Name], .cmere\n.gohere, .grab, .release\n")
-                cprint("--Utility--")
-                cprint(".light, .cam [number CameraMode], .lookat [string Name], .pickup\n.drop, .eat, .eject, .fire [number Duration]\n.headlock [number Pitch] [number Yaw] [number Roll]\n.talkprintmode, .talkproximitymode")
-                cprint("--Personality--")
-                cprint(".roar, .love [string Expression]\n.expr [string Expression] [bool Eyelids] [bool Squint], .wink [number Eye]\n.dance, .burp, .closeeyes\n")
+                dprint("DRAGON COMMANDS (See Manual for Details):")
+                cprint("\n--Poses--\n")
+                cprint(".stand, .sit, .lie, .sleep, .wake")
+                cprint("\n--Mobility--\n")
+                cprint(".come, .goto (string Name), .follow [string Name], .cmere\n.gohere, .grab, .release, .crouch [bool Crouch], .allowrun [bool Allowrun]")
+                cprint("\n--Utility--\n")
+                cprint(".light, .cam [number CameraMode], .lookat [string Name], .pickup\n.drop, .eat, .eject, .fire [number Duration]\n.headlock [number Pitch] [number Yaw] [number Roll]\n.talkprintmode, .talkproximitymode, .font [string FontName]")
+                cprint("\n--Personality--\n")
+                cprint(".roar, .love [string Expression]\n.expr [string Expression] [bool Eyelids] [bool Squint], .wink [number Eye]\n.dance, .burp, .closeeyes\n.blep [number Activate/Angle], .mlem [bool Loop], .cry [bool Cry]")
                 cprint(".sayto (string Dragon/Player) [sting Expression] \"(string Speech)\"")
-                cprint(".say [string Expression | Dragon/Player] \"(string Speech)\"\n.say [string Dragon/Player] [string Expression] \"(string Speech)\"\n")
-                cprint(".me [action], .event [global action]")
-                cprint(".chatroom [string chatroom]")
+                cprint(".say [string Expression | Dragon/Player] \"(string Speech)\"\n.say [string Dragon/Player] [string Expression] \"(string Speech)\"")
+                cprint(".me (string action), .event (string global_action), .chatroom [string chatroom]")
+                #cprint("")
                 
                 hideChat(1)
+                break
+            case ".reset",
+                hideChat(1)
+                reset()
+                exit()
                 break
             default,
                 if(CMD:index(1)=="."){
@@ -4789,16 +4943,17 @@ if(first()|duped()){
     # global table management
     local Ent_Ids = LDTable["ent_ids",array]
     foreach(K,V:number=Ent_Ids){
-        if(V == E:id()){
+        if(V == E:id() | !(entity(V):isDragon())){
             Ent_Ids:remove(K)
         }
     }
     local LDragons = LDTable["dragons",array]
     foreach(K,V:entity=LDragons){
-        if(V == E){
+        if((V == E | !V:isDragon()) & !V:isPlayer()){
             LDragons:remove(K)
         }
     }
+    LDTable["ent_ids",array] = Ent_Ids
     LDTable["dragons",array] = LDragons
 
     local Dragons = DTable["dragons",table]

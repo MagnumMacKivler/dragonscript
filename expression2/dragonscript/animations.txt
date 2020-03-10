@@ -1,41 +1,48 @@
 @name dragonscript/animations
 @inputs 
 @outputs 
-@persist [Times Playing Animations Durations]:table
+
 @persist IT_Pitch IT_Pitch_Old IT_Yaw IT_Roll LeftWing_Rand RightWing_Rand JawTheta
 @persist [FLPO FRPO RLPO RRPO]:vector FLPQ FRPQ RLPQ RRPQ
 @persist LanternTheta
 @trigger 
 
-AnimVersion = "2.1.0"
+AnimVersion = "2.2.0"
+
+local NeedFudge = !entity():getName():find("Magnums Dragon 2")
+if(NeedFudge){
+    #Jaw/Blep
+    JawAngleMaster = 0
+    Blepping = 0
+    TongueHolos = array()
+    TongueLeftToothHolo = 0
+    TongueRightToothHolo = 0
+    PupilHolos = array()
+    PupilScale = 1
+    EyeScale = vec()
+    ColorEye = vec()
+    ColorPupil = vec()
+    ColorEyeLid = vec()
+    MatEye = ""
+    MatPupil = ""
+    MatEyeLid = ""
+    DefaultExpression = "normal"
+    Mlemming = 0
+    MlemAngle = 0
+    MlemLoop = 0
+    MlemSound = ""
+    Scale = 1
+    
+    TearColor = vec4()
+    TearHolos = array()
+}
+
 
 function vector scp(V:vector,Scale){ #Scale Processing
     local X = V:x()*Scale
     local Y = V:y()*Scale
     local Z = -18 + (V:z()+18)*Scale
     return vec(X,Y,Z)
-}
-
-function number wsin(In){
-    return max(sin(In),0)
-}
-function number wcos(In){
-    return max(cos(In),0)
-}
-
-function number section(Points:array,T){
-    
-    local Index = 0
-    for(N=1,Points:count()-1){
-        local X0 = Points[N,vector2]:x()
-        local X1 = Points[N+1,vector2]:x()
-        if((T>=X0)&(T<X1)){
-            Index = N
-            break
-        }
-    }
-    
-    return Index
 }
 
 function number linterp(T,Start:vector2,End:vector2){ #2-Point Linear Interpolation
@@ -52,238 +59,21 @@ function number linterp(T,Start:vector2,End:vector2){ #2-Point Linear Interpolat
         return 0
     }
 }
-function vector2 mid(Start:vector2,End:vector2,T){
-    return Start + T*(End-Start)
-}
-
-function vector2 bezier3(Start:vector2,CP1:vector2,CP2:vector2,End:vector2,T){
+function number linterpsat(T,Start:vector2,End:vector2){ #2-Point Linear Interpolation - saturable
     
-    local Leg1 = mid(Start,CP1,T)
-    local Leg2 = mid(CP1,CP2,T)
-    local Leg3 = mid(CP2,End,T)
-    local Cen12 = mid(Leg1,Leg2,T)
-    local Cen23 = mid(Leg2,Leg3,T)
+    local X0 = Start:x()
+    local X1 = End:x()
+    local Y0 = Start:y()
+    local Y1 = End:y()
     
-    return mid(Cen12,Cen23,T)
-}
-
-function number linpiece(T,Points:array){ #Continuous Piecewise Linear Interpolation
-    
-    local Values = array()
-    for(N=1,Points:count()-1){
-        Values[N,number] = linterp(T,Points[N,vector2],Points[N+1,vector2])
-    }
-    
-    return Values:sum()
-}
-
-function array cp1(Points:array,Loop){
-    
-    local Ratio = 0.25
-    
-    local CP1 = array()
-    
-    local Vecs = array()
-    #local Mags = array()
-    for(N=1,Points:count()-1){
-        local V = Points[N+1,vector2] - Points[N,vector2]
-        Vecs[N,vector2] = V
-        #Mags[N,number] = V:length()
-    }
-    local Raws1 = array()
-    local Raws2 = array()
-    
-    local VC = Vecs:count()
-    
-    if(Loop){
-        Raws1[1,vector2] = Points[1,vector2] + Ratio*Vecs[VC,vector2]
-        Raws2[VC,vector2] = Points[VC+1,vector2] - Ratio*Vecs[1,vector2]
+    if((T>=X0)&(T<X1)){
+        local TN = (T-X0)/(X1-X0)
+        return Y0 + TN*(Y1-Y0)
+    }elseif(T<X0){ #Low out of range
+        return Y0
     }else{
-        Raws1[1,vector2] = Points[1,vector2] + Ratio*Vecs[1,vector2]:length()*vec2(1,0)
-        Raws2[VC,vector2] = Points[VC+1,vector2] + Ratio*Vecs[VC,vector2]:length()*vec2(-1,0)
+        return Y1 #High out of range
     }
-    
-    for(N=2,VC){
-        Raws1[N,vector2] = Points[N,vector2] + Ratio*Vecs[N-1,vector2] #Red
-    }
-    for(N=1,VC-1){
-        Raws2[N,vector2] = Points[N+1,vector2] - Ratio*Vecs[N+1,vector2] #Blue
-    }
-    if(Loop){    
-        local Distance = Points[VC+1,vector2]:x() - Points[1,vector2]:x()
-        local Disp = Raws1[1,vector2] - Raws2[VC,vector2] + vec2(Distance,0)
-        Raws1[1,vector2] = Points[1,vector2] + Disp/2
-        Raws2[VC,vector2] = Points[VC+1,vector2] - Disp/2
-    }
-    for(N=2,VC){
-        #Disps[N,vector2] = Raws1[N,vector2] - Raws2[N-1,vector2]
-        local Disp = Raws1[N,vector2] - Raws2[N-1,vector2]
-        Raws1[N,vector2] = Points[N,vector2] + Disp/2
-        Raws2[N-1,vector2] = Points[N,vector2] - Disp/2
-    }
-    
-    return Raws1
-}
-function array cp2(Points:array,Loop){
-    
-    local Ratio = 0.25
-    
-    local CP1 = array()
-    
-    local Vecs = array()
-    #local Mags = array()
-    for(N=1,Points:count()-1){
-        local V = Points[N+1,vector2] - Points[N,vector2]
-        Vecs[N,vector2] = V
-        #Mags[N,number] = V:length()
-    }
-    local Raws1 = array()
-    local Raws2 = array()
-    
-    local VC = Vecs:count()
-    
-    if(Loop){
-        Raws1[1,vector2] = Points[1,vector2] + Ratio*Vecs[VC,vector2]
-        Raws2[VC,vector2] = Points[VC+1,vector2] - Ratio*Vecs[1,vector2]
-    }else{
-        Raws1[1,vector2] = Points[1,vector2] + Ratio*Vecs[1,vector2]:length()*vec2(1,0)
-        Raws2[VC,vector2] = Points[VC+1,vector2] + Ratio*Vecs[VC,vector2]:length()*vec2(-1,0)
-    }
-    
-    for(N=2,VC){
-        Raws1[N,vector2] = Points[N,vector2] + Ratio*Vecs[N-1,vector2] #Red
-    }
-    for(N=1,VC-1){
-        Raws2[N,vector2] = Points[N+1,vector2] - Ratio*Vecs[N+1,vector2] #Blue
-    }
-    if(Loop){    
-        local Distance = Points[VC+1,vector2]:x() - Points[1,vector2]:x()
-        local Disp = Raws1[1,vector2] - Raws2[VC,vector2] + vec2(Distance,0)
-        Raws1[1,vector2] = Points[1,vector2] + Disp/2
-        Raws2[VC,vector2] = Points[VC+1,vector2] - Disp/2
-    }
-    for(N=2,VC){
-        #Disps[N,vector2] = Raws1[N,vector2] - Raws2[N-1,vector2]
-        local Disp = Raws1[N,vector2] - Raws2[N-1,vector2]
-        Raws1[N,vector2] = Points[N,vector2] + Disp/2
-        Raws2[N-1,vector2] = Points[N,vector2] - Disp/2
-    }
-    
-    return Raws2
-}
-
-function number bezpiece(T,Points:array,Cpts1:array,Cpts2:array){ #Continuous Piecewise Smoothed Interpolation
-    
-    local Value = vec2()
-    local Index = section(Points,T)
-    local Start = Points[Index,vector2]
-    local CP1 = Cpts1[Index,vector2]
-    local CP2 = Cpts2[Index,vector2]
-    local End = Points[Index+1,vector2]
-    
-    local Parm = (T-Start:x())/(End:x()-Start:x())
-    
-    Value = bezier3(Start,CP1,CP2,End,Parm)
-    
-    return Value:y()
-}
-
-function number entity:playlinear(Anim:string,InitialT){
-    local PlayStatus = Playing[Anim,number]
-    local Animation = Animations[Anim,table]
-
-    if(PlayStatus==0){
-        T = InitialT
-        Playing[Anim,number] = 1
-    }else{
-        T = Times[Anim,number]
-    }
-    
-    local PT = Animation["P",table]
-    local YT = Animation["Y",table]
-    local RT = Animation["R",table]
-    local Pitches = table()
-    local Yaws = table()
-    local Rolls = table()
-    
-    foreach(K,V:array=PT){
-        local Pee = linpiece(T,V)
-        Pitches[K,number] = Pee
-    }
-    foreach(K,V:array=YT){
-        local Yee = linpiece(T,V)
-        Yaws[K,number] = Yee
-        #print(Yee)
-    }
-    foreach(K,V:array=RT){
-        local Ree = linpiece(T,V)
-        Rolls[K,number] = Ree
-        local Angle = ang(Pitches[K,number],Yaws[K,number],Rolls[K,number])
-        holoAng(K:toNumber(),This:toWorld(Angle))
-    }
-    
-    T += 100
-    Times[Anim,number] = T
-    local MaxDur = Durations[Anim,number]
-    if(T>=MaxDur){
-        Playing[Anim,number] = 0
-        return 1
-    }else{
-        return T/MaxDur
-    }
-    
-}
-
-function number entity:playbezier(Anim:string,InitialT){
-    local PlayStatus = Playing[Anim,number]
-    local Animation = Animations[Anim,table]
-
-    if(PlayStatus==0){
-        T = InitialT
-        Playing[Anim,number] = 1
-    }else{
-        T = Times[Anim,number]
-    }
-    
-    local PT = Animation["P",table]
-    local YT = Animation["Y",table]
-    local RT = Animation["R",table]
-    local PC1 = Animation["PC1",table]
-    local YC1 = Animation["YC1",table]
-    local RC1 = Animation["RC1",table]
-    local PC2 = Animation["PC2",table]
-    local YC2 = Animation["YC2",table]
-    local RC2 = Animation["RC2",table]
-    local Pitches = table()
-    local Yaws = table()
-    local Rolls = table()
-    
-    foreach(K,V:array=PT){
-        local Pee = bezpiece(T,V,PC1[K,array],PC2[K,array])
-        Pitches[K,number] = Pee
-    }
-    foreach(K,V:array=YT){
-        local Yee = bezpiece(T,V,YC1[K,array],YC2[K,array])
-        Yaws[K,number] = Yee
-        #print(Yee)
-    }
-    foreach(K,V:array=RT){
-        local Ree = bezpiece(T,V,RC1[K,array],RC2[K,array])
-        Rolls[K,number] = Ree
-        local Angle = ang(Pitches[K,number],Yaws[K,number],Rolls[K,number])
-        holoAng(K:toNumber(),This:toWorld(Angle))
-    }
-    
-    T += 100
-    Times[Anim,number] = T
-    #print(linpiece(T,T))
-    if(T>=Durations[Anim,number]){
-        Playing[Anim,number] = 0
-        return 1
-    }else{
-        return T/Durations[Anim,number]
-    }
-    
 }
 
 function array ikstep(StepLength,WalkSpeed,PhaseOffset,ParmData,Scale){ #Gives "Local" Vector; ParmData -1 to +1
@@ -327,6 +117,12 @@ function array ikstep(StepLength,WalkSpeed,PhaseOffset,ParmData,Scale){ #Gives "
 }
 function void legReset(){ #Reset Legs for IK
     FLPQ = FRPQ = RLPQ = RRPQ = 0
+}
+
+function void entity:posReset(Axis:vector,Crouch,Scale){ #Reset position of E2 to compensate for crouching
+    rangerFilter(This)
+    local StandRanger = rangerOffsetHull(This:pos(),This:pos() - Axis*96, vec(32,32,0)*Scale)
+    if(StandRanger:hit()){This:setPos(StandRanger:pos() + Axis*(Crouch ? 12 : 18))}
 }
 
 function void entity:iklegs(FLP:vector, FRP:vector, RLP:vector, RRP:vector, Scale){ #Inputs local to E2
@@ -506,7 +302,7 @@ function void entity:poseTail(Pitch,Yaw,Voffset,PoseType,Scale){
     local HitSolid = 1
     if((PoseType>0)){
         local E = entity()
-        local TailRanger = rangerOffset(32*Scale,E:toWorld(scp(vec(-36,0,-18),Scale)),-E:up())
+        local TailRanger = rangerOffset(32*Scale,E:toWorld(scp(vec(-36,0,0),Scale)),-E:up())
         HitSolid = TailRanger:hit()
         #print(HitSolid)
     }
@@ -558,8 +354,7 @@ function void entity:poseTail(Pitch,Yaw,Voffset,PoseType,Scale){
     
     return void
 }
-function vector2 entity:aimEyes(Target:vector){
-    
+function vector2 entity:aimEyes(Target:vector){ #Produces a 2D vector for poseEyes()
     #5.5,6.5
     
     local FOV = 30
@@ -576,15 +371,9 @@ function vector2 entity:aimEyes(Target:vector){
 }
 
 # sorry magnum i made this function ginormous with its arguments
-function void entity:poseEyes(Direction:vector2,Close,Derp,Sex,Scale,Baby,Wink,ColorEye:vector,CosmeticTable:table,UsePupilAngles,PupilCos:array){
-    
-    local ScaleH = vec(Scale)
-    if(Baby){ #Baby
-        ScaleH = vec(Scale,0.6,0.6)
-    }
-    
-    local LeftEyeScale = CosmeticTable:exists(30) ? CosmeticTable[30,table]["SCALE",vector] : vec(0.125)
-    local RightEyeScale = CosmeticTable:exists(31) ? CosmeticTable[31,table]["SCALE",vector] : vec(0.125)
+function void entity:poseEyes(Direction:vector2,Close,Derp,Sex,Scale,Baby,Wink,CosmeticTable:table,UsePupilAngles,PupilCos:array){ #Moves Pupils, handles blinking/winking
+    local LeftEyeScale = CosmeticTable:exists(30) ? CosmeticTable[30,table]["SCALE",vector] : vec(0.125)*PupilScale
+    local RightEyeScale = CosmeticTable:exists(31) ? CosmeticTable[31,table]["SCALE",vector] : vec(0.125)*PupilScale
     
     if(Close){
         if(Sex){
@@ -598,14 +387,14 @@ function void entity:poseEyes(Direction:vector2,Close,Derp,Sex,Scale,Baby,Wink,C
         
         local Mat = holoEntity(19):getMaterial()
         local ColorBody = holoEntity(19):getColor()
-        holoMaterial(28,Mat)
-        holoMaterial(29,Mat)
-        holoColor(28,ColorBody*0.75)
-        holoColor(29,ColorBody*0.75)
+        holoMaterial(28,MatEyeLid)
+        holoMaterial(29,MatEyeLid)
+        holoColor(28,ColorEyeLid)
+        holoColor(29,ColorEyeLid)
         holoColor(30,vec())
         holoColor(31,vec())
-        holoScale(30,vec(0.125,0.25,0.0625)*ScaleH)
-        holoScale(31,vec(0.125,0.25,0.0625)*ScaleH)
+        holoScale(30,vec(0.125,0.25,0.0625)*EyeScale)
+        holoScale(31,vec(0.125,0.25,0.0625)*EyeScale)
         
         # hide attached holos
         foreach(K,V:number=PupilCos){
@@ -656,19 +445,15 @@ function void entity:poseEyes(Direction:vector2,Close,Derp,Sex,Scale,Baby,Wink,C
                 holoAng(31,Head:toWorld(ang(-Y*35,X*40,15)))
             }
         }
-        
-        local Mat = "debug/debugdrawflat"
-        local ColorBody = vec(255)
-        local MatW = holoEntity(19):getMaterial()
-        local ColorBodyW = holoEntity(19):getColor()*0.75
-        holoMaterial(28,(Wink==1) ? MatW : Mat)
-        holoMaterial(29,(Wink==2) ? MatW : Mat)
-        holoColor(28,(Wink==1) ? ColorBodyW : ColorBody)
-        holoColor(29,(Wink==2) ? ColorBodyW : ColorBody)
-        holoColor(30,((Wink==1) ? vec() : ColorEye))
-        holoColor(31,((Wink==2) ? vec() : ColorEye))
-        holoScale(30,((Wink==1) ? vec(0.125,0.25,0.0625) : LeftEyeScale)*ScaleH)
-        holoScale(31,((Wink==2) ? vec(0.125,0.25,0.0625) : RightEyeScale)*ScaleH)
+
+        holoMaterial(28,(Wink==1) ? MatEyeLid : MatEye)
+        holoMaterial(29,(Wink==2) ? MatEyeLid : MatEye)
+        holoColor(28,(Wink==1) ? ColorEyeLid : ColorEye)
+        holoColor(29,(Wink==2) ? ColorEyeLid : ColorEye)
+        holoColor(30,((Wink==1) ? vec() : ColorPupil))
+        holoColor(31,((Wink==2) ? vec() : ColorPupil))
+        holoScale(30,((Wink==1) ? vec(0.125,0.25,0.0625) : LeftEyeScale)*EyeScale)
+        holoScale(31,((Wink==2) ? vec(0.125,0.25,0.0625) : RightEyeScale)*EyeScale)
     }
     
     #ifdef cameraAng(number,angle)
@@ -679,7 +464,7 @@ function void entity:poseEyes(Direction:vector2,Close,Derp,Sex,Scale,Baby,Wink,C
     
     return void
 }
-function void entity:eyeExpression(Expr:string,Eyelids,Sex,Scale,Baby,Squint,Wink){
+function void entity:eyeExpression(Expr:string,Eyelids,Sex,Scale,Baby,Squint,Wink){ #Handles eye clips, eyelashes
     #holoClip(28,vec(0,0,1),vec(0,0,-1.5),0) #Confused
     
     #holoClip(28,vec(0,0,1),vec(0,0,-1.5),0) #Sad
@@ -691,210 +476,277 @@ function void entity:eyeExpression(Expr:string,Eyelids,Sex,Scale,Baby,Squint,Win
     #holoClip(28,vec(0,0,1.5),vec(0,1,-1),0) #Angry
     #holoClip(29,vec(0,0,1.5),vec(0,-1,-1),0)
     
-    local ScaleH = vec(Scale)
-    if(Baby){ #Baby
-        ScaleH = vec(Scale,0.6,0.6)
-    }
-    
     local PLE = vec(5,3,6.5)*Scale
     local PRE = vec(5,-3,6.5)*Scale
     
-    if((Squint & Expr != "happy") | (!Squint & Expr == "happy")){ # happy just has the squint in order to achieve the effect
-        holoClip(28,2,vec(0,0,-0.625)*ScaleH,vec(0,-0.25,1),0)
-        holoClip(29,2,vec(0,0,-0.625)*ScaleH,vec(0,0.25,1),0)
-    }elseif(Squint & Expr == "happy"){ # happy with squint desired is even more ludicrous
-        holoClip(28,2,vec(0,0,-0.55)*ScaleH,vec(0,-0.25,1),0)
-        holoClip(29,2,vec(0,0,-0.55)*ScaleH,vec(0,0.25,1),0)
+    local SuperSquint = (Expr=="happy")|(Expr=="scared") #Expressions to trigger super squinting
+    
+    if((Squint & !SuperSquint) | (!Squint & SuperSquint)){ # happy just has the squint in order to achieve the effect
+        holoClip(28,2,vec(0,0,-0.625)*EyeScale,vec(0,-0.25,1),0)
+        holoClip(29,2,vec(0,0,-0.625)*EyeScale,vec(0,0.25,1),0)
+    }elseif(Squint & SuperSquint){ # happy with squint desired is even more ludicrous
+        holoClip(28,2,vec(0,0,-0.55)*EyeScale,vec(0,-0.25,1),0)
+        holoClip(29,2,vec(0,0,-0.55)*EyeScale,vec(0,0.25,1),0)
     }else{
-        holoClip(28,2,vec(0,0,-3)*ScaleH,vec(0,-0.25,1),0)
-        holoClip(29,2,vec(0,0,-3)*ScaleH,vec(0,0.25,1),0)
+        holoClip(28,2,vec(0,0,-3)*EyeScale,vec(0,-0.25,1),0)
+        holoClip(29,2,vec(0,0,-3)*EyeScale,vec(0,0.25,1),0)
     }
+    
+    #Spooped
+    PupilScale = (Expr=="scared") ? 0.8125 : 1
     
     switch(Expr){
         case "happy", # i'm a filthy cheater
         case "normal",
-            holoClip(28,vec(0,0,3)*ScaleH,vec(0,0,-1),0)
-            holoClip(29,vec(0,0,3)*ScaleH,vec(0,0,-1),0)
-            holoClip(109,vec(0,0,3)*ScaleH,-vec(0,0,-1),0)
-            holoClip(110,vec(0,0,3)*ScaleH,-vec(0,0,-1),0)
+            #Left Eye
+            holoClip(28,vec(0,0,3)*EyeScale,vec(0,0,-1),0)
+            holoClip(109,vec(0,0,3)*EyeScale,-vec(0,0,-1),0)
             
-            holoPos(103,This:toWorld(PLE+vec(0,0.3,2.25)*ScaleH))
+            holoPos(103,This:toWorld(PLE+vec(0,0.3,2.25)*EyeScale))
             holoAng(103,This:angles())
             
-            holoPos(104,This:toWorld(PLE+vec(0,1.25,2)*ScaleH))
+            holoPos(104,This:toWorld(PLE+vec(0,1.25,2)*EyeScale))
             holoAng(104,This:toWorld(ang(0,0,-30)))
             
-            holoPos(105,This:toWorld(PLE+vec(0,1.75,1.25)*ScaleH))
+            holoPos(105,This:toWorld(PLE+vec(0,1.75,1.25)*EyeScale))
             holoAng(105,This:toWorld(ang(0,0,-60)))
             
-            holoPos(106,This:toWorld(PRE+vec(0,-0.3,2.25)*ScaleH))
+            #Right Eye
+            holoClip(29,vec(0,0,3)*EyeScale,vec(0,0,-1),0)
+            holoClip(110,vec(0,0,3)*EyeScale,-vec(0,0,-1),0)
+            
+            holoPos(106,This:toWorld(PRE+vec(0,-0.3,2.25)*EyeScale))
             holoAng(106,This:angles())
             
-            holoPos(107,This:toWorld(PRE+vec(0,-1.25,2)*ScaleH))
+            holoPos(107,This:toWorld(PRE+vec(0,-1.25,2)*EyeScale))
             holoAng(107,This:toWorld(ang(0,0,30)))
             
-            holoPos(108,This:toWorld(PRE+vec(0,-1.75,1.25)*ScaleH))
+            holoPos(108,This:toWorld(PRE+vec(0,-1.75,1.25)*EyeScale))
             holoAng(108,This:toWorld(ang(0,0,60)))
             break        
         case "confused",
-            holoClip(28,vec(0,0,1)*ScaleH,vec(0,0,-1.5),0)
-            holoClip(29,vec(0,0,3)*ScaleH,vec(0,0,-1),0)
-            holoClip(109,vec(0,0,1)*ScaleH,-vec(0,0,-1.5),0)
-            holoClip(110,vec(0,0,3)*ScaleH,-vec(0,0,-1),0)
+            #Left Eye
+            holoClip(28,vec(0,0,1)*EyeScale,vec(0,0,-1.5),0)
+            holoClip(109,vec(0,0,1)*EyeScale,-vec(0,0,-1.5),0)
             
-            
-            holoPos(103,This:toWorld(PLE+vec(0.5,-0.35,1.7)*ScaleH))
+            holoPos(103,This:toWorld(PLE+vec(0.5,-0.35,1.7)*EyeScale))
             holoAng(103,This:toWorld(ang(45,0,0)))
             
-            holoPos(104,This:toWorld(PLE+vec(0.75,0.66,1.2)*ScaleH))
+            holoPos(104,This:toWorld(PLE+vec(0.75,0.66,1.2)*EyeScale))
             holoAng(104,This:toWorld(ang(45,0,-30)))
             
-            holoPos(105,This:toWorld(PLE+vec(0.375,1.65,0.5)*ScaleH))
+            holoPos(105,This:toWorld(PLE+vec(0.375,1.65,0.5)*EyeScale))
             holoAng(105,This:toWorld(ang(45,0,-60)))
             
-            holoPos(106,This:toWorld(PRE+vec(0,-0.3,2.25)*ScaleH))
+            #Right Eye
+            holoClip(29,vec(0,0,3)*EyeScale,vec(0,0,-1),0)
+            holoClip(110,vec(0,0,3)*EyeScale,-vec(0,0,-1),0)
+            
+            holoPos(106,This:toWorld(PRE+vec(0,-0.3,2.25)*EyeScale))
             holoAng(106,This:angles())
             
-            holoPos(107,This:toWorld(PRE+vec(0,-1.25,2)*ScaleH))
+            holoPos(107,This:toWorld(PRE+vec(0,-1.25,2)*EyeScale))
             holoAng(107,This:toWorld(ang(0,0,30)))
             
-            holoPos(108,This:toWorld(PRE+vec(0,-1.75,1.25)*ScaleH))
+            holoPos(108,This:toWorld(PRE+vec(0,-1.75,1.25)*EyeScale))
             holoAng(108,This:toWorld(ang(0,0,60)))
             break
         case "sad",
-            holoClip(28,vec(0,0,1)*ScaleH,vec(0,0,-1.5),0)
-            holoClip(29,vec(0,0,1)*ScaleH,vec(0,0,-1.5),0)
-            holoClip(109,vec(0,0,1)*ScaleH,-vec(0,0,-1.5),0)
-            holoClip(110,vec(0,0,1)*ScaleH,-vec(0,0,-1.5),0)
+            #Left Eye
+            holoClip(28,vec(0,0,1)*EyeScale,vec(0,0,-1.5),0)
+            holoClip(109,vec(0,0,1)*EyeScale,-vec(0,0,-1.5),0)
             
-            holoPos(103,This:toWorld(PLE+vec(0.25,-0.35,1.7)*ScaleH))
+            holoPos(103,This:toWorld(PLE+vec(0.25,-0.35,1.7)*EyeScale))
             holoAng(103,This:toWorld(ang(45,0,-10)))
             
-            holoPos(104,This:toWorld(PLE+vec(0.5,0.66,1.2)*ScaleH))
+            holoPos(104,This:toWorld(PLE+vec(0.5,0.66,1.2)*EyeScale))
             holoAng(104,This:toWorld(ang(45,0,-20)))
             
-            holoPos(105,This:toWorld(PLE+vec(0.125,1.65,0.5)*ScaleH))
+            holoPos(105,This:toWorld(PLE+vec(0.125,1.65,0.5)*EyeScale))
             holoAng(105,This:toWorld(ang(45,0,-30)))
             
-            holoPos(106,This:toWorld(PRE+vec(0.25,0.35,1.7)*ScaleH))
+            #Right Eye
+            holoClip(29,vec(0,0,1)*EyeScale,vec(0,0,-1.5),0)
+            holoClip(110,vec(0,0,1)*EyeScale,-vec(0,0,-1.5),0)
+            
+            holoPos(106,This:toWorld(PRE+vec(0.25,0.35,1.7)*EyeScale))
             holoAng(106,This:toWorld(ang(45,0,10)))
             
-            holoPos(107,This:toWorld(PRE+vec(0.5,-0.66,1.2)*ScaleH))
+            holoPos(107,This:toWorld(PRE+vec(0.5,-0.66,1.2)*EyeScale))
             holoAng(107,This:toWorld(ang(45,0,20)))
             
-            holoPos(108,This:toWorld(PRE+vec(0.125,-1.65,0.5)*ScaleH))
+            holoPos(108,This:toWorld(PRE+vec(0.125,-1.65,0.5)*EyeScale))
             holoAng(108,This:toWorld(ang(45,0,30)))
             break
         case "annoyed",
-            holoClip(28,vec(0,0,1.5)*ScaleH,vec(0,1,-1.5),0)
-            holoClip(29,vec(0,0,1.5)*ScaleH,vec(0,-1,-1.5),0)
-            holoClip(109,vec(0,0,1.5)*ScaleH,-vec(0,1,-1.5),0)
-            holoClip(110,vec(0,0,1.5)*ScaleH,-vec(0,-1,-1.5),0)
+            #Left Eye
+            holoClip(28,vec(0,0,1.5)*EyeScale,vec(0,1,-1.5),0)
+            holoClip(109,vec(0,0,1.5)*EyeScale,-vec(0,1,-1.5),0)
             
-            holoPos(103,This:toWorld(PLE+vec(0.375,-0.75,1.5)*ScaleH))
+            holoPos(103,This:toWorld(PLE+vec(0.375,-0.75,1.5)*EyeScale))
             holoAng(103,This:toWorld(ang(45,0,5)))
             
-            holoPos(104,This:toWorld(PLE+vec(0.675,0.25,1.625)*ScaleH))
+            holoPos(104,This:toWorld(PLE+vec(0.675,0.25,1.625)*EyeScale))
             holoAng(104,This:toWorld(ang(45,0,0)))
             
-            holoPos(105,This:toWorld(PLE+vec(0.375,1.25,1.625)*ScaleH))
+            holoPos(105,This:toWorld(PLE+vec(0.375,1.25,1.625)*EyeScale))
             holoAng(105,This:toWorld(ang(45,0,-5)))
             
+            #Right Eye
+            holoClip(29,vec(0,0,1.5)*EyeScale,vec(0,-1,-1.5),0)
+            holoClip(110,vec(0,0,1.5)*EyeScale,-vec(0,-1,-1.5),0)
             
-            
-            holoPos(106,This:toWorld(PRE+vec(0.375,0.75,1.5)*ScaleH))
+            holoPos(106,This:toWorld(PRE+vec(0.375,0.75,1.5)*EyeScale))
             holoAng(106,This:toWorld(ang(45,0,-5)))
             
-            holoPos(107,This:toWorld(PRE+vec(0.675,-0.25,1.625)*ScaleH))
+            holoPos(107,This:toWorld(PRE+vec(0.675,-0.25,1.625)*EyeScale))
             holoAng(107,This:toWorld(ang(45,0,0)))
             
-            holoPos(108,This:toWorld(PRE+vec(0.375,-1.25,1.625)*ScaleH))
+            holoPos(108,This:toWorld(PRE+vec(0.375,-1.25,1.625)*EyeScale))
             holoAng(108,This:toWorld(ang(45,0,5)))
             
             
             break
         case "smug",
-            holoClip(28,vec(0,0,1.0)*ScaleH,vec(0,1,-1.5),0)
-            holoClip(29,vec(0,0,1.0)*ScaleH,vec(0,-1,-1.5),0)
-            holoClip(109,vec(0,0,1.0)*ScaleH,-vec(0,1,-1.5),0)
-            holoClip(110,vec(0,0,1.0)*ScaleH,-vec(0,-1,-1.5),0)
+            #Left Eye
+            holoClip(28,vec(0,0,1.0)*EyeScale,vec(0,1,-1.5),0)
+            holoClip(109,vec(0,0,1.0)*EyeScale,-vec(0,1,-1.5),0)
             
-            holoPos(103,This:toWorld(PLE+vec(0.55,-0.75,1.0)*ScaleH))
+            holoPos(103,This:toWorld(PLE+vec(0.55,-0.75,1.0)*EyeScale))
             holoAng(103,This:toWorld(ang(45,0,5)))
             
-            holoPos(104,This:toWorld(PLE+vec(0.75,0.25,1.125)*ScaleH))
+            holoPos(104,This:toWorld(PLE+vec(0.75,0.25,1.125)*EyeScale))
             holoAng(104,This:toWorld(ang(45,0,0)))
             
-            holoPos(105,This:toWorld(PLE+vec(0.55,1.25,1.25)*ScaleH))
+            holoPos(105,This:toWorld(PLE+vec(0.55,1.25,1.25)*EyeScale))
             holoAng(105,This:toWorld(ang(45,0,-5)))
             
+            #Right Eye
+            holoClip(29,vec(0,0,1.0)*EyeScale,vec(0,-1,-1.5),0)
+            holoClip(110,vec(0,0,1.0)*EyeScale,-vec(0,-1,-1.5),0)
             
-            
-            holoPos(106,This:toWorld(PRE+vec(0.55,0.75,1.0)*ScaleH))
+            holoPos(106,This:toWorld(PRE+vec(0.55,0.75,1.0)*EyeScale))
             holoAng(106,This:toWorld(ang(45,0,-5)))
             
-            holoPos(107,This:toWorld(PRE+vec(0.75,-0.25,1.125)*ScaleH))
+            holoPos(107,This:toWorld(PRE+vec(0.75,-0.25,1.125)*EyeScale))
             holoAng(107,This:toWorld(ang(45,0,0)))
             
-            holoPos(108,This:toWorld(PRE+vec(0.55,-1.25,1.25)*ScaleH))
+            holoPos(108,This:toWorld(PRE+vec(0.55,-1.25,1.25)*EyeScale))
             holoAng(108,This:toWorld(ang(45,0,5)))
             
             
             break
         case "angry",
-            holoClip(28,vec(0,0,1.5)*ScaleH,vec(0,1,-1),0)
-            holoClip(29,vec(0,0,1.5)*ScaleH,vec(0,-1,-1),0)
-            holoClip(109,vec(0,0,1.5)*ScaleH,-vec(0,1,-1),0)
-            holoClip(110,vec(0,0,1.5)*ScaleH,-vec(0,-1,-1),0)
+            #Left Eye
+            holoClip(28,vec(0,0,1.5)*EyeScale,vec(0,1,-1),0)
+            holoClip(109,vec(0,0,1.5)*EyeScale,-vec(0,1,-1),0)
             
-            holoPos(103,This:toWorld(PLE+vec(0.5,-1,1.25)*ScaleH))
+            holoPos(103,This:toWorld(PLE+vec(0.5,-1,1.25)*EyeScale))
             holoAng(103,This:toWorld(ang(45,0,15)))
             
-            holoPos(104,This:toWorld(PLE+vec(0.75,0,1.5)*ScaleH))
+            holoPos(104,This:toWorld(PLE+vec(0.75,0,1.5)*EyeScale))
             holoAng(104,This:toWorld(ang(45,0,10)))
             
-            holoPos(105,This:toWorld(PLE+vec(0.5,1,1.75)*ScaleH))
+            holoPos(105,This:toWorld(PLE+vec(0.5,1,1.75)*EyeScale))
             holoAng(105,This:toWorld(ang(45,0,5)))
             
+            #Right Eye
+            holoClip(29,vec(0,0,1.5)*EyeScale,vec(0,-1,-1),0)
+            holoClip(110,vec(0,0,1.5)*EyeScale,-vec(0,-1,-1),0)
             
-            
-            holoPos(106,This:toWorld(PRE+vec(0.5,1,1.25)*ScaleH))
+            holoPos(106,This:toWorld(PRE+vec(0.5,1,1.25)*EyeScale))
             holoAng(106,This:toWorld(ang(45,0,-15)))
             
-            holoPos(107,This:toWorld(PRE+vec(0.75,0,1.5)*ScaleH))
+            holoPos(107,This:toWorld(PRE+vec(0.75,0,1.5)*EyeScale))
             holoAng(107,This:toWorld(ang(45,0,-10)))
             
-            holoPos(108,This:toWorld(PRE+vec(0.5,-1,1.75)*ScaleH))
+            holoPos(108,This:toWorld(PRE+vec(0.5,-1,1.75)*EyeScale))
             holoAng(108,This:toWorld(ang(45,0,-5)))
             
             break
         case "concerned",
-            holoClip(28,vec(0,0,1.5)*ScaleH,vec(0,0.25,-1.5),0)
-            holoClip(29,vec(0,0,1.5)*ScaleH,vec(0,-0.25,-1.5),0)
-            holoClip(109,vec(0,0,1.5)*ScaleH,-vec(0,0.25,-1.5),0)
-            holoClip(110,vec(0,0,1.5)*ScaleH,-vec(0,-0.25,-1.5),0)
+        case "scared", #Guess who else is a filthy cheater?
+            #Left Eye
+            holoClip(28,vec(0,0,1.5)*EyeScale,vec(0,0.25,-1.5),0)
+            holoClip(109,vec(0,0,1.5)*EyeScale,-vec(0,0.25,-1.5),0)
             
-            holoPos(103,This:toWorld(PLE+vec(0.375,0,1.8)*ScaleH))
+            holoPos(103,This:toWorld(PLE+vec(0.375,0,1.8)*EyeScale))
             holoAng(103,This:toWorld(ang(45,0,-10)))
             
-            holoPos(104,This:toWorld(PLE+vec(0.6,0.75,1.625)*ScaleH))
+            holoPos(104,This:toWorld(PLE+vec(0.6,0.75,1.625)*EyeScale))
             holoAng(104,This:toWorld(ang(45,0,-15)))
             
-            holoPos(105,This:toWorld(PLE+vec(0.325,1.5,1.25)*ScaleH))
+            holoPos(105,This:toWorld(PLE+vec(0.325,1.5,1.25)*EyeScale))
             holoAng(105,This:toWorld(ang(45,0,-20)))
             
+            #Right Eye
+            holoClip(29,vec(0,0,1.5)*EyeScale,vec(0,-0.25,-1.5),0)
+            holoClip(110,vec(0,0,1.5)*EyeScale,-vec(0,-0.25,-1.5),0)
             
-            
-            holoPos(106,This:toWorld(PRE+vec(0.375,0,1.8)*ScaleH))
+            holoPos(106,This:toWorld(PRE+vec(0.375,0,1.8)*EyeScale))
             holoAng(106,This:toWorld(ang(45,0,10)))
             
-            holoPos(107,This:toWorld(PRE+vec(0.6,-0.75,1.625)*ScaleH))
+            holoPos(107,This:toWorld(PRE+vec(0.6,-0.75,1.625)*EyeScale))
             holoAng(107,This:toWorld(ang(45,0,15)))
             
-            holoPos(108,This:toWorld(PRE+vec(0.325,-1.5,1.25)*ScaleH))
+            holoPos(108,This:toWorld(PRE+vec(0.325,-1.5,1.25)*EyeScale))
             holoAng(108,This:toWorld(ang(45,0,20)))
             
             
+            break
+        case "flustered",
+            #Left Eye
+            holoClip(28,vec(0,0,1)*EyeScale,vec(0,-0,-1.5),0)
+            holoClip(109,vec(0,0,1)*EyeScale,-vec(0,-0,-1.5),0)
+            
+            holoPos(103,This:toWorld(PLE+vec(0.25,-0.35,1.7)*EyeScale))
+            holoAng(103,This:toWorld(ang(45,0,-10)))
+            
+            holoPos(104,This:toWorld(PLE+vec(0.5,0.66,1.2)*EyeScale))
+            holoAng(104,This:toWorld(ang(45,0,-20)))
+            
+            holoPos(105,This:toWorld(PLE+vec(0.125,1.65,0.5)*EyeScale))
+            holoAng(105,This:toWorld(ang(45,0,-30)))
+            
+            #Right Eye
+            holoClip(29,vec(0,0,1.5)*EyeScale,vec(0,-1,-1.5),0)
+            holoClip(110,vec(0,0,1.5)*EyeScale,-vec(0,-1,-1.5),0)
+            
+            holoPos(106,This:toWorld(PRE+vec(0.375,0.75,1.5)*EyeScale))
+            holoAng(106,This:toWorld(ang(45,0,-5)))
+            
+            holoPos(107,This:toWorld(PRE+vec(0.675,-0.25,1.625)*EyeScale))
+            holoAng(107,This:toWorld(ang(45,0,0)))
+            
+            holoPos(108,This:toWorld(PRE+vec(0.375,-1.25,1.625)*EyeScale))
+            holoAng(108,This:toWorld(ang(45,0,5)))
+            break
+        case "worried",
+            #Left Eye
+            holoClip(28,vec(0,0,1.3)*EyeScale,vec(0,3,-6),0)
+            holoClip(109,vec(0,0,1.3)*EyeScale,-vec(0,3,-6),0)
+            
+            holoPos(103,This:toWorld(PLE+vec(0.55,-0.75,1.6)*EyeScale))
+            holoAng(103,This:toWorld(ang(45,0,5)))
+            
+            holoPos(104,This:toWorld(PLE+vec(0.75,0.25,1.5)*EyeScale))
+            holoAng(104,This:toWorld(ang(45,0,0)))
+            
+            holoPos(105,This:toWorld(PLE+vec(0.55,1.25,1.4)*EyeScale))
+            holoAng(105,This:toWorld(ang(45,0,-5)))
+            
+            #Right Eye
+            holoClip(29,vec(0,0,1.3)*EyeScale,vec(0,-3,-6),0)
+            holoClip(110,vec(0,0,1.3)*EyeScale,-vec(0,-3,-6),0)
+            
+            holoPos(106,This:toWorld(PRE+vec(0.55,0.75,1.6)*EyeScale))
+            holoAng(106,This:toWorld(ang(45,0,-5)))
+            
+            holoPos(107,This:toWorld(PRE+vec(0.75,-0.25,1.5)*EyeScale))
+            holoAng(107,This:toWorld(ang(45,0,0)))
+            
+            holoPos(108,This:toWorld(PRE+vec(0.55,-1.25,1.4)*EyeScale))
+            holoAng(108,This:toWorld(ang(45,0,5)))
             break
         default,
             break
@@ -905,9 +757,9 @@ function void entity:eyeExpression(Expr:string,Eyelids,Sex,Scale,Baby,Squint,Win
     
     return void
 }
-function void entity:poseJaw(Angle,Scale){
+function void entity:poseJaw(Angle,MinAngle,Scale){
     local HA = holoEntity(2)
-    Angle = clamp(Angle,0,30)
+    Angle = clamp(max(Angle,MinAngle),0,30)
     
     if(JawTheta < Angle){
         JawTheta = Angle
@@ -922,6 +774,43 @@ function void entity:poseJaw(Angle,Scale){
     
     
     return void
+}
+function void entity:blep(BlepEnable, BlepAngle){ #Takes: jaw holo
+    BlepAngle = clamp(BlepAngle,-60,60)
+    if(BlepEnable & !Blepping){
+        Blepping = 1
+        foreach(K,Holo:number=TongueHolos){
+            holoAlpha(Holo,255)
+        }
+        MinJawAngle = 15
+    }elseif(!BlepEnable & Blepping){
+        Blepping = 0
+        holoAlpha(TongueLeftToothHolo,255)
+        holoAlpha(TongueRightToothHolo,255)
+        
+        foreach(K,Holo:number=TongueHolos){
+            holoAlpha(Holo,0)
+        }
+        MinJawAngle = 0
+    }
+    holoAng(119,This:toWorld(ang(0,BlepAngle,0)))
+    
+    if(Blepping){
+        holoAlpha(TongueLeftToothHolo,((BlepAngle>35)|BlepAngle<-12) ? 255 : 0)
+        holoAlpha(TongueRightToothHolo,((BlepAngle>12)|BlepAngle<-35) ? 255 : 0)
+    }
+}
+#Mlem animation is in poseHead() further down
+function void startMlem(){
+    JawAngleMaster = 25
+    MlemAngle = -15
+    timer("startmlem",200)
+}
+
+function void cry(Cry){
+    foreach(K,Holo:number=TearHolos){
+        holoAlpha(Holo,Cry*TearColor:w())
+    }
 }
 
 function void dytri(HoloIndex,Pos1:vector,Pos2:vector,Pos3:vector){
@@ -1079,8 +968,22 @@ function angle entity:poseHead(HeadAngle:angle,NeckPitch){ #Inputs Local to Chip
         IT_Roll += -clamp((IT_Roll-TR)/2,0,30)
         if(IT_Roll < TR){IT_Roll = TR}
     }
-    
-    local HA = ang(IT_Pitch,IT_Yaw,IT_Roll)
+    if(Mlemming){
+        MlemAngle += 5/Scale
+        if(MlemAngle>=25){
+            Mlemming = 0
+            holoEntity(35):blep(0,0)
+            if(MlemLoop){
+                MlemAngle = -15
+                timer("loopmlem",200)
+            }else{
+                MlemAngle = 0
+                JawAngleMaster = 0
+                timer("blink_open",100)
+            }
+        }
+    }
+    local HA = ang(IT_Pitch-MlemAngle,IT_Yaw,IT_Roll)
     local NA = ang(clamp(IT_Pitch/4 - NeckPitch,-60,60),clamp(IT_Yaw/4,-45,45),clamp(IT_Roll/4,-45,45))
     
     
@@ -1133,6 +1036,8 @@ function void entity:poseStand(Scale){
 }
 
 function void entity:poseSitF(Scale){ #Sit like a Lady
+    Climbing = 0 #Un-Crouch
+    entity():posReset(vec(0,0,1),0,Scale)
     
     holoAng(0,This:toWorld(ang(-35,0,0))) #Main Body
     holoPos(0,This:toWorld(vec(0,0,-18 + (18+5)*Scale)))
@@ -1164,6 +1069,8 @@ function void entity:poseSitF(Scale){ #Sit like a Lady
     return void
 }
 function void entity:poseSitM(Scale){ #Manspreading
+    Climbing = 0 #Un-Crouch
+    entity():posReset(vec(0,0,1),0,Scale)
     
     holoAng(0,This:toWorld(ang(-45,0,0))) #Main Body
     holoPos(0,This:toWorld(vec(0,0,-18 + 18*Scale)))
@@ -1194,6 +1101,8 @@ function void entity:poseSitM(Scale){ #Manspreading
     return void
 }
 function void entity:poseLieF(Scale){ #Lying down like a lady
+    Climbing = 0 #Un-Crouch
+    entity():posReset(vec(0,0,1),0,Scale)
     
     holoAng(0,This:toWorld(ang(0,0,0))) #Main Body
     holoPos(0,This:toWorld(vec(0,0,-18 + (18-3)*Scale)))
@@ -1226,6 +1135,8 @@ function void entity:poseLieF(Scale){ #Lying down like a lady
 }
 
 function void entity:poseLieM(Scale){ #Lying down for maximum ball cooling
+    Climbing = 0 #Un-Crouch
+    entity():posReset(vec(0,0,1),0,Scale)
     
     holoAng(0,This:toWorld(ang(-5,0,0))) #Main Body
     holoPos(0,This:toWorld(vec(0,0,-18 + (18-3)*Scale)))
@@ -1258,6 +1169,8 @@ function void entity:poseLieM(Scale){ #Lying down for maximum ball cooling
 }
 
 function void entity:poseSplat(Scale){ #Splat
+    Climbing = 0 #Un-Crouch
+    entity():posReset(vec(0,0,1),0,Scale)
     
     holoAng(0,This:toWorld(ang(0,0,0))) #Main Body
     holoPos(0,This:toWorld(vec(0,0,-18 + (18-3)*Scale)))
@@ -1290,6 +1203,8 @@ function void entity:poseSplat(Scale){ #Splat
 }
 
 function void entity:poseSleep1(Scale){ #Sleeping
+    Climbing = 0 #Un-Crouch
+    entity():posReset(vec(0,0,1),0,Scale)
     
     CurlDirection = (random()>0.5) ? 1 : -1 #1 for Left, -1 for Right
     
@@ -1375,10 +1290,30 @@ function void vocalizeRoar(DefaultExpression:string,Sex,DoTimer,VoScale){
             JawAngleMaster = 25
             if(DoTimer){timer("roarend",1500)}
             break
+        case "flustered",
+            soundPlay(5,1.5,"npc/antlion_guard/angry2.wav")
+            soundPitch(5,(70+10*Sex)/VoScale)
+            soundPitch(5,(95+10*Sex)/VoScale,1)
+            JawAngleMaster = 25
+            if(DoTimer){timer("roarend",1500)}
+            break
         case "concerned",
             soundPlay(5,1.5,"npc/antlion_guard/antlion_guard_pain2.wav")
             soundPitch(5,(90+10*Sex)/VoScale)
             #soundPitch(5,120+10*Sex,1)
+            JawAngleMaster = 25
+            if(DoTimer){timer("roarend",1500)}
+            break
+        case "scared",
+            soundPlay(5,3,"npc/antlion_guard/antlion_guard_die1.wav")
+            soundPitch(5,(90+10*Sex)/VoScale)
+            #soundPitch(5,120+10*Sex,1)
+            JawAngleMaster = 25
+            if(DoTimer){timer("roarend",3000)}
+            break
+        case "worried",
+            soundPlay(5,1.5,"npc/antlion_guard/antlion_guard_pain2.wav")
+            soundPitch(5,(80+10*Sex)/VoScale)
             JawAngleMaster = 25
             if(DoTimer){timer("roarend",1500)}
             break
@@ -1444,4 +1379,27 @@ function string owo(Input:string){
     }
     return Output
 }
-#print(owo("Sally sells sea shells by the seashore."))
+
+function string olo(Input:string){
+    local Output = ""
+    for(N=1,Input:length()){
+        local Char = Input:index(N)
+        if(Char=="b"){
+            Output += "p"
+        }elseif(Char=="B"){
+            Output += "P"
+        }elseif((Char=="s")|(Char=="f")){
+            Output += "th"
+        }elseif((Char=="S")|(Char=="F")){
+            Output += "TH"
+        }elseif(Char=="r"){
+            Output += "l"
+        }elseif(Char=="R"){
+            Output += "L"
+        }else{
+            Output += Char
+        }
+    }
+    return Output
+}
+#print(olo("Sally sells sea shells by the seashore."))

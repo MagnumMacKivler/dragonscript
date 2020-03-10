@@ -1,7 +1,7 @@
 @name dragonscript/cosmeticlib
 @inputs 
 @outputs 
-@persist Scale CurCos LastValidCosmetic CosmeticStart CosmeticTable:table [BoneLookup BodyLookup]:table
+@persist CurCos LastValidCosmetic CosmeticStart CosmeticTable:table [BoneLookup BodyLookup]:table
 @persist UsePupilAngles PupilCos:array # flags
 @trigger 
 
@@ -65,10 +65,18 @@ CosmeticTable(
 }
 ]#
 
-CosmeticStart = 119
+#fudge function, returns 1 if you need to fudge certain variables
+function number cosmeticFudge(){
+    return !entity():getName():find("Magnums Dragon 2")
+}
+
+if(cosmeticFudge()){
+    Scale = 1
+}
+
+CosmeticStart = 124
 CurCos = CosmeticStart-1 # -1 because creating a cosmetic indexes this value by 1 at start
 LastValidCosmetic = CurCos
-
 # cosmetic delay handler for starting the dragon
 
 function cosmeticHandleDelay(CosDelay1,CosDelay2,CosDelay3){
@@ -106,6 +114,7 @@ function number cosmeticAdd(Bone:string){
     if(Parent == -1){
         return 0
     }
+    if(LastValidCosmetic < CosmeticStart-1){ error("Screwy Wiremod bugs! You have to put down a new dragon.") } # AAA WTF E2 MEMORY ISSUES WHY
     LastValidCosmetic++
     CurCos = LastValidCosmetic
     
@@ -472,3 +481,11 @@ BodyLookup["RightWingPlane3",number] = 91
 #Misc
 BodyLookup["Lantern",number] = 117
 BodyLookup["FireBall",number] = 118
+
+#Tongue
+BodyLookup["TongueCurve",number] = 120
+BodyLookup["TongueTip",number] = 121
+
+#Tears
+BodyLookup["Tear1",number] = 122
+BodyLookup["Tear2",number] = 123

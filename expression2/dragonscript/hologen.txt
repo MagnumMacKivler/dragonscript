@@ -4,7 +4,7 @@
 @persist RagdollBits:table
 @trigger 
 
-HoloVersion = "2.1.0"
+HoloVersion = "2.2.0"
 
 function void holoSkeleton(P0:vector,PH:vector,PLWJ:vector,PLWH:vector,PRWJ:vector,PRWH:vector,Scale){
     local Ang0 = ang()
@@ -341,18 +341,17 @@ function void ragdollConstrain(){
     }
 }
 
-function void holos1(P0:vector, PH:vector, ColorBody:vector, ColorEye:vector, Material:string, Scale, Baby){
+function void holos1(P0:vector, PH:vector, ColorBody:vector, ColorEye:vector, ColorPupil:vector, MatEye:string, MatPupil:string, Material:string, Scale, Baby){
     local Ang0 = ang()
     local PLS = P0 + vec(24,7,0)*Scale
     local PRS = P0 + vec(24,-7,0)*Scale
     local PLH = P0 + vec(-20,7,0)*Scale
     local PRH = P0 + vec(-20,-7,0)*Scale
     
-    local ScaleH = vec(Scale)
+    EyeScale = vec(Scale)
     if(Baby){ #Baby
-        ScaleH = vec(Scale,0.6,0.6)
+        EyeScale = vec(Scale,Scale*1.2,Scale*1.2)
     }
-    
     
     
     #Main Body
@@ -382,21 +381,23 @@ function void holos1(P0:vector, PH:vector, ColorBody:vector, ColorEye:vector, Ma
     holoCreate(26,PH+vec(18.5,2,0)*Scale,vec(0.0625,0.125,0.125)*Scale,Ang0,vec(),"sphere")
     holoCreate(27,PH+vec(18.5,-2,0)*Scale,vec(0.0625,0.125,0.125)*Scale,Ang0,vec(),"sphere")
     
-    holoCreate(28,PH+vec(5,3,6.5)*Scale,vec(0.125,0.25,0.35)*ScaleH,ang(0,0,-30),vec(255),"hq_sphere") #Eyes
-    holoMaterial(28,"debug/debugdrawflat")
-    holoCreate(29,PH+vec(5,-3,6.5)*Scale,vec(0.125,0.25,0.35)*ScaleH,ang(0,0,30),vec(255),"hq_sphere")
-    holoMaterial(29,"debug/debugdrawflat")
+    holoCreate(28,PH+vec(5,3,6.5)*Scale,vec(0.125,0.25,0.35)*EyeScale,ang(0,0,-30),ColorEye,"hq_sphere") #Eyes
+    holoMaterial(28,MatEye)
+    holoCreate(29,PH+vec(5,-3,6.5)*Scale,vec(0.125,0.25,0.35)*EyeScale,ang(0,0,30),ColorEye,"hq_sphere")
+    holoMaterial(29,MatEye)
     
     holoClipEnabled(28,1,1)
     holoClipEnabled(28,2,1)
     holoClipEnabled(29,1,1)
     holoClipEnabled(29,2,1)
     
-    holoCreate(30,PH+vec(5.5,3,6.5)*Scale,vec(0.125)*ScaleH,ang(0,0,-15),ColorEye,"sphere") #Pupils
-    holoMaterial(30,"debug/debugdrawflat")
-    holoCreate(31,PH+vec(5.5,-3,6.5)*Scale,vec(0.125)*ScaleH,ang(0,0,15),ColorEye,"sphere")
-    holoMaterial(31,"debug/debugdrawflat")
-
+    holoCreate(30,PH+vec(5.5,3,6.5)*Scale,vec(0.125)*EyeScale,ang(0,0,-15),ColorPupil,"sphere") #Pupils
+    holoMaterial(30,MatPupil)
+    holoCreate(31,PH+vec(5.5,-3,6.5)*Scale,vec(0.125)*EyeScale,ang(0,0,15),ColorPupil,"sphere")
+    holoMaterial(31,MatPupil)
+    
+    PupilHolos = array(30,31)
+    
     holoCreate(32,PH+vec(-4,7.5,11)*Scale,vec(0.375,0.375,1)*Scale,ang(-30,0,-30),vec(255),"hq_cone") #Horns
     holoCreate(33,PH+vec(-4,-7.5,11)*Scale,vec(0.375,0.375,1)*Scale,ang(-30,0,30),vec(255),"hq_cone")
     
@@ -709,5 +710,39 @@ function void holosFX(){
         holoMaterial(N,"debug/debugdrawflat")
     }
     return void
+}
+function void holosTongue(PH:vector, Material:string, Scale){
+    holoCreate(119,PH + Scale*vec(8,0,-3),vec(1)*Scale,ang(),vec(255),"models/editor/axis_helper_thick.mdl")
+    holoAlpha(119,0)
+    holoParent(119,35)
+    
+    holoCreate(120,PH + Scale*vec(12.65,0,-3.55),vec(0.75,0.3125,0.75)*Scale,ang(30,180,0),vec(200,100,100),"models/sprops/misc/tubes_thin/size_1/t_q_tube_12x12.mdl")
+    holoAlpha(120,0)
+    holoMaterial(120,Material)
+    holoParent(120,119)
+    
+    holoCreate(121,PH + Scale*vec(15.75,0,-5.625),vec(0.3125,0.75,0.375)*Scale,ang(180,90,0):rotateAroundAxis(vec(0,1,0),-30),vec(200,100,100),"models/sprops/geometry/t_hdisc_12.mdl")
+    holoAlpha(121,0)
+    holoMaterial(121,Material)
+    holoParent(121,119)
+    
+    TongueHolos = array(120,121)
+    TongueHideHolos = array(37,38)
+    TongueLeftToothHolo = 37
+    TongueRightToothHolo = 38
+    #print("Tongue Holos: ",holoEntity(120),holoEntity(121))
+}
+function void holosTears(PH:vector,TearColor:vector4,TearMat:string, Scale){
+    holoCreate(122,PH + Scale*vec(4.75,4.5,5.625),vec(0.125,0.1875,0.125),ang(0,30,-15),TearColor,"hq_sphere")
+    holoAlpha(122,0)
+    holoMaterial(122,TearMat)
+    holoParent(122,2)
+    
+    holoCreate(123,PH + Scale*vec(4.75,-4.5,5.625),vec(0.125,0.1875,0.125),ang(0,-30,15),TearColor,"hq_sphere")
+    holoAlpha(123,0)
+    holoMaterial(123,TearMat)
+    holoParent(123,2)
+    
+    TearHolos = array(122,123)
 }
 

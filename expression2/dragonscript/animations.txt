@@ -4,10 +4,10 @@
 
 @persist IT_Pitch IT_Pitch_Old IT_Yaw IT_Roll LeftWing_Rand RightWing_Rand JawTheta
 @persist [FLPO FRPO RLPO RRPO]:vector FLPQ FRPQ RLPQ RRPQ
-@persist LanternTheta
+@persist LanternTheta BlushTheta BlushQ
 @trigger 
 
-AnimVersion = "2.2.0"
+AnimVersion = "2.2.1"
 
 local NeedFudge = !entity():getName():find("Magnums Dragon 2")
 if(NeedFudge){
@@ -35,6 +35,9 @@ if(NeedFudge){
     
     TearColor = vec4()
     TearHolos = array()
+    BlushColor = vec4()
+    BlushHolos = array()
+    FilterEnts = array()
 }
 
 
@@ -121,6 +124,7 @@ function void legReset(){ #Reset Legs for IK
 
 function void entity:posReset(Axis:vector,Crouch,Scale){ #Reset position of E2 to compensate for crouching
     rangerFilter(This)
+    rangerFilter(FilterEnts)
     local StandRanger = rangerOffsetHull(This:pos(),This:pos() - Axis*96, vec(32,32,0)*Scale)
     if(StandRanger:hit()){This:setPos(StandRanger:pos() + Axis*(Crouch ? 12 : 18))}
 }
@@ -530,13 +534,13 @@ function void entity:eyeExpression(Expr:string,Eyelids,Sex,Scale,Baby,Squint,Win
             holoClip(109,vec(0,0,1)*EyeScale,-vec(0,0,-1.5),0)
             
             holoPos(103,This:toWorld(PLE+vec(0.5,-0.35,1.7)*EyeScale))
-            holoAng(103,This:toWorld(ang(45,0,0)))
+            holoAng(103,This:toWorld(ang(45,0,-10)))
             
             holoPos(104,This:toWorld(PLE+vec(0.75,0.66,1.2)*EyeScale))
-            holoAng(104,This:toWorld(ang(45,0,-30)))
+            holoAng(104,This:toWorld(ang(45,0,-20)))
             
             holoPos(105,This:toWorld(PLE+vec(0.375,1.65,0.5)*EyeScale))
-            holoAng(105,This:toWorld(ang(45,0,-60)))
+            holoAng(105,This:toWorld(ang(45,0,-30)))
             
             #Right Eye
             holoClip(29,vec(0,0,3)*EyeScale,vec(0,0,-1),0)
@@ -556,26 +560,26 @@ function void entity:eyeExpression(Expr:string,Eyelids,Sex,Scale,Baby,Squint,Win
             holoClip(28,vec(0,0,1)*EyeScale,vec(0,0,-1.5),0)
             holoClip(109,vec(0,0,1)*EyeScale,-vec(0,0,-1.5),0)
             
-            holoPos(103,This:toWorld(PLE+vec(0.25,-0.35,1.7)*EyeScale))
+            holoPos(103,This:toWorld(PLE+vec(0.5,-0.35,1.7)*EyeScale))
             holoAng(103,This:toWorld(ang(45,0,-10)))
             
-            holoPos(104,This:toWorld(PLE+vec(0.5,0.66,1.2)*EyeScale))
+            holoPos(104,This:toWorld(PLE+vec(0.75,0.66,1.2)*EyeScale))
             holoAng(104,This:toWorld(ang(45,0,-20)))
             
-            holoPos(105,This:toWorld(PLE+vec(0.125,1.65,0.5)*EyeScale))
+            holoPos(105,This:toWorld(PLE+vec(0.375,1.65,0.5)*EyeScale))
             holoAng(105,This:toWorld(ang(45,0,-30)))
             
             #Right Eye
             holoClip(29,vec(0,0,1)*EyeScale,vec(0,0,-1.5),0)
             holoClip(110,vec(0,0,1)*EyeScale,-vec(0,0,-1.5),0)
             
-            holoPos(106,This:toWorld(PRE+vec(0.25,0.35,1.7)*EyeScale))
+            holoPos(106,This:toWorld(PRE+vec(0.5,0.35,1.7)*EyeScale))
             holoAng(106,This:toWorld(ang(45,0,10)))
             
-            holoPos(107,This:toWorld(PRE+vec(0.5,-0.66,1.2)*EyeScale))
+            holoPos(107,This:toWorld(PRE+vec(0.75,-0.66,1.2)*EyeScale))
             holoAng(107,This:toWorld(ang(45,0,20)))
             
-            holoPos(108,This:toWorld(PRE+vec(0.125,-1.65,0.5)*EyeScale))
+            holoPos(108,This:toWorld(PRE+vec(0.375,-1.65,0.5)*EyeScale))
             holoAng(108,This:toWorld(ang(45,0,30)))
             break
         case "annoyed",
@@ -699,13 +703,13 @@ function void entity:eyeExpression(Expr:string,Eyelids,Sex,Scale,Baby,Squint,Win
             holoClip(28,vec(0,0,1)*EyeScale,vec(0,-0,-1.5),0)
             holoClip(109,vec(0,0,1)*EyeScale,-vec(0,-0,-1.5),0)
             
-            holoPos(103,This:toWorld(PLE+vec(0.25,-0.35,1.7)*EyeScale))
+            holoPos(103,This:toWorld(PLE+vec(0.5,-0.35,1.7)*EyeScale))
             holoAng(103,This:toWorld(ang(45,0,-10)))
             
-            holoPos(104,This:toWorld(PLE+vec(0.5,0.66,1.2)*EyeScale))
+            holoPos(104,This:toWorld(PLE+vec(0.75,0.66,1.2)*EyeScale))
             holoAng(104,This:toWorld(ang(45,0,-20)))
             
-            holoPos(105,This:toWorld(PLE+vec(0.125,1.65,0.5)*EyeScale))
+            holoPos(105,This:toWorld(PLE+vec(0.375,1.65,0.5)*EyeScale))
             holoAng(105,This:toWorld(ang(45,0,-30)))
             
             #Right Eye
@@ -812,6 +816,22 @@ function void cry(Cry){
         holoAlpha(Holo,Cry*TearColor:w())
     }
 }
+function void blush(Blush){
+    if(Blush){
+        BlushQ = 1
+        foreach(K,Holo:number=BlushHolos){
+            holoAlpha(Holo,Blush*BlushColor:w() + 20*sin(BlushTheta))
+        }
+        BlushTheta += 15
+        if(BlushTheta>=360){BlushTheta-=360}
+    }elseif(!Blush & BlushQ){
+        BlushQ = 0
+        foreach(K,Holo:number=BlushHolos){
+            holoAlpha(Holo,0)
+        }
+        BlushTheta = 0
+    }
+}
 
 function void dytri(HoloIndex,Pos1:vector,Pos2:vector,Pos3:vector){
     local H = holoEntity(HoloIndex)
@@ -850,13 +870,48 @@ function void dytri(HoloIndex,Pos1:vector,Pos2:vector,Pos3:vector){
     holoClip(HoloIndex,3,H:toLocal(Pos1),H:toLocalAxis(CA13),0)
     return void
 }
+#This function would set up the entity-based wing clips, but isn't used because the wings tend to fall apart :(
+#function void setupWingClips(){
+#    local LH1 = holoEntity(70)
+#    local LH2 = holoEntity(71)
+#    local LH3 = holoEntity(72)
+#    local LH4 = holoEntity(12)
 
+#    holoScale(76,vec(4,4,0.03125))
+#    holoClip(76,1,vec(),vec(-1,0,0),LH1)
+#    holoClip(76,2,vec(),vec(1,0,0),LH2)
+    
+#    holoScale(77,vec(4,4,0.03125))
+#    holoClip(77,1,vec(),vec(-1,0,0),LH2)
+#    holoClip(77,2,vec(),vec(1,0,0),LH3)
+    
+#    holoScale(78,vec(4,4,0.03125))
+#    holoClip(78,1,vec(),vec(-1,0,0),LH3)
+#    holoClip(78,2,vec(),vec(-1,0,0),LH4)
+    
+#    local RH1 = holoEntity(80)
+#    local RH2 = holoEntity(81)
+#    local RH3 = holoEntity(82)
+#    local RH4 = holoEntity(14)
+    
+#    holoScale(89,vec(4,4,0.03125))
+#    holoClip(89,1,vec(),vec(-1,0,0),RH1)
+#    holoClip(89,2,vec(),vec(1,0,0),RH2)
+    
+#    holoScale(90,vec(4,4,0.03125))
+#    holoClip(90,1,vec(),vec(-1,0,0),RH2)
+#    holoClip(90,2,vec(),vec(1,0,0),RH3)
+    
+#    holoScale(91,vec(4,4,0.03125))
+#    holoClip(91,1,vec(),vec(-1,0,0),RH3)
+#    holoClip(91,2,vec(),vec(-1,0,0),RH4)
+#}
 function void entity:poseWings(ShoulderYaw, ShoulderPitchUp, ShoulderRollUp, Splay, Flap, Offset, Scale){
     
     local JL = holoEntity(12)
     local JR = holoEntity(14)
     
-    local ShoulderAngle1 = ang():rotateAroundAxis(vec(0,0,1),-ShoulderYaw):rotateAroundAxis(vec(0,1,0),-ShoulderPitchUp)
+    local ShoulderAngle1 = ang(0,-ShoulderYaw,0):rotateAroundAxis(vec(0,1,0),-ShoulderPitchUp)
     
     local ALS = ShoulderAngle1:rotateAroundAxis(vec(1,0,0),ShoulderRollUp + Offset)
     local ARS = (ShoulderAngle1:rotateAroundAxis(vec(1,0,0),ShoulderRollUp) - Offset)*ang(1,-1,-1)
@@ -873,8 +928,6 @@ function void entity:poseWings(ShoulderYaw, ShoulderPitchUp, ShoulderRollUp, Spl
     local RH2 = LH2*ang(1,-1,-1)
     local RH3 = LH3*ang(1,-1,-1)
     
-    
-    
     holoAng(12,This:toWorld(ALS))
     holoAng(70,This:toWorld(LH1))
     holoAng(71,This:toWorld(LH2))
@@ -890,6 +943,20 @@ function void entity:poseWings(ShoulderYaw, ShoulderPitchUp, ShoulderRollUp, Spl
     local PRWH = JR:toWorld(vec(0,-36,0)*Scale)
     local PRWJ = JR:pos()
     
+    #Started making entity-based wing clip code, turns out it didn't work due to it coming apart when the wings flap.
+    
+    #local A76 = This:toWorld((LH1+LH2)/2)
+    #local A77 = This:toWorld((LH2+LH3)/2)
+    #local D3 = ((PLWH-47*This:toWorld(LH3):right())-PLWJ):normalized()
+    #local A78 = This:toWorld(ALS:rotateAroundAxis(ALS:up(),acos((PLWH-PLWJ):normalized():dot(D3))))
+    
+    #holoPos(76,PLWH - 23*A76:right())
+    #holoAng(76,A76)
+    #holoPos(77,PLWH - 23*A77:right())
+    #holoAng(77,A77)
+    #holoPos(78,PLWJ + 25*A78:forward())
+    #holoAng(78,A78)
+    
     dytri(76,PLWH,PLWH-48*This:toWorld(LH1):right()*Scale,PLWH-48*This:toWorld(LH2):right()*Scale)
     dytri(77,PLWH,PLWH-48*This:toWorld(LH2):right()*Scale,PLWH-48*This:toWorld(LH3):right()*Scale)
     dytri(78,PLWH,PLWH-48*This:toWorld(LH3):right()*Scale,PLWJ)
@@ -898,19 +965,21 @@ function void entity:poseWings(ShoulderYaw, ShoulderPitchUp, ShoulderRollUp, Spl
     dytri(90,PRWH,PRWH+48*This:toWorld(RH2):right()*Scale,PRWH+48*This:toWorld(RH3):right()*Scale)
     dytri(91,PRWH,PRWH+48*This:toWorld(RH3):right()*Scale,PRWJ)
     
-    
-    
     return void
 }
-function void entity:poseWingsCheap(ShoulderYaw, ShoulderRollUp){
+function void entity:poseWingsCheap(ShoulderPitchUp, ShoulderYaw, ShoulderRollUp){
     
     local JL = holoEntity(12)
     local JR = holoEntity(14)
     
-    local ShoulderAngle = ang():rotateAroundAxis(vec(0,0,1),-ShoulderYaw):rotateAroundAxis(vec(1,0,0),ShoulderRollUp)
+    #local ShoulderAngle = ang():rotateAroundAxis(vec(0,0,1),-ShoulderYaw):rotateAroundAxis(vec(1,0,0),ShoulderRollUp)
+    #local ALS = ShoulderAngle
+    #local ARS = ShoulderAngle*ang(1,-1,-1)
     
-    local ALS = ShoulderAngle
-    local ARS = ShoulderAngle*ang(1,-1,-1)
+    local ShoulderAngle = ang(0,-ShoulderYaw,0):rotateAroundAxis(vec(0,1,0),-ShoulderPitchUp)
+    
+    local ALS = ShoulderAngle:rotateAroundAxis(vec(1,0,0),ShoulderRollUp)
+    local ARS = ALS*ang(1,-1,-1)
 
     holoAng(12,This:toWorld(ALS))
     
@@ -919,12 +988,17 @@ function void entity:poseWingsCheap(ShoulderYaw, ShoulderRollUp){
     return void
 }
 
-function void entity:poseWingsDance(ShoulderYaw, ShoulderRollUp, Offset){
+function void entity:poseWingsDance(ShoulderPitchUp, ShoulderYaw, ShoulderRollUp, Offset){
     
     local JL = holoEntity(12)
     local JR = holoEntity(14)
     
-    local ShoulderAngle = ang():rotateAroundAxis(vec(0,0,1),-ShoulderYaw)
+    #local ShoulderAngle = ang():rotateAroundAxis(vec(0,0,1),-ShoulderYaw)
+    
+    #local ALS = ShoulderAngle:rotateAroundAxis(vec(1,0,0),ShoulderRollUp + Offset)
+    #local ARS = (ShoulderAngle:rotateAroundAxis(vec(1,0,0),ShoulderRollUp) - Offset)*ang(1,-1,-1)
+
+    local ShoulderAngle = ang(0,-ShoulderYaw,0):rotateAroundAxis(vec(0,1,0),-ShoulderPitchUp)
     
     local ALS = ShoulderAngle:rotateAroundAxis(vec(1,0,0),ShoulderRollUp + Offset)
     local ARS = (ShoulderAngle:rotateAroundAxis(vec(1,0,0),ShoulderRollUp) - Offset)*ang(1,-1,-1)

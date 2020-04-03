@@ -15,6 +15,7 @@
 @persist [ColorEye ColorPupil ColorEyeLid]:vector [MatEye MatPupil MatEyeLid]:string PupilScale PupilHolos:array #Eyes
 @persist JawAngleMaster MinJawAngle TongueHolos:array TongueLeftToothHolo TongueRightToothHolo Blepping #Jaw and Blep
 @persist TearColor:vector4 TearMat:string TearHolos:array Crying #Tears
+@persist BlushColor:vector4 BlushMat:string BlushHolos:array Blushing #Blush
 
 #Physics
 @persist Loading Driveable Driving Riding Sleeping Following #States
@@ -26,7 +27,7 @@
 @persist FlyVelW:vector FlyTerminalVelocity FlyTurnMul FlapQ FlapTheta FlapResetQ FlyPitchVel FlyYawVel FlyRollVel FlyBobTheta #Flying Data
 @persist SlideSpeed SlideAccel #Sliding Data
 @persist SwimSpeed SwimTurnSpeed SwimSpeedMax SwimAccel SwimTurnSpeedMax SwimTurnAccel SwimTheta SwimTheta2 SwishQ TreadWater #Swimming Data
-@persist RidingEntity:entity HeadLock HeadLockAngle:angle #Prop Surfing
+@persist RidingEntity:entity #Prop Surfing
 @persist Ragdoll RagdollStep NoCosmetics #Ragdoll stuff
 @persist Dazed DazedTheta Recovering Crashing ShakeAng ShakeQ #Fender Bender
 @persist CurlDirection ShutEyesQ Snoring ZTheta1 ZTheta2 ZTheta3 ZQ #Sleeping
@@ -40,6 +41,7 @@
 @persist CameraOn FirstPerson #Camera
 @persist GTpos:vector GTang:angle TeleLock #Needateleportahere
 @persist Carrying CarryObject:entity PickupQ DragonPos:vector #Object Carrying
+@persist HeadLock HeadLockAngle:angle WingPoseParams:table #Head and Wing Pose Override
 
 #Personality
 @persist SpeakBubbleTimeout SpeakAlpha SpeakFading Speaking SpeakType TalkingTo TalkPrintMode TalkProximityMode SpeakIndex TargetText:string MSGSortString:string SpeechFont:string #Speaking
@@ -52,7 +54,7 @@
 @persist Mlemming MlemAngle MlemSound:string MlemLoop #Doggie Kisses
 
 #Miscellaneous
-@persist [E O]:entity GetInQ1 GetInQ2 SitAngleCorrect Active1 Weapon WeaponQ WeaponAlpha Freeze MinScale MaxScale PopPitch EyeScale:vector #Misc
+@persist [E O]:entity GetInQ1 GetInQ2 SitAngleCorrect Active1 Weapon WeaponQ WeaponAlpha Freeze MinScale MaxScale PopPitch EyeScale:vector FilterEnts:array #Misc
 @persist Version:string AnimVersion:string HoloVersion:string SettingsVersion:string InitVersion:string #Version Info
 @persist DTable:gtable LDTable:gtable DragonFindName:string DragonFindArray:array Chatroom:string # Global-Based Stuff
 
@@ -60,7 +62,7 @@
 #You can change these variables in the config file. Again, DO NOT CHANGE THEM HERE.
 
 #Versioning
-InitVersion = "2.2.0"
+InitVersion = "2.2.1"
 
 #Name & Titles
 Prefix = "" #Text that comes before the dragon's name on the E2 Cube's tooltip. Not included in chat or search functions.
@@ -83,8 +85,10 @@ MatEye = "debug/debugdrawflat" #The material for the dragon's eyes (sclera).
 MatPupil = MatEye #The material for the dragon's pupils.
 MatEyeLid = Material #The material for the dragon's eyelids. Normally a copy of the skin material.
 DefaultLanternColor = vec(255,255,200) #The color of the lantern/light the dragon uses. Normally a pleasant incandescent soft white.
-TearColor = vec4(127,191,255, 191) #The color used for the dragon's tears.
+TearColor = vec4(127,191,255,191) #The color used for the dragon's tears.
 TearMat = "" #The material used for the dragon's tears.
+BlushColor = vec4(200,150,170,127) #The color of the dragon's rosy cheeks.
+BlushMat = Material #The material for the dragon's rosy cheeks. Normally a copy of the skin material.
 
 #Physics... adjust at your own peril. Speeds are given in 1/10 units (or degrees) per second (so a speed of 5 means 50 units per second). Accels are given in 1/10 units per second, per second.
 WalkSpeedMax = 16 #Maximum walking speed on flat ground.
@@ -115,6 +119,7 @@ DefaultExpression = "normal" #The dragon's default emotional state.
 DefaultExpressionEyelids = 0 #The dragon's default eyelid state.
 DefaultSquint = 0 #The dragon's default squint state.
 FireExpression = "angry" #Expression to use when breathing fire at something.
+JayMode = 0 #If set to 1, the dragon will only passively look at the closest player or dragon, instead of shifting betwen the nearest 3. Henlo.
 
 #Speech and Chat
 Chatroom = "all" #The chat room name to join initially.

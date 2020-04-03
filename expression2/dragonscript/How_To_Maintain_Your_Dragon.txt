@@ -1,6 +1,6 @@
 @name dragonscript/How_To_Maintain_Your_Dragon
 @model models/props_lab/binderredlabel.mdl
-setName("How to Maintain your Dragon\nRelease 2.2.0")
+setName("How to Maintain your Dragon\nRelease 2.2.1")
 #[
     
     
@@ -12,7 +12,7 @@ setName("How to Maintain your Dragon\nRelease 2.2.0")
                                                                                |___/                                    |___/               
     
     ========================================================================================================================================
-                                                                Release Version 2.2.0
+                                                                Release Version 2.2.1
                                                       An Operation, Maintenance, and Survival Guide
                                                         Copyright 2018-20 Magnum Technologies Inc.
     ========================================================================================================================================
@@ -414,6 +414,9 @@ setName("How to Maintain your Dragon\nRelease 2.2.0")
     .cry [bool Enable]
     Toggles tears at the corners of the dragon's eyes. Not emotion-dependent.
     
+    .blush [bool Enable]
+    Toggles a pink flushing effect in the dragon's cheeks. Not emption-dependent.
+    
     .dance
     The .dance command toggles the dragon's dancing mode! While dancing, the dragon is unable to move (except by teleporting). Comes with music note effects.
     
@@ -482,6 +485,19 @@ setName("How to Maintain your Dragon\nRelease 2.2.0")
     
     .jaw [number angle]
     The .jaw command makes the dragon open its mouth to the specified angle in degrees. Clamped from 0 to 30.
+    
+    .posewings (string option) [numbers values]
+    Allows you to control the wing base pose. Since there are five variables you can adjust, the command allows you to change them one at a time.
+    
+    The options are:
+    
+    "yaw" : Changes/Resets the Forward Yaw. Positive values rotate the wings forward. The wings are rotated this way FIRST.
+    "pitch" : Changes/Resets the Angle of Attack (AoA) Pitch. Positive values increase the AoA. The wings are rotated this way SECOND.
+    "roll" : Changes/Resets the Upward Roll. Positive values roll the wings up towards the vertical. The wings are rotated this way THIRD.
+    "splay" : The angle between the wing ribs. Changing this value can give the effect of stretching/extending the wings out.
+    "flap" : The 'flap factor', a value from -1 to +1 that bends the wings up (+1) or down (-1).
+    "get" : Prints all the current values, and command to restore them, to the chat.
+    "all" : Allows you to set all five parameters at once, in the order Pitch, Yaw, Roll, Splay, Flap.
     
     
     

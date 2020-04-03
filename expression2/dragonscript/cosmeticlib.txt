@@ -74,7 +74,7 @@ if(cosmeticFudge()){
     Scale = 1
 }
 
-CosmeticStart = 124
+CosmeticStart = 128
 CurCos = CosmeticStart-1 # -1 because creating a cosmetic indexes this value by 1 at start
 LastValidCosmetic = CurCos
 # cosmetic delay handler for starting the dragon

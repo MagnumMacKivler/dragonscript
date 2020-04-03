@@ -8,7 +8,7 @@
 #For updates for the Dragonscript E2, check out where you probably got it: https://github.com/MagnumMacKivler/dragonscript
 
 if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init", setName("Magnums Dragon 2")
-    Version = "2.2.0"
+    Version = "2.2.1"
     
     #Config: Which Dragon Settings file do you want to load?
     #include "dragonscript/settings/grayscale"
@@ -20,7 +20,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
     #Launch Options
     
     TalkPrintMode = 1 #Changes whether or not the dragon has its chatlog in the console, or the player chat. 1 is player chat, 0 is console.
-    TalkProximityMode = 1 #Changes whether or not the dragon chatlog is proximity based. 1 is proximity based, 0 is console. Unheard messages still appear in console.
+    TalkProximityMode = 0 #Changes whether or not the dragon chatlog is proximity based. 1 is proximity based, 0 is console. Unheard messages still appear in console.
     Ragdoll = 0 #Turn the dragon into a ragdoll? Results may vary.
     NoCosmetics = 0 #Prevent cosmetics from loading?
     ForceScale = 0 #If anything other than 0, force the dragon's scale to this (max 3):
@@ -46,12 +46,29 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
     
     StandTransitionQ = 1
     
+    WingPoseParams = table()
+    WingPoseParams["pitch",number] = 0
+    WingPoseParams["yaw",number] = 30
+    WingPoseParams["roll",number] = 75
+    WingPoseParams["splay",number] = 22.5
+    WingPoseParams["flap",number] = 0
+    
     if((Baby==1)|ForceBaby){
         Scale = 0.5
         Baby = 1
     }elseif(ForceScale!=0){
         Scale = min(ForceScale,3)
     }
+    
+    FilterEnts = array()
+    if(->Seat1){FilterEnts:pushEntity(Seat1:entity())}
+    if(->Seat2){FilterEnts:pushEntity(Seat2:entity())}
+    if(->FlamePlate){FilterEnts:pushEntity(FlamePlate:entity())}
+    if(->Igniter){FilterEnts:pushEntity(Igniter:entity())}
+    if(->EGP){FilterEnts:pushEntity(EGP:entity())}
+    if(->FireLight){FilterEnts:pushEntity(FireLight:entity())}
+    if(->LanternLight){FilterEnts:pushEntity(LanternLight:entity())}
+    if(->User){FilterEnts:pushEntity(User:entity())}
     
     VoScale = 1 + (Scale-1)/3  
     runOnChat(1)
@@ -378,10 +395,10 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
     
     #Compatibility Checking
     
-    local NeedAnim = "2.2.0"
-    local NeedHolo = "2.2.0"
+    local NeedAnim = "2.2.1"
+    local NeedHolo = "2.2.1"
     local NeedSettings = "2.2.0"
-    local NeedInit = "2.2.0"
+    local NeedInit = "2.2.1"
     
     
     local AnimCompat = compatCheck(NeedAnim,AnimVersion)
@@ -449,14 +466,14 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
     timer("holos3",1000)
 }elseif(clk("holos3")){
     holos3(PLWJ, PLWH, PRWJ, PRWH, ColorBody, ColorWings, Material, Scale)
+    #setupWingClips()
+    #dytri(76,PLWH,PLWH-48*LH1:right()*Scale,PLWH-48*LH2:right()*Scale)
+    #dytri(77,PLWH,PLWH-48*LH2:right()*Scale,PLWH-48*LH3:right()*Scale)
+    #dytri(78,PLWH,PLWH-48*LH3:right()*Scale,PLWJ)
     
-    dytri(76,PLWH,PLWH-48*LH1:right()*Scale,PLWH-48*LH2:right()*Scale)
-    dytri(77,PLWH,PLWH-48*LH2:right()*Scale,PLWH-48*LH3:right()*Scale)
-    dytri(78,PLWH,PLWH-48*LH3:right()*Scale,PLWJ)
-    
-    dytri(89,PRWH,PRWH+48*RH1:right()*Scale,PRWH+48*RH2:right()*Scale)
-    dytri(90,PRWH,PRWH+48*RH2:right()*Scale,PRWH+48*RH3:right()*Scale)
-    dytri(91,PRWH,PRWH+48*RH3:right()*Scale,PRWJ)
+    #dytri(89,PRWH,PRWH+48*RH1:right()*Scale,PRWH+48*RH2:right()*Scale)
+    #dytri(90,PRWH,PRWH+48*RH2:right()*Scale,PRWH+48*RH3:right()*Scale)
+    #dytri(91,PRWH,PRWH+48*RH3:right()*Scale,PRWJ)
     soundPlay(0,1,"garrysmod/balloon_pop_cute.wav")
     soundPitch(0,PopPitch)
     PopPitch += 10
@@ -477,6 +494,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
 }elseif(clk("holos4.5")){
     holosTongue(PH,Material,Scale)
     holosTears(PH,TearColor,TearMat,Scale)
+    holosBlush(PH,BlushColor,BlushMat,Scale)
     
     soundPlay(0,1,"garrysmod/balloon_pop_cute.wav")
     soundPitch(0,PopPitch)
@@ -1183,7 +1201,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
             TailTheta += (Moving ? WalkSpeedEffective*4 : IdleBaseSpeed)/Scale
             if(TailTheta>360){TailTheta-=360}
             holoEntity(0):poseTail(-15 + 5*sin(WalkBobTheta2),5*sin(TailTheta) - WalkTurnSpeed,0,0,Scale)
-            holoEntity(0):poseWingsCheap(30,(Climbing ? 60 : 75) + 2.5*sin(TailTheta))
+            holoEntity(0):poseWingsCheap(WingPoseParams["pitch",number],WingPoseParams["yaw",number],WingPoseParams["roll",number] - (Climbing ? 15 : 0) + 2.5*sin(TailTheta))
             
         }elseif(Driving==2){ #Running
             
@@ -1431,7 +1449,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                     TailTheta += RunSpeedEffective/(3*Scale)
                     if(TailTheta>360){TailTheta-=360}
                     holoEntity(0):poseTail(-15 + RunSpeedEffective/32,10*sin(TailTheta),0,0,Scale)
-                    holoEntity(0):poseWingsCheap(30,75 + 2.5*sin(TailTheta))
+                    holoEntity(0):poseWingsCheap(WingPoseParams["pitch",number],WingPoseParams["yaw",number],WingPoseParams["roll",number] + 2.5*sin(TailTheta))
                     
                 }else{
                     if(Moving){
@@ -2137,7 +2155,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 
                 #Tail/Wing
                 holoEntity(0):poseTail(-15 + 5*sin(WalkBobTheta2),5*sin(TailTheta) - WalkTurnSpeed,0,0,Scale)
-                holoEntity(0):poseWingsCheap(30,75 + 2.5*sin(TailTheta))
+                holoEntity(0):poseWingsCheap(WingPoseParams["pitch",number],WingPoseParams["yaw",number],WingPoseParams["roll",number] + 2.5*sin(TailTheta))
                 
                 if(abs(SlideSpeedEffective)>0){
                     if(!Moving & (Driving==5)){
@@ -2160,7 +2178,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                     TailTheta += SlideSpeedEffective/2
                     if(TailTheta>360){TailTheta-=360}
                     holoEntity(0):poseTail(-15,2.5*sin(TailTheta)-2.5*WalkTurnSpeed,0,0,Scale)
-                    holoEntity(0):poseWingsCheap(30,75 + 2.5*sin(TailTheta))
+                    holoEntity(0):poseWingsCheap(WingPoseParams["pitch",number],WingPoseParams["yaw",number],WingPoseParams["roll",number] + 2.5*sin(TailTheta))
                     
                 }else{
                     if(Moving){
@@ -2484,7 +2502,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 
                 #Tail/Wings
                 H0:poseTail(0,7.5*sin(SwimTheta2) - SwimTurnSpeed*1.5,0,0,Scale)
-                H0:poseWingsCheap(30,75+5*sin(SwimTheta2))
+                H0:poseWingsCheap(WingPoseParams["pitch",number],WingPoseParams["yaw",number],WingPoseParams["roll",number]+5*sin(SwimTheta2))
                 
             }
             
@@ -2572,7 +2590,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 local SD1S = sin(DanceTheta1)
                 E:poseHeadInstant(ang(10*SD1F,10*SD1S,-5*SD1S),SitAngleCorrect)
                 holoEntity(2):poseEyes(vec2(),1,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
-                holoEntity(0):poseWingsDance(30,75,7.5*SD1M)
+                holoEntity(0):poseWingsDance(WingPoseParams["pitch",number],WingPoseParams["yaw",number],WingPoseParams["roll",number],7.5*SD1M)
             }elseif(!Active1){
                 #Look @ Players
                 if(!HasLookTarget){
@@ -2592,7 +2610,6 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                     
                     local LATarget = !JayMode? ValidTargets[randint(1,min(randint(1,3),ValidTargets:count())),entity] : ValidTargets[1,entity] # find a random target based on the three closest targets
                     IdleLookTarget = LATarget # no need to search - we already sorted the list
-                    
                     timer("resetIdleLookTarget",DefaultExpression=="scared" ? 1000 : 5000)
                 }
                 
@@ -2721,7 +2738,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 #Tail/Wings
                 if(!Dancing){
                     H0:poseTail(0,7.5*sin(SwimTheta2),0,0,Scale)
-                    H0:poseWingsCheap(30,75+5*sin(SwimTheta2))
+                    H0:poseWingsCheap(WingPoseParams["pitch",number],WingPoseParams["yaw",number],WingPoseParams["roll",number]+5*sin(SwimTheta2))
                 }else{
                     holoEntity(0):poseTail(0,5*sin(DanceTheta1*3),0,0,Scale)
                 }
@@ -2741,7 +2758,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                     if(Freeze){TailTheta=0}
                     holoEntity(0):poseTail(-15,5*sin(TailTheta),0,0,Scale)
                     #holoEntity(0):poseWingsCheap(30,75 + 2.5*sin(TailTheta))
-                    holoEntity(0):poseWingsCheap(30,(Climbing ? 60 : 75) + 2.5*sin(TailTheta))
+                    holoEntity(0):poseWingsCheap(WingPoseParams["pitch",number],WingPoseParams["yaw",number],WingPoseParams["roll",number] - (Climbing ? 15 : 0) + 2.5*sin(TailTheta))
                 }else{
                     holoEntity(0):poseTail(-15,5*sin(DanceTheta1*3),0,0,Scale)
                 }
@@ -2762,7 +2779,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 TailTheta += IdleBaseSpeed/Scale
                 if(TailTheta>360){TailTheta-=360}
                 if(Freeze){TailTheta=0}
-                holoEntity(0):poseWingsCheap(30,75 + 2.5*sin(TailTheta))
+                holoEntity(0):poseWingsCheap(WingPoseParams["pitch",number],WingPoseParams["yaw",number],WingPoseParams["roll",number] + 2.5*sin(TailTheta))
             }else{
                 if(Sex){
                     E:poseTail(-5,5*sin(DanceTheta1*3),1,0,Scale)
@@ -2788,7 +2805,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 TailTheta += IdleBaseSpeed/Scale
                 if(TailTheta>360){TailTheta-=360}
                 if(Freeze){TailTheta=0}
-                holoEntity(0):poseWingsCheap(30,45 + 2.5*sin(TailTheta))
+                holoEntity(0):poseWingsCheap(WingPoseParams["pitch",number],WingPoseParams["yaw",number],WingPoseParams["roll",number] - 30 + 2.5*sin(TailTheta))
             }else{
                 if(Sex){
                     E:poseTail(-7.55,5*sin(DanceTheta1*3),-4,0,Scale)
@@ -2814,7 +2831,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
             TailTheta += IdleBaseSpeed/Scale
             if(TailTheta>360){TailTheta-=360}
             if(Freeze){TailTheta=0}
-            holoEntity(0):poseWingsCheap(30,45 + 2.5*sin(TailTheta))
+            holoEntity(0):poseWingsCheap(WingPoseParams["pitch",number],WingPoseParams["yaw",number],WingPoseParams["roll",number] - 30 + 2.5*sin(TailTheta))
             
             if(Snoring){
                 ZTheta1 += 10
@@ -3489,6 +3506,9 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 holoScale(115,(1 + NoteTheta3/360)*vec(0.5)*Scale)
             }
     }
+    
+    #Blush
+    if(Blushing){blush(Blushing)}
     
     #Stop Following if entity disappears
     if(Following & !FollowTarget){
@@ -4779,6 +4799,86 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 }
                 hideChat(1)
                 break
+            case ".posewings", #Yaw 30, Pitch 0, Roll 75, Splay 22.5, Flap 0, Offset 0
+                
+                #Rearranged to: AoA (0), Yaw (rename) (30), Roll (rename), Splay (22.5), Flap (0)
+                local Keyword = Sentence[2,string]
+                local Value = Sentence[3,string]
+                local NeedSet = 0
+                switch(Keyword){
+                    case "pitch",
+                        if(Value==""){
+                            WingPoseParams["pitch",number] = 0
+                        }else{
+                            WingPoseParams["pitch",number] = clamp(Value:toNumber(),-90,90)
+                        }
+                        dprint("Set wing AoA Pitch to "+WingPoseParams["pitch",number]+".")
+                        NeedSet = 1
+                        break
+                    case "yaw",
+                        if(Value==""){
+                            WingPoseParams["yaw",number] = 30
+                        }else{
+                            WingPoseParams["yaw",number] = clamp(Value:toNumber(),-90,90)
+                        }
+                        dprint("Set wing Forward Yaw to "+WingPoseParams["yaw",number]+".")
+                        NeedSet = 1
+                        break
+                    case "roll",
+                        if(Value==""){
+                            WingPoseParams["roll",number] = 75
+                        }else{
+                            WingPoseParams["roll",number] = clamp(Value:toNumber(),-90,120)
+                        }
+                        dprint("Set wing Upward Roll to "+WingPoseParams["roll",number]+".")
+                        NeedSet = 1
+                        break
+                    case "splay",
+                        if(Value==""){
+                            WingPoseParams["splay",number] = 22.5
+                        }else{
+                            WingPoseParams["splay",number] = clamp(Value:toNumber(),5,60)
+                        }
+                        dprint("Set wing Rib Splay to "+WingPoseParams["splay",number]+".")
+                        NeedSet = 1
+                        break
+                    case "flap",
+                        if(Value==""){
+                            WingPoseParams["flap",number] = 0
+                        }else{
+                            WingPoseParams["flap",number] = clamp(Value:toNumber(),-1,1)
+                        }
+                        dprint("Set wing Flap Factor to "+WingPoseParams["flap",number]+".")
+                        NeedSet = 1
+                        break
+                    case "all",
+                        WingPoseParams["pitch",number] = clamp(Sentence[3,string]:toNumber(),-90,90)
+                        WingPoseParams["yaw",number] = clamp(Sentence[4,string]:toNumber(),-90,90)
+                        WingPoseParams["roll",number] = clamp(Sentence[5,string]:toNumber(),-90,120)
+                        WingPoseParams["splay",number] = clamp(Sentence[6,string]:toNumber(),5,60)
+                        WingPoseParams["flap",number] = clamp(Sentence[7,string]:toNumber(),-1,1)
+                        dprint("Set wing pose: Pitch "+WingPoseParams["pitch",number]+", Yaw "+WingPoseParams["yaw",number]+", Roll "+WingPoseParams["roll",number]+", Splay "+WingPoseParams["splay",number]+", Flap "+WingPoseParams["flap",number]+".")
+                        NeedSet = 1
+                        break
+                    case "reset",
+                        WingPoseParams["pitch",number] = 0
+                        WingPoseParams["yaw",number] = 30
+                        WingPoseParams["roll",number] = 75
+                        WingPoseParams["splay",number] = 22.5
+                        WingPoseParams["flap",number] = 0
+                        dprint("Reset wing pose to default (Pitch 0, Yaw 30, Roll 75, Splay 22.5, Flap 0).")
+                        NeedSet = 1
+                        break
+                    case "get",
+                    default,
+                        dprint("Current Wing Pose: Pitch "+WingPoseParams["pitch",number]+", Yaw "+WingPoseParams["yaw",number]+", Roll "+WingPoseParams["roll",number]+", Splay "+WingPoseParams["splay",number]+", Flap "+WingPoseParams["flap",number]+".")
+                        cprint("Command:\n.posewings all "+WingPoseParams["pitch",number]+" "+WingPoseParams["yaw",number]+" "+WingPoseParams["roll",number]+" "+WingPoseParams["splay",number]+" "+WingPoseParams["flap",number])
+                        break
+                }
+                if(NeedSet){holoEntity(0):poseWings(WingPoseParams["yaw",number],WingPoseParams["pitch",number],WingPoseParams["roll",number],WingPoseParams["splay",number],WingPoseParams["flap",number],0,Scale)}
+                
+                hideChat(1)
+                break
             case ".wink",
                 local Arg = Sentence[2,string]
                 if(Arg==""){ #Toggle
@@ -4814,6 +4914,21 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                     dprint(Name + " is starting to tear up.")
                 }else{
                     dprint(Name + " has stopped crying.")
+                }
+                hideChat(1)
+                break
+            case ".blush",
+                local Arg = Sentence[2,string]
+                if(Arg==""){
+                    Blushing = !Blushing
+                }else{
+                    Blushing = Arg:toNumber()   
+                }
+                blush(Blushing) #Put here just to get an instant response, it's also done in the clk
+                if(Blushing){
+                    dprint(Name + " is starting to blush.")
+                }else{
+                    dprint(Name + "'s blush has faded.")
                 }
                 hideChat(1)
                 break

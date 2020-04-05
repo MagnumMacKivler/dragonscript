@@ -35,6 +35,7 @@ Baby = 0 #Adjusts eye and body scale. 0 = Adult, 1 = Baby Eyes + Baby Scale (0.5
 ColorBody = vec(255,255,255) #The color of the dragon's body
 ColorWings = vec(143,143,143) #The color of the dragon's wings
 Material = "sprops/textures/sprops_metal5" #The material used for the dragon's skin
+BlushMat = Material #The material used for the dragon's rosy cheeks
 
 ColorEye = vec(255) #The color of the "whites" of the eyes (the sclera)
 ColorEyeLid = ColorBody*0.75 #The color for the dragon's eyelids. Normally a slightly darkened copy of the body color.

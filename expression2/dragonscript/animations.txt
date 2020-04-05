@@ -7,7 +7,7 @@
 @persist LanternTheta BlushTheta BlushQ
 @trigger 
 
-AnimVersion = "2.2.1"
+AnimVersion = "2.2.2"
 
 local NeedFudge = !entity():getName():find("Magnums Dragon 2")
 if(NeedFudge){
@@ -816,15 +816,15 @@ function void cry(Cry){
         holoAlpha(Holo,Cry*TearColor:w())
     }
 }
-function void blush(Blush){
-    if(Blush){
+function void blush(CenterAlpha){
+    if(CenterAlpha>0){
         BlushQ = 1
         foreach(K,Holo:number=BlushHolos){
-            holoAlpha(Holo,Blush*BlushColor:w() + 20*sin(BlushTheta))
+            holoAlpha(Holo,CenterAlpha + 20*sin(BlushTheta))
         }
         BlushTheta += 15
         if(BlushTheta>=360){BlushTheta-=360}
-    }elseif(!Blush & BlushQ){
+    }elseif((CenterAlpha==0) & BlushQ){
         BlushQ = 0
         foreach(K,Holo:number=BlushHolos){
             holoAlpha(Holo,0)

@@ -15,7 +15,7 @@
 @persist [ColorEye ColorPupil ColorEyeLid]:vector [MatEye MatPupil MatEyeLid]:string PupilScale PupilHolos:array #Eyes
 @persist JawAngleMaster MinJawAngle TongueHolos:array TongueLeftToothHolo TongueRightToothHolo Blepping #Jaw and Blep
 @persist TearColor:vector4 TearMat:string TearHolos:array Crying #Tears
-@persist BlushColor:vector4 BlushMat:string BlushHolos:array Blushing #Blush
+@persist BlushColor:vector4 BlushMat:string BlushHolos:array Blushing TargetBlushAlpha BlushAlpha #Blush
 
 #Physics
 @persist Loading Driveable Driving Riding Sleeping Following #States
@@ -62,7 +62,7 @@
 #You can change these variables in the config file. Again, DO NOT CHANGE THEM HERE.
 
 #Versioning
-InitVersion = "2.2.1"
+InitVersion = "2.2.2"
 
 #Name & Titles
 Prefix = "" #Text that comes before the dragon's name on the E2 Cube's tooltip. Not included in chat or search functions.

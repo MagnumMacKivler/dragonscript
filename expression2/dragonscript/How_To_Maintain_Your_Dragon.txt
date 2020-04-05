@@ -1,6 +1,6 @@
 @name dragonscript/How_To_Maintain_Your_Dragon
 @model models/props_lab/binderredlabel.mdl
-setName("How to Maintain your Dragon\nRelease 2.2.1")
+setName("How to Maintain your Dragon\nRelease 2.2.2")
 #[
     
     
@@ -12,7 +12,7 @@ setName("How to Maintain your Dragon\nRelease 2.2.1")
                                                                                |___/                                    |___/               
     
     ========================================================================================================================================
-                                                                Release Version 2.2.1
+                                                                Release Version 2.2.1-2.2.2
                                                       An Operation, Maintenance, and Survival Guide
                                                         Copyright 2018-20 Magnum Technologies Inc.
     ========================================================================================================================================

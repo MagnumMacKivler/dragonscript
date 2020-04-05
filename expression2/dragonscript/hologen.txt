@@ -4,7 +4,7 @@
 @persist RagdollBits:table
 @trigger 
 
-HoloVersion = "2.2.1"
+HoloVersion = "2.2.2"
 
 function void holoSkeleton(P0:vector,PH:vector,PLWJ:vector,PLWH:vector,PRWJ:vector,PRWH:vector,Scale){
     local Ang0 = ang()
@@ -751,30 +751,29 @@ function void holosBlush(PH:vector,BlushColor:vector4,BlushMat:string,Scale){
     holoAlpha(124,0)
     holoMaterial(124,BlushMat)
     holoClipEnabled(124,1)
-    holoClip(124,vec(5,6.1,1.5),vec(0.6,1,0.1),0)
+    holoClip(124,Scale*vec(5,6.1,1.5),vec(0.6,1,0.1),0)
     holoParent(124,2)
     
     holoCreate(125,PH,Scale*vec(1.505),ang(),BlushColor,"sphere2")
     holoAlpha(125,0)
     holoMaterial(125,BlushMat)
     holoClipEnabled(125,1)
-    holoClip(125,vec(5,-6.1,1.5),vec(0.6,-1,0.1),0)
+    holoClip(125,Scale*vec(5,-6.1,1.5),vec(0.6,-1,0.1),0)
     holoParent(125,2)
     
     holoCreate(126,PH+Scale*vec(8,0,-2),Scale*vec(2.05,1.38,1.05),ang(),BlushColor,"sphere2")
     holoAlpha(126,0)
     holoMaterial(126,BlushMat)
     holoClipEnabled(126,1)
-    holoClip(126,vec(-0,6.5,2.5),vec(-0.15,1,0.5),0)
+    holoClip(126,Scale*vec(-0,6.5,2.5),vec(-0.15,1,0.5),0)
     holoParent(126,2)
     
     holoCreate(127,PH+Scale*vec(8,0,-2),Scale*vec(2.05,1.38,1.05),ang(),BlushColor,"sphere2")
     holoAlpha(127,0)
     holoMaterial(127,BlushMat)
     holoClipEnabled(127,1)
-    holoClip(127,vec(-0,-6.5,2.5),vec(-0.15,-1,0.5),0)
+    holoClip(127,Scale*vec(-0,-6.5,2.5),vec(-0.15,-1,0.5),0)
     holoParent(127,2)
-    
     BlushHolos = array(124,125,126,127)
 }
 

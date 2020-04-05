@@ -8,7 +8,7 @@
 #For updates for the Dragonscript E2, check out where you probably got it: https://github.com/MagnumMacKivler/dragonscript
 
 if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init", setName("Magnums Dragon 2")
-    Version = "2.2.1"
+    Version = "2.2.2"
     
     #Config: Which Dragon Settings file do you want to load?
     #include "dragonscript/settings/grayscale"
@@ -33,6 +33,12 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
     #include "dragonscript/hologen"
     
     #Non-Optional Init: stuff the config shouldn't normally be allowed to change.
+    
+    #Compatability Requirements
+    local NeedAnim = "2.2.2"
+    local NeedHolo = "2.2.2"
+    local NeedSettings = "2.2.0"
+    local NeedInit = "2.2.2"
     
     E = entity()
     O = owner()
@@ -395,10 +401,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
     
     #Compatibility Checking
     
-    local NeedAnim = "2.2.1"
-    local NeedHolo = "2.2.1"
-    local NeedSettings = "2.2.0"
-    local NeedInit = "2.2.1"
+    
     
     
     local AnimCompat = compatCheck(NeedAnim,AnimVersion)
@@ -3508,7 +3511,20 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
     }
     
     #Blush
-    if(Blushing){blush(Blushing)}
+    if(Blushing | (BlushAlpha>0)){
+        #Linear Ramp BlushAlpha
+        if(BlushAlpha < TargetBlushAlpha){
+            BlushAlpha += 5
+            if(BlushAlpha > TargetBlushAlpha){BlushAlpha = TargetBlushAlpha}
+        }elseif(BlushAlpha > TargetBlushAlpha){
+            BlushAlpha -= 5
+            if(BlushAlpha < TargetBlushAlpha){BlushAlpha = TargetBlushAlpha}
+        }
+        blush(BlushAlpha)
+        #print(BlushAlpha)
+    }elseif(!Blushing & (BlushAlpha==0) & BlushQ){
+        blush(0)
+    }
     
     #Stop Following if entity disappears
     if(Following & !FollowTarget){
@@ -4924,7 +4940,9 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 }else{
                     Blushing = Arg:toNumber()   
                 }
-                blush(Blushing) #Put here just to get an instant response, it's also done in the clk
+                
+                TargetBlushAlpha = Blushing*BlushColor:w()
+                
                 if(Blushing){
                     dprint(Name + " is starting to blush.")
                 }else{

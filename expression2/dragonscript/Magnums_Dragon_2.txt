@@ -8,7 +8,7 @@
 #For updates for the Dragonscript E2, check out where you probably got it: https://github.com/MagnumMacKivler/dragonscript
 
 if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init", setName("Magnums Dragon 2")
-    Version = "2.2.2"
+    Version = "2.2.3"
     
     #Config: Which Dragon Settings file do you want to load?
     #include "dragonscript/settings/grayscale"
@@ -35,10 +35,10 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
     #Non-Optional Init: stuff the config shouldn't normally be allowed to change.
     
     #Compatability Requirements
-    local NeedAnim = "2.2.2"
+    local NeedAnim = "2.2.3"
     local NeedHolo = "2.2.2"
     local NeedSettings = "2.2.0"
-    local NeedInit = "2.2.2"
+    local NeedInit = "2.2.3"
     
     E = entity()
     O = owner()
@@ -1056,7 +1056,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
             if(Mlemming){TargetAngle += ang(-MlemAngle,0,0)}
             
             (Following ? E : holoEntity(0)):poseHead(Flaming ? TargetAngle : TargetAngle*0.75,Climbing ? -15 : 0)
-            EyeVec = holoEntity(2):aimEyes(AimPos)
+            EyeVec = EyeRolling ? EyeRollVec : holoEntity(2):aimEyes(AimPos)
             holoEntity(2):poseEyes(EyeVec,Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
             
             #Cmere/GoHere Reset
@@ -1353,7 +1353,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 local TargetAngle = -heading(holoEntity(0):toWorld(vec(48,0,22)*Scale),E:angles(),AimPos)
                 
                 (Following ? E : holoEntity(0)):poseHead(TargetAngle,0)
-                holoEntity(2):poseEyes(vec2(),Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
+                holoEntity(2):poseEyes(EyeRolling ? EyeRollVec : vec2(),Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
                 
                 #Angles and Stuff
             
@@ -1592,7 +1592,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 local TargetAngle = -heading(holoEntity(0):toWorld(vec(48,0,22)*Scale),E:angles(),AimPos)
                 
                 E:poseHead(TargetAngle,0)
-                holoEntity(2):poseEyes(vec2(),Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
+                holoEntity(2):poseEyes(EyeRolling ? EyeRollVec : vec2(),Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
                 
                 #Legs
                 
@@ -1680,7 +1680,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                     E:applyForce(E:mass()*FlyVelW*5)
                     
                     holoEntity(2):eyeExpression("angry",0,Sex,Scale,Baby,1,Wink)
-                    holoEntity(2):poseEyes(vec2(),1,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
+                    holoEntity(2):poseEyes(EyeRolling ? EyeRollVec : vec2(),1,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
                     
                     stoptimer("blink_open")
                     stoptimer("blink_close")
@@ -1750,7 +1750,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                         E:applyForce(E:mass()*FlyVelW*5)
                         
                         holoEntity(2):eyeExpression("angry",0,Sex,Scale,Baby,1,Wink)
-                        holoEntity(2):poseEyes(vec2(),1,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
+                        holoEntity(2):poseEyes(EyeRolling ? EyeRollVec : vec2(),1,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
                         
                         stoptimer("blink_open")
                         stoptimer("blink_close")
@@ -1928,7 +1928,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                     if(Mlemming){TargetAngle += ang(-MlemAngle,0,0)}
                     
                     holoEntity(0):poseHead(TargetAngle,0)
-                    holoEntity(2):poseEyes(vec2(),Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
+                    holoEntity(2):poseEyes(EyeRolling ? EyeRollVec : vec2(),Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
                     
                     #Legs
                     
@@ -2094,7 +2094,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 #local AimPos = PodController1["AimPos",vector] - vec(0,0,6.5)
                 #local TargetAngle = -heading(holoEntity(2):pos(),E:angles(),AimPos)
                 holoEntity(0):poseHead(TargetAngle,0)
-                holoEntity(2):poseEyes(vec2(),Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
+                holoEntity(2):poseEyes(EyeRolling ? EyeRollVec : vec2(),Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
                 
                 #Angles and Stuff
             
@@ -2382,7 +2382,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 if(Mlemming){TargetAngle += ang(-MlemAngle,0,0)}
                 
                 (Following ? E : holoEntity(0)):poseHead(Flaming ? TargetAngle : TargetAngle*0.75,0)
-                EyeVec = holoEntity(2):aimEyes(AimPos)
+                EyeVec = EyeRolling ? EyeRollVec : holoEntity(2):aimEyes(AimPos)
                 holoEntity(2):poseEyes(EyeVec,Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
                 
                 #Cmere/GoHere Reset
@@ -2592,7 +2592,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 local SD1M = sin(DanceTheta1*3)
                 local SD1S = sin(DanceTheta1)
                 E:poseHeadInstant(ang(10*SD1F,10*SD1S,-5*SD1S),SitAngleCorrect)
-                holoEntity(2):poseEyes(vec2(),1,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
+                holoEntity(2):poseEyes(EyeRolling ? EyeRollVec : vec2(),1,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
                 holoEntity(0):poseWingsDance(WingPoseParams["pitch",number],WingPoseParams["yaw",number],WingPoseParams["roll",number],7.5*SD1M)
             }elseif(!Active1){
                 #Look @ Players
@@ -2624,7 +2624,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                     local TargetAngle = -heading(holoEntity(0):toWorld(vec(48,0,22)*Scale),E:angles(),AimPos)
                     if(Mlemming){TargetAngle += ang(-MlemAngle,0,0)}
                     E:poseHead(HeadLock ? HeadLockAngle : Flaming ? TargetAngle : TargetAngle*0.75,SitAngleCorrect)
-                    EyeVec = holoEntity(2):aimEyes(AimPos)
+                    EyeVec = EyeRolling ? EyeRollVec : holoEntity(2):aimEyes(AimPos)
                     holoEntity(2):poseEyes(EyeVec,Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
                 }elseif(IdleLookTarget){
                     local AimPos = vec()
@@ -2648,10 +2648,10 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                     E:poseHead(HeadLock ? HeadLockAngle : Flaming ? TargetAngle : TargetAngle*0.75,SitAngleCorrect)
                     EyeVec = holoEntity(2):aimEyes(AimPos)
                     if(Freeze){EyeVec=vec2()}
-                    holoEntity(2):poseEyes(EyeVec,Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
+                    holoEntity(2):poseEyes(EyeRolling ? EyeRollVec : EyeVec,Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
                 }else{
                     E:poseHead(HeadLock ? HeadLockAngle : ang(),SitAngleCorrect)
-                    holoEntity(2):poseEyes(vec2(),Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
+                    holoEntity(2):poseEyes(EyeRolling ? EyeRollVec : vec2(),Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
                     if(HasLookTarget){
                         HasLookTarget = 0
                     }
@@ -2671,7 +2671,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 if(Mlemming){TargetAngle += ang(-MlemAngle,0,0)}
                 
                 E:poseHead(HeadLock ? HeadLockAngle : Flaming ? TargetAngle : TargetAngle*0.75,SitAngleCorrect)
-                EyeVec = holoEntity(2):aimEyes(AimPos)
+                EyeVec = EyeRolling ? EyeRollVec : holoEntity(2):aimEyes(AimPos)
                 holoEntity(2):poseEyes(EyeVec,Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
             }
         }
@@ -3196,9 +3196,13 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
         if(Mouse1 & !PickupQ){
             PickupQ = 1
             if(Carrying){
+                local CarryPos = CarryObject:pos()
+                local CarryAng = CarryObject:angles()
                 CarryObject:propNotSolid(0)
                 CarryObject:deparent()
                 CarryObject:propFreeze(0)
+                CarryObject:setPos(CarryPos)
+                CarryObject:setAng(CarryAng)
                 Carrying = 0
                 JawAngleMaster =Carrying ? 25 : LanternOn ? 22 : 0
                 DragonPos = E:pos()
@@ -3530,6 +3534,18 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
     if(Following & !FollowTarget){
         Following = 0
         dprint(Name + " has stopped following because " + (Sex ? "her" : "his") + " target is gone!")
+    }
+    
+    #Eye Roll
+    if(EyeRolling){
+        EyeRollParam += 0.1
+        
+        if(EyeRollParam>1){
+            EyeRolling = 0
+            timer("blink_close",(random() > 0.75) ? IdleBlinkHoldtime : IdleBlinkInterval)
+        }else{
+            EyeRollVec = getEyeRoll(EyeRollParam)
+        }
     }
     
     # prop protection ejection
@@ -3983,6 +3999,14 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 }
                 hideChat(1)
                 break
+            case ".groan",
+                if((DefaultExpression=="happy") | (DefaultExpression=="normal")){
+                    holoEntity(2):eyeExpression("annoyed",0,Sex,Scale,Baby,DefaultSquint,0)
+                    timer("endFireBallSpit",3000) #Reusing a simple timer to reset expression
+                }
+                vocalizeGroan(Sex,VoScale)
+                hideChat(1)
+                break
             case ".light",
                 LanternOn = !LanternOn
                 if(LanternOn){
@@ -4086,6 +4110,26 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                     MlemLoop = 0
                 }elseif(Single | MlemLoop){
                     startMlem()
+                }
+                
+                hideChat(1)
+                break
+            case ".rolleyes",
+            case ".eyeroll",
+                if(!EyeRolling & !Sleeping){
+                    EyeRolling = 1
+                    EyeRollParam = -1 #-1 to +1
+                    EyeRollVec = getEyeRoll(EyeRollParam)
+                    Blinking = 0
+                    stoptimer("blink_close")
+                    stoptimer("blink_open")
+                    if(Sentence[2,string]!=""){
+                        if((DefaultExpression=="happy") | (DefaultExpression=="normal")){
+                            holoEntity(2):eyeExpression("annoyed",0,Sex,Scale,Baby,DefaultSquint,0)
+                            timer("endFireBallSpit",3000) #Reusing a simple timer to reset expression
+                        }
+                        vocalizeGroan(Sex,VoScale)
+                    }
                 }
                 
                 hideChat(1)
@@ -4706,9 +4750,13 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 break
             case ".drop",
                 if(Carrying){
+                    local CarryPos = CarryObject:pos()
+                    local CarryAng = CarryObject:angles()
                     CarryObject:propNotSolid(0)
                     CarryObject:deparent()
                     CarryObject:propFreeze(0)
+                    CarryObject:setPos(CarryPos)
+                    CarryObject:setAng(CarryAng)
                     Carrying = 0
                     JawAngleMaster =Carrying ? 25 : LanternOn ? 22 : 0
                     if(Driving==3){CarryObject:applyForce(CarryObject:mass()*FlyVelW)}

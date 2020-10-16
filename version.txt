@@ -1,3 +1,3 @@
-version:2.2.2
+version:2.2.3
 name:Special Order.
-changelog:Hotfixed issues with Blush. Added a new line (BlushMat = Material) to Grayscale; Config update NOT required unless you use a non-default skin material.
+changelog:Added .groan and .eyeroll commands, fixed a bug caused by a Gmod update.

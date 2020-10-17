@@ -49,7 +49,7 @@
 @persist RoarQ VoScale #Rawr Colon Three
 @persist Loving LoveTheta1 LoveTheta2 LoveTheta3 LoveQ #Love and Affection
 @persist Dancing DanceTheta1 NoteTheta1 NoteTheta2 NoteTheta3 NoteQ DanceStyle #Get down and Boogey
-@persist IdleBlinkInterval IdleBlinkHoldtime Blinking DefaultExpression:string DefaultExpressionEyelids DefaultSquint Wink ClosedEyes #Eyes and Expressions
+@persist IdleBlinkInterval IdleBlinkHoldtime Blinking DefaultExpression:string DefaultExpressionEyelids DefaultSquint Wink ClosedEyes EyeRolling EyeRollParam EyeRollVec:vector2 #Eyes and Expressions
 @persist JayMode # henlo
 @persist Mlemming MlemAngle MlemSound:string MlemLoop #Doggie Kisses
 
@@ -62,7 +62,7 @@
 #You can change these variables in the config file. Again, DO NOT CHANGE THEM HERE.
 
 #Versioning
-InitVersion = "2.2.2"
+InitVersion = "2.2.3"
 
 #Name & Titles
 Prefix = "" #Text that comes before the dragon's name on the E2 Cube's tooltip. Not included in chat or search functions.

@@ -8,7 +8,7 @@
 #For updates for the Dragonscript E2, check out where you probably got it: https://github.com/MagnumMacKivler/dragonscript
 
 if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init", setName("Magnums Dragon 2")
-    Version = "2.2.3"
+    Version = "2.2.4"
     
     #Config: Which Dragon Settings file do you want to load?
     #include "dragonscript/settings/grayscale"
@@ -35,7 +35,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
     #Non-Optional Init: stuff the config shouldn't normally be allowed to change.
     
     #Compatability Requirements
-    local NeedAnim = "2.2.3"
+    local NeedAnim = "2.2.4"
     local NeedHolo = "2.2.2"
     local NeedSettings = "2.2.0"
     local NeedInit = "2.2.3"
@@ -310,6 +310,10 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 case "sad",
                     if(Target != ""){ PrintArray = array(Color,Name,vec(255),", in sadness, says to ",TargetColor,Target,vec(255), ": \""):add(MSG)
                     }else{ PrintArray = array(Color,Name,vec(255),", in sadness, says: \""):add(MSG) }
+                break
+                case "grumpy",
+                    if(Target != ""){ PrintArray = array(Color,Name,vec(255),", grumpily says to ",TargetColor,Target,vec(255), ": \""):add(MSG)
+                    }else{ PrintArray = array(Color,Name,vec(255),", grumpily, says: \""):add(MSG) }
                 break
                 case "annoyed",
                     if(Target != ""){ PrintArray = array(Color,Name,vec(255),", rather annoyed at ",TargetColor,Target,vec(255), ", says: \""):add(MSG)
@@ -4045,6 +4049,9 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                         case "sad",
                             dprint(Name + " is feeling sad.")
                             break
+                        case "grumpy",
+                            dprint(Name + " is feeling grumpy.")
+                            break
                         case "annoyed",
                             dprint(Name + " is feeling annoyed.")
                             break
@@ -4216,7 +4223,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                         if(!Sentence[2,string]:find("\"")){
                             switch(Sentence[2,string]){
                                 case "normal", case "happy", case "confused", case "flustered",
-                                case "sad", case "annoyed", case "smug", case "angry",
+                                case "sad", case "grumpy", case "annoyed", case "smug", case "angry",
                                 case "concerned", case "scared", case "happy", case "worried",
                                 case "",
                                     ExprUsed = 1

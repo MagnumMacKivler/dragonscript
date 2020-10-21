@@ -7,7 +7,7 @@
 @persist LanternTheta BlushTheta BlushQ
 @trigger 
 
-AnimVersion = "2.2.3"
+AnimVersion = "2.2.4"
 
 local NeedFudge = !entity():getName():find("Magnums Dragon 2")
 if(NeedFudge){
@@ -590,7 +590,7 @@ function void entity:eyeExpression(Expr:string,Eyelids,Sex,Scale,Baby,Squint,Win
             holoPos(108,This:toWorld(PRE+vec(0.375,-1.65,0.5)*EyeScale))
             holoAng(108,This:toWorld(ang(45,0,30)))
             break
-        case "annoyed",
+        case "grumpy", #formerly annoyed
             #Left Eye
             holoClip(28,vec(0,0,1.5)*EyeScale,vec(0,1,-1.5),0)
             holoClip(109,vec(0,0,1.5)*EyeScale,-vec(0,1,-1.5),0)
@@ -619,7 +619,7 @@ function void entity:eyeExpression(Expr:string,Eyelids,Sex,Scale,Baby,Squint,Win
             
             
             break
-        case "smug",
+        case "annoyed", #formerly smug
             #Left Eye
             holoClip(28,vec(0,0,1.0)*EyeScale,vec(0,1,-1.5),0)
             holoClip(109,vec(0,0,1.0)*EyeScale,-vec(0,1,-1.5),0)
@@ -645,7 +645,34 @@ function void entity:eyeExpression(Expr:string,Eyelids,Sex,Scale,Baby,Squint,Win
             
             holoPos(108,This:toWorld(PRE+vec(0.55,-1.25,1.25)*EyeScale))
             holoAng(108,This:toWorld(ang(45,0,5)))
+            break
+        case "smug",
             
+            #Left Eye
+            holoClip(28,vec(0,0,0.5)*EyeScale,vec(1.5,1,-1.5),0)
+            holoClip(109,vec(0,0,0.5)*EyeScale,-vec(1.5,1,-1.5),0)
+            
+            holoPos(103,This:toWorld(PLE+vec(0.55,-0.75,1.0)*EyeScale))
+            holoAng(103,This:toWorld(ang(45,0,5)))
+            
+            holoPos(104,This:toWorld(PLE+vec(0.75,0.25,1.35)*EyeScale))
+            holoAng(104,This:toWorld(ang(45,0,0)))
+            
+            holoPos(105,This:toWorld(PLE+vec(0.55,1.25,1.125)*EyeScale))
+            holoAng(105,This:toWorld(ang(45,0,-5)))
+            
+            #Right Eye
+            holoClip(29,vec(0,0,0.5)*EyeScale,vec(1.5,-1,-1.5),0)
+            holoClip(110,vec(0,0,0.5)*EyeScale,-vec(1.5,-1,-1.5),0)
+            
+            holoPos(106,This:toWorld(PRE+vec(0.55,0.75,1.0)*EyeScale))
+            holoAng(106,This:toWorld(ang(45,0,-5)))
+            
+            holoPos(107,This:toWorld(PRE+vec(0.75,-0.25,1.35)*EyeScale))
+            holoAng(107,This:toWorld(ang(45,0,0)))
+            
+            holoPos(108,This:toWorld(PRE+vec(0.55,-1.25,1.125)*EyeScale))
+            holoAng(108,This:toWorld(ang(45,0,5)))
             
             break
         case "angry",
@@ -1347,6 +1374,12 @@ function void vocalizeRoar(DefaultExpression:string,Sex,DoTimer,VoScale){
             JawAngleMaster = 25
             if(DoTimer){timer("roarend",2000)}
             break
+        case "grumpy",
+            soundPlay(5,1.5,"npc/antlion_guard/angry2.wav")
+            soundPitch(5,(95+10*Sex)/VoScale)
+            JawAngleMaster = 25
+            if(DoTimer){timer("roarend",1500)}
+            break
         case "annoyed",
             soundPlay(5,1.5,"npc/antlion_guard/angry2.wav")
             soundPitch(5,(70+10*Sex)/VoScale)
@@ -1451,7 +1484,7 @@ function string mumble(Input:string){
     
     return Output
 }
-function string owo(Input:string){
+function string owo(Input:string){ #Child Speak
     local Output = ""
     for(N=1,Input:length()){
         local Char = Input:index(N)
@@ -1466,7 +1499,7 @@ function string owo(Input:string){
     return Output
 }
 
-function string olo(Input:string){
+function string olo(Input:string){ #Tongue Out Speak
     local Output = ""
     for(N=1,Input:length()){
         local Char = Input:index(N)

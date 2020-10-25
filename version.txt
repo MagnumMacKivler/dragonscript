@@ -1,3 +1,3 @@
-version:2.2.4
+version:2.2.5
 name:Special Order.
-changelog:Renamed 'annoyed' to 'grumpy', renamed 'smug' to 'annoyed', added a new 'smug' that looks more smug (community contribution).
+changelog:Small Bug fix with expressions and sleeping

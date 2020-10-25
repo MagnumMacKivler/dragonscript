@@ -8,7 +8,7 @@
 #For updates for the Dragonscript E2, check out where you probably got it: https://github.com/MagnumMacKivler/dragonscript
 
 if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init", setName("Magnums Dragon 2")
-    Version = "2.2.4"
+    Version = "2.2.5"
     
     #Config: Which Dragon Settings file do you want to load?
     #include "dragonscript/settings/grayscale"
@@ -2805,6 +2805,9 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 }
                 SitAngleCorrect = 0
                 Sleeping = 0
+                
+                holoEntity(2):eyeExpression(DefaultExpression,DefaultExpressionEyelids,Sex,Scale,Baby,DefaultSquint,Wink)
+                
                 timer("blink_open",100)
             }
             

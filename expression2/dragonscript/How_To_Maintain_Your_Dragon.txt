@@ -1,6 +1,6 @@
 @name dragonscript/How_To_Maintain_Your_Dragon
 @model models/props_lab/binderredlabel.mdl
-setName("How to Maintain your Dragon\nRelease 2.2.5")
+setName("How to Maintain your Dragon\nRelease 2.2.6")
 #[
     
     
@@ -12,7 +12,7 @@ setName("How to Maintain your Dragon\nRelease 2.2.5")
                                                                                |___/                                    |___/               
     
     ========================================================================================================================================
-                                                                Release Version 2.2.4 - 2.2.5
+                                                                Release Version 2.2.6
                                                       An Operation, Maintenance, and Survival Guide
                                                         Copyright 2018-20 Magnum Technologies Inc.
     ========================================================================================================================================
@@ -266,246 +266,269 @@ setName("How to Maintain your Dragon\nRelease 2.2.5")
     ---
     
     .list
-    The .list command prints a list of all useful chat commands to the chat.
+        The .list command prints a list of all useful chat commands to the chat.
     
     -----
     POSES
     -----
     
     .stand
-    The .stand command makes the dragon stand up.
+        The .stand command makes the dragon stand up.
     
     .sit
-    The .sit command makes the dragon sit down. It doesn't matter where the dragon is or what it's doing. When sitting, the dragon cannot move (except by teleporting).
+        The .sit command makes the dragon sit down. It doesn't matter where the dragon is or what it's doing. When sitting, the dragon cannot move (except by teleporting).
     
-    .lie
-    The .lie command makes the dragon to down. When lying down, the dragon cannot move (except by teleporting).
+    .lie [number posetype]
+        The .lie command makes the dragon to down. When lying down, the dragon cannot move (except by teleporting).
+        There are a number of pose options for this.
     
     .sleep
-    The .sleep command makes the dragon fall asleep, complete with snoring and cartoon "ZZZ" effects. When asleep, the dragon can't move (except by teleporting) or do
-    anything else but wake up.
+        The .sleep command makes the dragon fall asleep, complete with snoring and cartoon "ZZZ" effects. When asleep, the dragon can't move (except by teleporting) or do
+        anything else but wake up.
     
     .wake
-    The .wake command makes the dragon wake up, if asleep.
+        The .wake command makes the dragon wake up, if asleep.
     
     --------
     MOBILITY
     --------
     
     .come
-    The .come command makes the dragon teleport to wherever you are pointing. Great for if you get it stuck somewhere!
-    Tip: if someone is driving the dragon around, the .come command may not work. Make it .sit first and then try!
+        The .come command makes the dragon teleport to wherever you are pointing. Great for if you get it stuck somewhere!
+        Tip: if someone is driving the dragon around, the .come command may not work. Make it .sit first and then try!
     
     .goto (string name)
-    The .goto command makes the dragon teleport to the specified player or dragon. Right behind them. Perfect for spooking people!
-    Tip: see tip for .come command.
+        The .goto command makes the dragon teleport to the specified player or dragon. Right behind them. Perfect for spooking people!
+        Tip: see tip for .come command.
     
     .follow [string name]
-    The .follow command makes the dragon follow the given target name. The dragon will walk and run to try and catch up to the target, and teleport if they get stuck.
-    If no player name is given, the dragon will follow you.
-    If no player name is given and the dragon is already following someone, the dragon will stop following.
-    If no player name is given and you're pointing at a prop, the dragon will follow that prop instead.
+        The .follow command makes the dragon follow the given target name. The dragon will walk and run to try and catch up to the target, and teleport if they get stuck.
+        If no player name is given, the dragon will follow you.
+        If no player name is given and the dragon is already following someone, the dragon will stop following.
+        If no player name is given and you're pointing at a prop, the dragon will follow that prop instead.
     
     .cmere [string name]
-    The .cmere command is the same as .follow, except it only works for players or dragons, and the dragon stops and greets the target when it gets close enough.
+        The .cmere command is the same as .follow, except it only works for players or dragons, and the dragon stops and greets the target when it gets close enough.
     
     .gohere
-    The .gohere command makes the dragon walk to the coordinates you point at.
+        The .gohere command makes the dragon walk to the coordinates you point at.
     
     .grab
-    The .grab command makes the dragon ride whatever it's standing, sitting, or lying on. When riding a prop, the dragon will be unable to move.
+        The .grab command makes the dragon ride whatever it's standing, sitting, or lying on. When riding a prop, the dragon will be unable to move.
     
     .release
-    The .release command makes the dragon release from whichever prop it's riding.
+        The .release command makes the dragon release from whichever prop it's riding.
     
     .crouch
-    Toggles the dragon's crouching/climbing state.
+        Toggles the dragon's crouching/climbing state.
+        
+    .allowrun [bool enable]
+        Sets whether the dragon will run or walk when moving on its own.
     
     -------
     UTILITY
     -------
     
     .light
-    The .light command toggles the dragon's handy lantern that it carries around in its mouth.
+        The .light command toggles the dragon's handy lantern that it carries around in its mouth.
     
     .cam [number mode]
-    The .cam command controls spectating the dragon first-person. Passing a parameter of 1 lets you see through the dragon's eyes, while a parameter of 0 (or nothing)
-    returns you to your own view. A parameter of 2 enables the firstperson camera and makes the dragon look around as you do.
+        The .cam command controls spectating the dragon first-person. Passing a parameter of 1 lets you see through the dragon's eyes, while a parameter of 0 (or nothing)
+        returns you to your own view. A parameter of 2 enables the firstperson camera and makes the dragon look around as you do.
     
     .lookat [string name]
-    The .lookat command makes the dragon look at a specific target, if specified.
-    If no name is given, the dragon will revert to its normal looking-at behavior.
-    If no name is given and you're pointing at a prop, the dragon will look at that prop.
+        The .lookat command makes the dragon look at a specific target, if specified.
+        If no name is given, the dragon will revert to its normal looking-at behavior.
+        If no name is given and you're pointing at a prop, the dragon will look at that prop.
     
     .pickup
-    The .pickup command makes the dragon pick up whatever it's looking at, subject to the same restrictions as the pickup/drop weapon mode. If you're pointing at a prop,
-    the dragon will attempt to pick that up instead.
+        The .pickup command makes the dragon pick up whatever it's looking at, subject to the same restrictions as the pickup/drop weapon mode. If you're pointing at a prop,
+        the dragon will attempt to pick that up instead.
     
     .drop
-    The .drop command makes the dragon drop whatever is in its mouth.
+        The .drop command makes the dragon drop whatever is in its mouth.
     
     .eat
-    The .eat command makes the dragon consider eating whatever it's looking at. If the dragon is carrying something in its mouth, it will eat that first.
-    Pointing at a prop will make the dragon target that instead.
-    Subject to the same restrictions as the prop eating weapon mode.
+        The .eat command makes the dragon consider eating whatever it's looking at. If the dragon is carrying something in its mouth, it will eat that first.
+        Pointing at a prop will make the dragon target that instead.
+        Subject to the same restrictions as the prop eating weapon mode.
     
     .eject
-    The .eject command kicks anyone who is riding the dragon off the dragon. Note: other players should only be able to do anything on your dragon if they have
-    your prop protection, otherwise the dragon will kick them out of the driver's seat.
+        The .eject command kicks anyone who is riding the dragon off the dragon. Note: other players should only be able to do anything on your dragon if they have
+        your prop protection, otherwise the dragon will kick them out of the driver's seat.
     
     .fire [number duration]
-    The .fire command makes the dragon breathe fire at whatever or whomever it's looking at. Supplying the duration parameter changes how long the fire lasts.
+        The .fire command makes the dragon breathe fire at whatever or whomever it's looking at. Supplying the duration parameter changes how long the fire lasts.
     
     .headlock [number pitch] [number yaw] [number roll]
-    The .headlock command forces the dragon to point its head to the specified 3D Angle. Pitches > 0 look upwards, Yaw > 0 looks left, Roll > 0 tilts left.
-    This command is useful for when the dragon is riding a prop, so that it doesn't spaz its head when looking at nearby players.
-    Typing .headlock without any arguments while the dragon is head-locked will allow it to look around freely again.
+        The .headlock command forces the dragon to point its head to the specified 3D Angle. Pitches > 0 look upwards, Yaw > 0 looks left, Roll > 0 tilts left.
+        This command is useful for when the dragon is riding a prop, so that it doesn't spaz its head when looking at nearby players.
+        Alternatively, you can type '.headlock lock' or '.headlock copy' to lock into the current head angles, whatever they are.
+        Typing .headlock without any arguments while the dragon is head-locked will allow it to look around freely again.
     
     .talkprintmode
-    Toggles between the chat log appearing in the player chat box or the console.
+        Toggles between the chat log appearing in the player chat box or the console.
     
     .talkproximitymode
-    Toggles between the chat log being proximity based or global.
+        Toggles between the chat log being proximity based or global.
     
     .font [string fontname]
-    Changes the font used by the speech bubble. The default is WireGPU_ConsoleFont. Acceptable fonts are: "WireGPU_ConsoleFont", "Coolvetica", "Arial", "Lucida Console", "Trebuchet",
-    "Courier New", "Times New Roman", "ChatFont", "Marlett", and "Roboto". Not every font fits in the speech bubble, so be careful.
+        Changes the font used by the speech bubble. The default is WireGPU_ConsoleFont. Acceptable fonts are: "WireGPU_ConsoleFont", "Coolvetica", "Arial", "Lucida Console", "Trebuchet",
+        "Courier New", "Times New Roman", "ChatFont", "Marlett", and "Roboto". Not every font fits in the speech bubble, so be careful.
     
     .reset
-    Reloads the E2.
+        Reloads the E2.
     
     -----------
     PERSONALITY
     -----------
     
     .roar
-    The .roar command makes the dragon roar. The exact sound it makes depends on what mood it's in (expression).
+        The .roar command makes the dragon roar. The exact sound it makes depends on what mood it's in (expression).
     
     .love [string expression]
-    The .love command makes the dragon show their contentment or affection by roaring at you happily as hearts drift out of its head cartoonishly.
-    Including an argument for the expression will make the dragon switch to that expression in the process.
+        The .love command makes the dragon show their contentment or affection by roaring at you happily as hearts drift out of its head cartoonishly.
+        Including an argument for the expression will make the dragon switch to that expression in the process.
     
     .expr [string expression] [bool eyelids] [bool squint]
-    
-    The .expr command changes the dragon's expression. The Expression paramter can be one of the following:
-    
-    normal
-    happy
-    sad
-    grumpy
-    annoyed
-    angry
-    confused
-    smug
-    concerned
-    flustered
-    scared
-    worried
-    
-    A blank string reverts the dragon to normal (happy) expression.
-    Putting a 1 for the Eyelids parameter makes the dragon's eyelids more prominent. This can have a significant effect on what the expression shows.
-    For example, eyelids can be the difference between "F*** you" and "F*** me."
-    
-    Putting a 1 for the Squint parameter makes the dragon appear to be squinting. This can change an annoyed look into a suspicious one, amplify confusion, or make an expression look happier.
+        The .expr command changes the dragon's expression. The Expression paramter can be one of the following:
+        
+        normal
+        happy
+        sad
+        grumpy
+        annoyed
+        angry
+        confused
+        smug
+        concerned
+        flustered
+        scared
+        worried
+        
+        A blank string reverts the dragon to normal (happy) expression.
+        Putting a 1 for the Eyelids parameter makes the dragon's eyelids more prominent. This can have a significant effect on what the expression shows.
+        For example, eyelids can be the difference between "F*** you" and "F*** me."
+        
+        Putting a 1 for the Squint parameter makes the dragon appear to be squinting. This can change an annoyed look into a suspicious one, amplify confusion, or make an expression look happier.
     
     .wink [number Eye]
-    The .wink command causes the dragon to wink. Passing a zero forces it to stop winking. Passing a 1 makes the left eye wink, and 2 makes the right eye wink. If no
-    parameter is given, it wil toggle between winking the left eye and not winking at all.
+        The .wink command causes the dragon to wink. Passing a zero forces it to stop winking. Passing a 1 makes the left eye wink, and 2 makes the right eye wink. If no
+        parameter is given, it wil toggle between winking the left eye and not winking at all.
     
     .cry [bool Enable]
-    Toggles tears at the corners of the dragon's eyes. Not emotion-dependent.
+        Toggles tears at the corners of the dragon's eyes. Not emotion-dependent.
     
     .blush [bool Enable]
-    Toggles a pink flushing effect in the dragon's cheeks. Not emption-dependent.
+        Toggles a pink flushing effect in the dragon's cheeks. Not emption-dependent.
     
     .dance
-    The .dance command toggles the dragon's dancing mode! While dancing, the dragon is unable to move (except by teleporting). Comes with music note effects.
+        The .dance command toggles the dragon's dancing mode! While dancing, the dragon is unable to move (except by teleporting). Comes with music note effects.
     
     .say [string expression | name] "(string speech)"
     .say [string name] [string expression] \"(string speech)\"
-    The .say command can be used to make the dragon talk! Note that the speech must be encased in quotes.
-    
-    Supplying an expression parameter will make the dragon's expression shift, incorporating the functionality of the .expr command.
-    If you supply a name instead (it's determined automatically), it will instead talk to that target. This will be noted in the chatlog, and your dragon will 
-    look at the target during the duration of the speech. You can also just put a name before the expression.
-    
-    If your chat log is displaying the player chat, supplying an expression will make the chat message flavored with an emotion.
-    Supplying a target will also flavor the chat log.
-    Examples:
-    Grayscale angrily shouts! "Grr, I'm angry!"
-    Grayscale says to Custard: "How are you doing?"
-    
-    You can also use a dragon autocomplete (it works on players too, actually).
-    Putting the expression "d:[dragon/player]" will autocomplete that portion of their name, and also will color their name in the chat.
-    This system works in .me and .event as well.
-    Examples with a dragon named "Zenith Leadwing":
-    Command: .say "Hello, d:zen" | Output: Grayscale says: "Hello, Zenith" (The "Zenith" portion will be colored)
-    Command: .say "Hello, d:lead" | Output: Grayscale says "Hello, Leadwing" (Still colored)
+        The .say command can be used to make the dragon talk! Note that the speech must be encased in quotes.
+        
+        Supplying an expression parameter will make the dragon's expression shift, incorporating the functionality of the .expr command.
+        If you supply a name instead (it's determined automatically), it will instead talk to that target. This will be noted in the chatlog, and your dragon will 
+        look at the target during the duration of the speech. You can also just put a name before the expression.
+        
+        If your chat log is displaying the player chat, supplying an expression will make the chat message flavored with an emotion.
+        Supplying a target will also flavor the chat log.
+        Examples:
+        Grayscale angrily shouts! "Grr, I'm angry!"
+        Grayscale says to Custard: "How are you doing?"
+        
+        You can also use a dragon autocomplete (it works on players too, actually).
+        Putting the expression "d:[dragon/player]" will autocomplete that portion of their name, and also will color their name in the chat.
+        This system works in .me and .event as well.
+        Examples with a dragon named "Zenith Leadwing":
+        Command: .say "Hello, d:zen" | Output: Grayscale says: "Hello, Zenith" (The "Zenith" portion will be colored)
+        Command: .say "Hello, d:lead" | Output: Grayscale says "Hello, Leadwing" (Still colored)
     
     .sayto (string name) [string expression] \"(string speech)\"
     .talkto (string name) [string expression] \"(string speech)\"
-    Also makes the dragon target, but at a specific target. Works like the previous .say supplied with a target, but is more rigid and requires a name.
+        Also makes the dragon target, but at a specific target. Works like the previous .say supplied with a target, but is more rigid and requires a name.
     
     .chatroom [string chatroom]
-    Sets the current chat log chatroom. By default, this is set to "all".
-    If you leave the command blank, it will default it back to "all".
+        Sets the current chat log chatroom. By default, this is set to "all".
+        If you leave the command blank, it will default it back to "all".
     
     .me
-    Makes your dragon "say" they performed an action. It will show up in chat, and in a square speech bubble.
-    Supports dragon autocomplete (d:)
-    Examples:
-    .me waves to you | Grayscale waves to you
-    .me is very happy | Grayscale is very happy
+        Makes your dragon "say" they performed an action. It will show up in chat, and in a square speech bubble.
+        Supports dragon autocomplete (d:)
+        Examples:
+        .me waves to you | Grayscale waves to you
+        .me is very happy | Grayscale is very happy
     
     .event
-    Only works with the chat log visible. Performs an "event" visible to everyone in the chatlog.
-    Supports dragon autocomplete (d:)
-    Examples:
-    .event A huge explosion sounds in the distance!
-    .event The earth shakes, making d:grayscale fall over!
+        Only works with the chat log visible. Performs an "event" visible to everyone in the chatlog.
+        Supports dragon autocomplete (d:)
+        Examples:
+        .event A huge explosion sounds in the distance!
+        .event The earth shakes, making d:grayscale fall over!
     
     .blep [number Angle]
-    Causes the dragon to stick their tongue out at the specified angle, or toggle on/off if no number is given.
+        Causes the dragon to stick their tongue out at the specified angle, or toggle on/off if no number is given.
     
     .mlem [bool Loop]
     .kiss [bool Loop]
     .lick [bool Loop]
-    Causes the dragon to doggie-kiss whatever it is looking at. If a 1 is given, the dragon will repeatedly lick until told to stop.
+        Causes the dragon to doggie-kiss whatever it is looking at. If a 1 is given, the dragon will repeatedly lick until told to stop.
     
     .burp
-    The .burp command forces the dragon to belch. It does not say "Excuse me" unless told to.
+        The .burp command forces the dragon to belch. It does not say "Excuse me" unless told to.
     
     .closeeyes
-    The .closeeyes command opens or closes the dragon's eyes.
-    
-    DEBUG COMMANDS
-    A couple of commands that aren't really useful, but made for testing and left in.
-    
-    .splat
-    The .splat command stuns the dragon momentarily and makes it flop on the ground for no apparent reason.
-    
-    .jaw [number angle]
-    The .jaw command makes the dragon open its mouth to the specified angle in degrees. Clamped from 0 to 30.
-    
-    .posewings (string option) [numbers values]
-    Allows you to control the wing base pose. Since there are five variables you can adjust, the command allows you to change them one at a time.
-    
-    The options are:
-    
-    "yaw" : Changes/Resets the Forward Yaw. Positive values rotate the wings forward. The wings are rotated this way FIRST.
-    "pitch" : Changes/Resets the Angle of Attack (AoA) Pitch. Positive values increase the AoA. The wings are rotated this way SECOND.
-    "roll" : Changes/Resets the Upward Roll. Positive values roll the wings up towards the vertical. The wings are rotated this way THIRD.
-    "splay" : The angle between the wing ribs. Changing this value can give the effect of stretching/extending the wings out.
-    "flap" : The 'flap factor', a value from -1 to +1 that bends the wings up (+1) or down (-1).
-    "get" : Prints all the current values, and command to restore them, to the chat.
-    "all" : Allows you to set all five parameters at once, in the order Pitch, Yaw, Roll, Splay, Flap.
+        The .closeeyes command opens or closes the dragon's eyes.
     
     .eyeroll [bool Groan]
     .rolleyes [bool Groan]
-    Make the dragon roll their eyes sarcastically. If provided an argument of 1, the dragon will also groan.
+        Make the dragon roll their eyes sarcastically. If provided an argument of 1, the dragon will also groan.
     
     .groan
-    Make the dragon groan in disgust.
+        Make the dragon groan in disgust.
+    
+    .yes
+    .nod
+        Make the dragon nod their head 'yes'.
+    
+    .no
+    .headshake
+        Make the dragon shake their head 'no'.
+    
+    --------------
+    DEBUG COMMANDS
+    --------------
+    
+    A couple of commands that aren't really useful, but made for testing and left in.
+    
+    .splat [number duration]
+        The .splat command stuns the dragon momentarily and makes it flop on the ground for no apparent reason.
+        If a number is provided, the dragon will be stunned for that many seconds.
+        If the number is 0, the dragon will be stunned indefinitely until you use the .recover command.
+    
+    .recover
+        Makes the dragon recover from the stunned state (.splat).
+    
+    .jaw [number angle]
+        The .jaw command makes the dragon open its mouth to the specified angle in degrees. Clamped from 0 to 30.
+    
+    .posewings (string option) [numbers values]
+        Allows you to control the wing base pose. Since there are five variables you can adjust, the command allows you to change them one at a time.
+    
+        The options are:
+        
+        "yaw" : Changes/Resets the Forward Yaw. Positive values rotate the wings forward. The wings are rotated this way FIRST.
+        "pitch" : Changes/Resets the Angle of Attack (AoA) Pitch. Positive values increase the AoA. The wings are rotated this way SECOND.
+        "roll" : Changes/Resets the Upward Roll. Positive values roll the wings up towards the vertical. The wings are rotated this way THIRD.
+        "splay" : The angle between the wing ribs. Changing this value can give the effect of stretching/extending the wings out.
+        "flap" : The 'flap factor', a value from -1 to +1 that bends the wings up (+1) or down (-1).
+        "get" : Prints all the current values, and command to restore them, to the chat.
+        "all" : Allows you to set all five parameters at once, in the order Pitch, Yaw, Roll, Splay, Flap.
+    
+    .poseneck [number pitch]
+        Poses the dragon's neck from 0 to 45 degrees (default 30).
     
        ____________  _   _____               ____      __  ___     _      __                            
       /  _/  _/  _/ (_) / ___/__ ________   / __/___  /  |/  /__ _(_)__  / /____ ___  ___ ____  _______ 

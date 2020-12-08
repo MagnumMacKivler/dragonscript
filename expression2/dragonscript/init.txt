@@ -10,7 +10,7 @@
 @persist [P0 PH PLWJ PRWJ PLWH PRWH]:vector Ang0:angle [LH1 LH2 LH3 RH1 RH2 RH3]:entity CIndex #Holo/Skeleon Shit
 
 #General & Body
-@persist [Prefix Name Suffix]:string #Name and Titles
+@persist [Prefix Name Suffix QName]:string #Name and Titles
 @persist Sex Baby Scale [ColorBody ColorWings]:vector Material:string #Overall Body
 @persist [ColorEye ColorPupil ColorEyeLid]:vector [MatEye MatPupil MatEyeLid]:string PupilScale PupilHolos:array #Eyes
 @persist JawAngleMaster MinJawAngle TongueHolos:array TongueLeftToothHolo TongueRightToothHolo Blepping #Jaw and Blep
@@ -19,7 +19,7 @@
 
 #Physics
 @persist Loading Driveable Driving Riding Sleeping Following #States
-@persist IdleLookTarget:entity HasLookTarget TailTheta StandMode StandTransitionQ #Idling Data
+@persist IdleLookTarget:entity HasLookTarget TailTheta StandMode LieMode RecoverStandMode StandTransitionQ #Idling Data
 @persist WalkSpeed WalkTurnSpeed WalkSpeedMax WalkAccel WalkTurnSpeedMax WalkTurnAccel LastPos:vector Pm1 Pm2 BodyAngle:angle NeedsReset BPitch WalkBobTheta WalkBobTheta2 Moving EjectQ #Walking Data
 @persist StandOn StandOnEntity:entity Climbing VkeyQ PhysPos:vector PhysAng:angle CollisionAvoidTick #Walking 2
 @persist RunSpeed RunSpeedMax RunAccel RunTheta1 JumpQ JumpPower RunRoll #Running Data
@@ -29,7 +29,7 @@
 @persist SwimSpeed SwimTurnSpeed SwimSpeedMax SwimAccel SwimTurnSpeedMax SwimTurnAccel SwimTheta SwimTheta2 SwishQ TreadWater #Swimming Data
 @persist RidingEntity:entity #Prop Surfing
 @persist Ragdoll RagdollStep NoCosmetics #Ragdoll stuff
-@persist Dazed DazedTheta Recovering Crashing ShakeAng ShakeQ #Fender Bender
+@persist Dazed DazedTheta Recovering RecoverTime Crashing ShakeAng ShakeQ #Fender Bender
 @persist CurlDirection ShutEyesQ Snoring ZTheta1 ZTheta2 ZTheta3 ZQ #Sleeping
 @persist FollowTarget:entity GoHerePos:vector GoHere Cmere Greet FollowDisp:vector FollowSpeedTarget FWL:wirelink FollowQ AllowRun #Follow Freeman!
 
@@ -52,6 +52,7 @@
 @persist IdleBlinkInterval IdleBlinkHoldtime Blinking DefaultExpression:string DefaultExpressionEyelids DefaultSquint Wink ClosedEyes EyeRolling EyeRollParam EyeRollVec:vector2 #Eyes and Expressions
 @persist JayMode # henlo
 @persist Mlemming MlemAngle MlemSound:string MlemLoop #Doggie Kisses
+@persist HeadShaking HeadShakeType HeadShakeTheta #Nods and Shakes
 
 #Miscellaneous
 @persist [E O]:entity GetInQ1 GetInQ2 SitAngleCorrect Active1 Weapon WeaponQ WeaponAlpha Freeze MinScale MaxScale PopPitch EyeScale:vector FilterEnts:array #Misc
@@ -62,7 +63,7 @@
 #You can change these variables in the config file. Again, DO NOT CHANGE THEM HERE.
 
 #Versioning
-InitVersion = "2.2.3"
+InitVersion = "2.2.6"
 
 #Name & Titles
 Prefix = "" #Text that comes before the dragon's name on the E2 Cube's tooltip. Not included in chat or search functions.
@@ -137,4 +138,6 @@ MlemSound = "ambient/levels/canals/toxic_slime_gurgle8.wav"
 #Set Initial State
 StandMode = 0 #Initial state for the dragon to be in. 0 is Standing, 1 is Sitting, 2 is Lying. Behavior for 3 (Sleeping) and 4 (Dazed) is not defined.
 
+#Function Definitions
+function clprint(Type:string,PrintArray:array,Name:string,RawMSG:string,InProximity){}
 

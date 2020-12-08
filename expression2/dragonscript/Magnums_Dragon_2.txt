@@ -7,8 +7,11 @@
 #For draconic care instructions, please see dragonscript/How_To_Maintain_Your_Dragon.txt!
 #For updates for the Dragonscript E2, check out where you probably got it: https://github.com/MagnumMacKivler/dragonscript
 
+#To Do
+#Replace Lights with Splights
+
 if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init", setName("Magnums Dragon 2")
-    Version = "2.2.5"
+    Version = "2.2.6"
     
     #Config: Which Dragon Settings file do you want to load?
     #include "dragonscript/settings/grayscale"
@@ -35,15 +38,18 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
     #Non-Optional Init: stuff the config shouldn't normally be allowed to change.
     
     #Compatability Requirements
-    local NeedAnim = "2.2.4"
+    local NeedAnim = "2.2.6"
     local NeedHolo = "2.2.2"
     local NeedSettings = "2.2.0"
-    local NeedInit = "2.2.3"
+    local NeedInit = "2.2.6"
     
     E = entity()
     O = owner()
     Loading = 1
     CosDelay1 = CosDelay2 = CosDelay3 = 0
+    
+    local NameArray = Name:explode(" ")
+    QName = NameArray[1,string]
     
     MinScale = 0.65 #Minimum Rideable scale, anything lower will cause splat if anyone tries to get on
     
@@ -1534,7 +1540,9 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                     Eject = 1
                     Eject2 = 1
                     soundStop(1)
+                    RecoverStandMode = 0
                     StandMode = 4
+                    RecoverTime = 5
                     StandTransitionQ = 1
                     Dazed = 1
                     E:soundPlay(2,1,(random()>0.5) ? "player/pl_fallpain1.wav" : "player/pl_fallpain3.wav")
@@ -2534,7 +2542,10 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
             E:soundPlay(2,1,(random()>0.5) ? "player/pl_fallpain1.wav" : "player/pl_fallpain3.wav")
             soundPitch(2,75)
             
+            
+            RecoverStandMode = 0
             StandMode = 4
+            RecoverTime = 5
             StandTransitionQ = 1
         }
         
@@ -2598,6 +2609,28 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 E:poseHeadInstant(ang(10*SD1F,10*SD1S,-5*SD1S),SitAngleCorrect)
                 holoEntity(2):poseEyes(EyeRolling ? EyeRollVec : vec2(),1,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
                 holoEntity(0):poseWingsDance(WingPoseParams["pitch",number],WingPoseParams["yaw",number],WingPoseParams["roll",number],7.5*SD1M)
+            }elseif(HeadShaking){
+                local TargetAngle = ang()
+                local AimPos = vec()
+                if(IdleLookTarget){
+                    AimPos = getAimPosFromTarget(IdleLookTarget)
+                    TargetAngle = -heading(holoEntity(0):toWorld(vec(48,0,22)*Scale),E:angles(),AimPos)
+                }
+                
+                HeadShakeTheta += 60
+                if(HeadShakeTheta>1080){
+                    HeadShaking = 0
+                }
+                
+                if(HeadShakeType){
+                    E:poseHead(TargetAngle*0.75 + ang(sin(HeadShakeTheta)*15,0,0),SitAngleCorrect)
+                }else{
+                    E:poseHead(TargetAngle*0.75 + ang(10,sin(HeadShakeTheta)*15,0),SitAngleCorrect)
+                }
+                EyeVec = holoEntity(2):aimEyes(AimPos)
+                if(Freeze|!IdleLookTarget){EyeVec=vec2()}
+                holoEntity(2):poseEyes(EyeRolling ? EyeRollVec : EyeVec,Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
+                
             }elseif(!Active1){
                 #Look @ Players
                 if(!HasLookTarget){
@@ -2631,21 +2664,9 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                     EyeVec = EyeRolling ? EyeRollVec : holoEntity(2):aimEyes(AimPos)
                     holoEntity(2):poseEyes(EyeVec,Blinking|ClosedEyes,0,Sex,Scale,Baby,Wink,CosmeticTable,UsePupilAngles,PupilCos)
                 }elseif(IdleLookTarget){
-                    local AimPos = vec()
-                    if(IdleLookTarget:isPlayer()){
-                        AimPos = IdleLookTarget:shootPos() - vec(0,0,6.5)*Scale
-                    }elseif(IdleLookTarget:type()=="gmod_wire_expression2"){
-                        local Wirelink = IdleLookTarget:wirelink()
-                        local HeadHolo = Wirelink["DragonHead",entity]
-                        
-                        if(HeadHolo){
-                            AimPos = HeadHolo:pos() - vec(0,0,6.5)*Scale
-                        }else{
-                            AimPos = AimPos = IdleLookTarget:boxCenterW() - vec(0,0,6.5)*Scale
-                        }
-                    }else{
-                        AimPos = IdleLookTarget:boxCenterW() - vec(0,0,6.5)*Scale
-                    }
+                    
+                    local AimPos = getAimPosFromTarget(IdleLookTarget)
+                    
                     local TargetAngle = -heading(holoEntity(0):toWorld(vec(48,0,22)*Scale),E:angles(),AimPos)
                     
                     if(Mlemming){TargetAngle += ang(-MlemAngle,0,0)}
@@ -2798,10 +2819,14 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
         }elseif(StandMode==2){ #Lying Down
             if(StandTransitionQ){
                 StandTransitionQ = 0
-                if(Sex){
-                    E:poseLieF(Scale)
+                if(LieMode==2){
+                    E:poseSploot(Scale)
                 }else{
-                    E:poseLieM(Scale)
+                    if(Sex){
+                        E:poseLieF(Scale)
+                    }else{
+                        E:poseLieM(Scale)
+                    }
                 }
                 SitAngleCorrect = 0
                 Sleeping = 0
@@ -2902,7 +2927,9 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 }
                 
                 timer("blink_open",100)
-                timer("recover",5000)
+                if(RecoverTime!=0){
+                    timer("recover",RecoverTime*1000)
+                }
             }
             
             #E:poseHead(ang(0),-60)
@@ -3687,7 +3714,12 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
     timer("recover2",2000)
 }elseif(clk("recover2")){
     
-    StandMode = 0
+    if(RecoverStandMode==4 | RecoverStandMode==5){
+        RecoverStandMode = 0
+    }
+    
+    StandMode = RecoverStandMode
+    RecoverStandMode = 0
     StandTransitionQ = 1
     Dazed = 0
     Recovering = 0
@@ -3848,8 +3880,8 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
     soundPitch(5,linterpsat(Scale,vec2(0.5,100),vec2(2,60)))
     holoEntity(35):blep(1,0)
     Mlemming = 1
-}elseif(chatClk(O)){
-    local LS = O:lastSaid()
+}elseif(chatClk(O) | clkName():index(1)=="."){
+    LS = chatClk() ? O:lastSaid() : clkName()
     local Sentence = LS:explode(" ")
     local CMD_Prename = Sentence[1,string]
     local CMD_S = CMD_Prename:explode(":")
@@ -3900,7 +3932,14 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 break
             case ".lie",
                 if(!Sleeping){
-                    if(StandMode!=2){
+                    local Arg = Sentence[2,string]
+                    local NLM = 1 #NewLieMode
+                    if(Arg!=""){
+                        NLM = max(floor(Arg:toNumber()),1)
+                    }
+                    if(StandMode!=2 | (NLM!=LieMode)){
+                        LieMode = NLM
+                        
                         StandMode = 2
                         StandTransitionQ = 1
                         Following = 0
@@ -3916,9 +3955,22 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
             case ".splat",
                 if(!Sleeping){
                     if(StandMode!=4){
+                        RecoverStandMode = StandMode
                         StandMode = 4
                         StandTransitionQ = 1
                         Following = 0
+                        
+                        RecoverTime = 5
+                        local Arg = Sentence[2,string]
+                        if(Arg!=""){
+                            local Time = Arg:toNumber()
+                            if(Time<=0){
+                                RecoverTime = 0
+                            }else{
+                                RecoverTime = Time
+                            }
+                        }
+                        
                         dprint(Name + " is now dazed for some reason.")
                     }else{
                         dprint("Give poor " + Name + " a few seconds before giving " + (Sex ? "her " : "him ") + "another concussion.")
@@ -3926,6 +3978,15 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 }else{
                     dprint(Name + " is asleep!")
                 }
+                hideChat(1)
+                break
+            case ".recover",
+                
+                if(StandMode==4){
+                    stoptimer("recover")
+                    timer("recover",100)
+                }
+                
                 hideChat(1)
                 break
             case ".sleep",
@@ -4373,7 +4434,7 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                         if(Carrying){
                             TargetText = mumble(TargetText)
                         }
-                        if(Baby){
+                        if(Baby==1){
                             TargetText = owo(TargetText)
                         }
                         
@@ -4857,7 +4918,13 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 local HYaw = Sentence[3,string]:toNumber()
                 local HRoll = -Sentence[4,string]:toNumber()
                 
-                if(Sentence[2,string]!=""){
+                if(Sentence[2,string]=="lock" | Sentence[2,string]=="copy"){
+                    HeadLock = 1
+                    HPitch = IT_Pitch
+                    HYaw = IT_Yaw
+                    HRoll = IT_Roll
+                    HeadLockAngle = clamp(ang(HPitch,HYaw,HRoll),ang(-90,-135,-45),ang(90,135,45))
+                }elseif(Sentence[2,string]!=""){
                     if(!HeadLock){
                         HeadLock = 1
                     }
@@ -4953,12 +5020,24 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 
                 hideChat(1)
                 break
+            case ".poseneck",
+                local Arg = Sentence[2,string]
+                local Val = 30
+                if(Arg!=""){
+                    Val = clamp(Arg:toNumber(),0,45)
+                }
+                dprint("Set neck angle to "+Val+" (Default 30).")
+                SitAngleCorrect = Val - 30
+                
+                hideChat(1)
+                break
             case ".wink",
                 local Arg = Sentence[2,string]
                 if(Arg==""){ #Toggle
                     if(Wink==0){
                         Wink = 1
-                        dprint(Name + " is now winking.")
+                        #dprint(Name + " is now winking.")
+                        timer(".me winks.",100)
                     }else{
                         Wink = 0
                         dprint(Name + " is no longer winking.")
@@ -4968,9 +5047,13 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                     if(Wink==0){
                         dprint(Name + " is no longer winking.")
                     }elseif(Wink==1){
-                        dprint(Name + " is now winking (Left Eye).")
+                        #dprint(Name + " is now winking (Left Eye).")
+                        cprint("(Left Eye)")
+                        timer(".me winks.",100)
                     }elseif(Wink==2){
-                        dprint(Name + " is now winking (Right Eye).")
+                        #dprint(Name + " is now winking (Right Eye).")
+                        cprint("(Right Eye)")
+                        timer(".me winks.",100)
                     }
                 }
                 
@@ -5018,6 +5101,26 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 }
                 hideChat(1)
             break
+            case ".yes",
+            case ".nod",
+                if(!HeadShaking){
+                    HeadShaking = 1
+                    HeadShakeTheta = 0
+                    HeadShakeType = 1 #Vertical Shake
+                    timer(".me nods their head 'yes'.",100)
+                }
+                hideChat(1)
+                break
+            case ".no",
+            case ".headshake",
+                if(!HeadShaking){
+                    HeadShaking = 1
+                    HeadShakeTheta = 0
+                    HeadShakeType = 0 #Horizontal Shake
+                    timer(".me shakes their head 'no'.",100)
+                }
+                hideChat(1)
+                break
             case ".printscales",
                 if(0){ #Disabled debug only
                     for(N=0,119+CosmeticTable:count()){
@@ -5045,16 +5148,18 @@ if(first()|duped()){ if(duped()){ reset(), exit() }, #include "dragonscript/init
                 
                 dprint("DRAGON COMMANDS (See Manual for Details):")
                 cprint("\n--Poses--\n")
-                cprint(".stand, .sit, .lie, .sleep, .wake")
+                cprint(".stand, .sit, .lie [number pose], .sleep, .wake")
                 cprint("\n--Mobility--\n")
                 cprint(".come, .goto (string Name), .follow [string Name], .cmere\n.gohere, .grab, .release, .crouch [bool Crouch], .allowrun [bool Allowrun]")
                 cprint("\n--Utility--\n")
-                cprint(".light, .cam [number CameraMode], .lookat [string Name], .pickup\n.drop, .eat, .eject, .fire [number Duration]\n.headlock [number Pitch] [number Yaw] [number Roll]\n.talkprintmode, .talkproximitymode, .font [string FontName]")
+                cprint(".light, .cam [number CameraMode], .lookat [string Name], .pickup\n.drop, .eat, .eject, .fire [number Duration]\n.headlock [number Pitch] [number Yaw] [number Roll]\n.talkprintmode, .talkproximitymode, .font [string FontName], .reset")
                 cprint("\n--Personality--\n")
                 cprint(".roar, .love [string Expression]\n.expr [string Expression] [bool Eyelids] [bool Squint], .wink [number Eye]\n.dance, .burp, .closeeyes\n.blep [number Activate/Angle], .mlem [bool Loop], .cry [bool Cry]")
+                cprint(".blush [bool enable], .eyeroll [bool groan], .yes, .no, .say [string Expression | Dragon/Player] \"(string Speech)\"\n.say [string Dragon/Player] [string Expression] \"(string Speech)\"")
                 cprint(".sayto (string Dragon/Player) [sting Expression] \"(string Speech)\"")
-                cprint(".say [string Expression | Dragon/Player] \"(string Speech)\"\n.say [string Dragon/Player] [string Expression] \"(string Speech)\"")
                 cprint(".me (string action), .event (string global_action), .chatroom [string chatroom]")
+                cprint("\n--Debug--\n")
+                cprint(".splat [number duration], .recover, .jaw [number angle], .posewings [string option] [numbers values], .poseneck [number pitch]")
                 #cprint("")
                 
                 hideChat(1)

@@ -7,7 +7,7 @@
 @persist LanternTheta BlushTheta BlushQ
 @trigger 
 
-AnimVersion = "2.2.4"
+AnimVersion = "2.2.6"
 
 local NeedFudge = !entity():getName():find("Magnums Dragon 2")
 if(NeedFudge){
@@ -1311,6 +1311,40 @@ function void entity:poseSplat(Scale){ #Splat
     return void
 }
 
+function void entity:poseSploot(Scale){ #Sploot (Lie2), similar to poseSplat with larger random tail pose and narrower front paw pose
+    Climbing = 0 #Un-Crouch
+    entity():posReset(vec(0,0,1),0,Scale)
+    
+    holoAng(0,This:toWorld(ang(0,0,0))) #Main Body
+    holoPos(0,This:toWorld(vec(0,0,-18 + (18-3)*Scale)))
+    
+    holoAng(3,This:toWorld(ang(-35,10,2.5))) #Front Left Leg
+    holoAng(92,This:toWorld(ang(-90,10,0)))
+    holoAng(4,This:toWorld(ang(0,10,0)))
+    
+    holoAng(5,This:toWorld(ang(-35,-10,-2.5))) #Front Right Leg
+    holoAng(93,This:toWorld(ang(-90,-10,-0)))
+    holoAng(6,This:toWorld(ang(0,-10,0)))
+    
+    holoAng(7,This:toWorld(ang(60,-30,15))) #Rear Left Leg
+    holoAng(94,This:toWorld(ang(90,-15,0)))
+    holoAng(8,This:toWorld(ang(135,-5,0)))
+    
+    holoAng(9,This:toWorld(ang(60,30,-15))) #Rear Right Leg
+    holoAng(95,This:toWorld(ang(90,15,0)))
+    holoAng(10,This:toWorld(ang(135,5,0)))
+    
+    local Ang0 = This:angles()
+    holoAng(102,Ang0)
+    holoAng(111,Ang0)
+    
+    This:poseTail(-5,randint(-20,20),-4,2,Scale)
+    This:poseHead(ang(),0)
+    holoPos(1,holoEntity(0):toWorld(vec(24,0,-4)*Scale))
+    
+    return void
+}
+
 function void entity:poseSleep1(Scale){ #Sleeping
     Climbing = 0 #Un-Crouch
     entity():posReset(vec(0,0,1),0,Scale)
@@ -1520,5 +1554,24 @@ function string olo(Input:string){ #Tongue Out Speak
         }
     }
     return Output
+}
+
+function vector getAimPosFromTarget(Target:entity){
+    local AimPos = vec()
+    if(Target:isPlayer()){
+        AimPos = Target:shootPos() - vec(0,0,6.5)*Scale
+    }elseif(Target:type()=="gmod_wire_expression2"){
+        local Wirelink = Target:wirelink()
+        local HeadHolo = Wirelink["DragonHead",entity]
+        
+        if(HeadHolo){
+            AimPos = HeadHolo:pos() - vec(0,0,6.5)*Scale
+        }else{
+            AimPos = AimPos = Target:boxCenterW() - vec(0,0,6.5)*Scale
+        }
+    }else{
+        AimPos = Target:boxCenterW() - vec(0,0,6.5)*Scale
+    }
+    return AimPos
 }
 #print(olo("Sally sells sea shells by the seashore."))

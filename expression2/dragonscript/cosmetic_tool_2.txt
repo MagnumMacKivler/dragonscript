@@ -12,7 +12,7 @@ if(first()|duped()){
     
     
     #Put your config file in here
-    #include "dragonscript/settings/random_ba2"
+    #include "dragonscript/settings/grayscale"
     
     cosmeticHandleDelay(CosDelay1,CosDelay2,CosDelay3) #Don't touch this
     entity():setName("[Dragonscript Cosmetic Tool 2]\n"+Name+"\nLoading cosmetics..."+"\nVersion "+Version) #Don't touch this either
